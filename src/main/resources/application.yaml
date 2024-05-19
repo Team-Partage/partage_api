@@ -17,10 +17,14 @@ spring:
     url: jdbc:mysql://183.96.35.71:4406/partage?useSSL=false&serverTimezone=Asia/Seoul
     username: ENC(kCK23Aq6Hb3NfP8FQ/Nd4A==)
     password: ENC(pxWqfCD/p9PPsWa12DXBlg==)
+  redis:
+    host: 183.96.35.71
+    port: 4407
+    password: zxc123
 
 security:
   jwt:
-    secret-key: jwtSecretKey
+    secret-key: bWUtaHllb25pYy1teS1wbGktbWUtaHllb25pYy1teS1wbGktbWUtaHllb25pYy1teS1wbGktbWUtaHllb25pYy1teS1wbGk=
     access-token-expire: 300000
     refresh-token-expire: 86400000
   cors:
