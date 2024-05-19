@@ -1,7 +1,12 @@
 package com.egatrap.partage.service;
 
+import com.egatrap.partage.constants.UserRoleType;
+import com.egatrap.partage.model.dto.RequestJoinDto;
 import com.egatrap.partage.model.dto.RequestLoginDto;
+import com.egatrap.partage.model.dto.RequestSendAuthEmailDto;
+import com.egatrap.partage.model.entity.*;
 import com.egatrap.partage.repository.UserRepository;
+import com.egatrap.partage.repository.UserRoleMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -9,15 +14,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.egatrap.partage.model.entity.AuthEmail;
 import com.egatrap.partage.repository.AuthEmailRepository;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.Optional;
 import java.util.Random;
 
 @Slf4j
@@ -27,6 +34,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final AuthEmailRepository authEmailRepository;
+    private final UserRoleMappingRepository userRoleMappingRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -42,9 +51,10 @@ public class UserService {
     }
 
     @Async
-    public void sendAuthEmail(String toEmail) {
+    public void sendAuthEmail(RequestSendAuthEmailDto params) {
 
         String authNumber = makeAuthNumber();
+        String toEmail = params.getEmail();
         String setFrom = "feat240513@gmail.com";
         String title = "[Partage] 회원가입 인증 이메일";
         String content =
@@ -79,5 +89,36 @@ public class UserService {
             authNumber.append(Integer.toString(random.nextInt(10)));
 
         return authNumber.toString();
+    }
+
+    @Transactional
+    public boolean join(RequestJoinDto params) {
+
+        boolean isCheckedAuthNumber = checkAuthNumber(params.getEmail(), params.getAuthNumber());
+        if (!isCheckedAuthNumber)
+            return false;
+
+        params.setPassword(passwordEncoder.encode(params.getPassword()));
+        UserEntity user = params.toEntity();
+        userRepository.save(user);
+
+        UserRoleEntity userRole = new UserRoleEntity(UserRoleType.ROLE_USER);
+
+        UserRoleMappingId userRoleMappingId = new UserRoleMappingId();
+        userRoleMappingId.setUserNo(user.getUserNo());
+        userRoleMappingId.setRoleId(userRole.getRoleId());
+
+        UserRoleMappingEntity userRoleMappingEntity = new UserRoleMappingEntity(userRoleMappingId, user, userRole);
+        userRoleMappingRepository.save(userRoleMappingEntity);
+
+        return true;
+    }
+
+    private boolean checkAuthNumber(String email, String authNumber) {
+
+        Optional<AuthEmail> optionalAuthEmail = authEmailRepository.findById(email);
+        return optionalAuthEmail.isPresent() &&
+                email.equals(optionalAuthEmail.get().getEmail()) &&
+                authNumber.equals(optionalAuthEmail.get().getAuthNum());
     }
 }

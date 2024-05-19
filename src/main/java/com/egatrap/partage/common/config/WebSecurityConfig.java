@@ -33,10 +33,17 @@ public class WebSecurityConfig {
     private final String[] EXCLUDE_PATHS = {
             "/api/health",
             "/api/encrypt",
-            "/api/v1/user/auth-email"
+            "/api/v1/user/auth-email",
+            "/api/v1/user/join"
     };
 
     private final JwtSecurityConfig jwtSecurityConfig;
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

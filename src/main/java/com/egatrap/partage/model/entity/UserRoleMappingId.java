@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.io.Serializable;
 
 @Getter
@@ -13,6 +15,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Embeddable
 public class UserRoleMappingId implements Serializable {
+
+    @Enumerated(EnumType.STRING)
     private UserRoleType roleId;
+
     private Long userNo;
 }
