@@ -21,6 +21,7 @@ public class WebSecurityConfig {
     private final String[] EXCLUDE_PATHS = {
             "/api/health",
             "/api/encrypt",
+            "/api/v1/user/auth-email"
     };
 
     @Bean

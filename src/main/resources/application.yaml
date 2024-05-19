@@ -17,6 +17,23 @@ spring:
     url: jdbc:mysql://183.96.35.71:4406/partage?useSSL=false&serverTimezone=Asia/Seoul
     username: ENC(kCK23Aq6Hb3NfP8FQ/Nd4A==)
     password: ENC(pxWqfCD/p9PPsWa12DXBlg==)
+  # jpa
+  jpa:
+    hibernate:
+      ddl-auto: update
+  # redis - local
+  redis:
+    port: 6379
+    host: localhost
+  # mail-service
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ENC(tMf8R/oUs6OdZu8pUzdxEkbfo8ajmLf/GyXGx58YvZY=)
+    password: ENC(LZLXORicR8sUKCfLueTpyT7tg/0L49D+35QKchswk7GNDJAcet4RWw==)
+    properties:
+      mail.smtp.starttls.enable: true
+      mail.smtp.auth: true
 
 logging:
   level:
