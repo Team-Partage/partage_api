@@ -18,6 +18,14 @@ spring:
     username: ENC(kCK23Aq6Hb3NfP8FQ/Nd4A==)
     password: ENC(pxWqfCD/p9PPsWa12DXBlg==)
 
+security:
+  jwt:
+    secret-key: jwtSecretKey
+    access-token-expire: 300000
+    refresh-token-expire: 86400000
+  cors:
+    allowed-origins: http://localhost:3000
+
 logging:
   level:
     root: error
