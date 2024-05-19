@@ -57,12 +57,19 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     implementation 'org.modelmapper:modelmapper:2.4.4'
     implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 //	+------------------------------------------------------------------------+
 //  | Development tools													     |
 //	+------------------------------------------------------------------------+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+//	+------------------------------------------------------------------------+
+//  | Additional dependency for Mac OS												     |
+//	+------------------------------------------------------------------------+
+    if (isAppleSilicon()) {
+        runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.94.Final:osx-aarch_64")
+    }
 
 //	+------------------------------------------------------------------------+
 //	| Test														             |
@@ -70,6 +77,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+static def isAppleSilicon() {
+    return System.getProperty("os.name") == "Mac OS X" && System.getProperty("os.arch") == "aarch64"
 }
 
 tasks.named('test') {
