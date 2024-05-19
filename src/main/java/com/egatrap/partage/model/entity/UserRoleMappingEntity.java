@@ -25,4 +25,5 @@ public class UserRoleMappingEntity {
     @JoinColumn(name = "role_id")
     @ToString.Exclude
     private UserRoleEntity role;
+
 }

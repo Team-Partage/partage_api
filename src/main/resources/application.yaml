@@ -20,7 +20,7 @@ spring:
   redis:
     host: 183.96.35.71
     port: 4407
-    password: zxc123
+    password: ENC(CbbG8fWSz/uTEugdbiMPZQ==)
 
 security:
   jwt:

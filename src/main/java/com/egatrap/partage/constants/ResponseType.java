@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum ResponseType {
 
     SUCCESS("Success", true),
+    FAIL("Fail", false),
     ERROR("Error", false);
 
     private final String message;
