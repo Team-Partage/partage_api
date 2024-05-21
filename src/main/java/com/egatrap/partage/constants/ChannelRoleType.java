@@ -7,9 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ChannelRoleType {
 
-    READ("R0000"),
-    WRITE("R0100"),
-    OWNER("R0200");
+    ROLE_VIEWER("C0100"),
+    ROLE_MODERATOR("C0200"),
+    ROLE_OWNER("C0300");
 
     private final String ROLE_ID;
 

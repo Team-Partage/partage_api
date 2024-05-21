@@ -34,9 +34,6 @@ public class ChannelEntity {
     @Column(length = 20)
     private String channelColor;
 
-    @Column(length = 255)
-    private String channelImage;
-
     @Column(nullable = false, updatable = false)
     private LocalDateTime createAt;
 
@@ -49,6 +46,10 @@ public class ChannelEntity {
     @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ChannelRoleMappingEntity> channelRoleMappings;
+
+    @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<ChannelPermissionMappingEntity> channelPermissionMappings;
 
     @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
