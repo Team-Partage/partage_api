@@ -33,6 +33,7 @@ public class WebSecurityConfig {
     private final String[] EXCLUDE_PATHS = {
             "/api/health",
             "/api/encrypt",
+            "/api/v1/auth/login",
             "/api/v1/user/check-email/{email}",
             "/api/v1/user/check-nickname/{nickname}",
             "/api/v1/user/auth-email",

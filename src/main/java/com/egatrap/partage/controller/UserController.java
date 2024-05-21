@@ -25,7 +25,6 @@ public class UserController {
     @PostMapping("/auth-email")
     public ResponseEntity<?> sendAuthEmail(@Valid @RequestBody RequestSendAuthEmailDto params) {
 
-        System.out.println("UserController.sendAuthEmail");
         // 인증 메일 발송
         userService.sendAuthEmail(params);
 
@@ -73,7 +72,9 @@ public class UserController {
                     HttpStatus.CONFLICT);
         }
 
-        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new ResponseDto(ResponseType.SUCCESS),
+                HttpStatus.OK);
     }
 
     /**
@@ -82,26 +83,28 @@ public class UserController {
     @PostMapping("/join")
     public ResponseEntity<?> join(@Valid @RequestBody RequestJoinDto params) {
 
-        // 이메일 중복 확인
-        if (userService.isExistEmail(params.getEmail())) {
-            return new ResponseEntity<>(ErrorMessageDto.builder().code(409).status("CONFLICT").message("Email is already registered").build(), HttpStatus.CONFLICT);
-        }
-        // 닉네임 중복 확인
-        if (userService.isExistNickname(params.getNickname())) {
-            return new ResponseEntity<>(ErrorMessageDto.builder().code(409).status("CONFLICT").message("Nickname is already registered").build(), HttpStatus.CONFLICT);
-        }
-        // 비밀번호, 비밀번호 확인 필드 확인
-        if (!params.getPassword().equals(params.getPasswordConfirm())) {
-            return new ResponseEntity<>(ErrorMessageDto.builder().code(400).status("BAD REQUEST").message("Passwords do not match").build(), HttpStatus.BAD_REQUEST);
-        }
-        // 인증 번호 확인
-        if (!userService.checkAuthNumber(params.getEmail(), params.getAuthNumber())) {
-            return new ResponseEntity<>(ErrorMessageDto.builder().code(400).status("BAD REQUEST").message("Invalid auth number").build(), HttpStatus.BAD_REQUEST);
+        if (isInvalidJoinRequest(params)) {
+            return new ResponseEntity<>(
+                    ErrorMessageDto.builder()
+                    .code(400)
+                    .status("BAD REQUEST")
+                    .message("Invalid join request")
+                    .build(),
+                    HttpStatus.BAD_REQUEST);
         }
 
         // 회원가입
         userService.join(params);
+        return new ResponseEntity<>(
+                new ResponseDto(ResponseType.SUCCESS),
+                HttpStatus.OK);
+    }
 
-        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    private boolean isInvalidJoinRequest(RequestJoinDto params) {
+
+        return userService.isExistEmail(params.getEmail()) ||
+                userService.isExistNickname(params.getNickname()) ||
+                !params.getPassword().equals(params.getPasswordConfirm()) ||
+                !userService.checkAuthNumber(params.getEmail(), params.getAuthNumber());
     }
 }
