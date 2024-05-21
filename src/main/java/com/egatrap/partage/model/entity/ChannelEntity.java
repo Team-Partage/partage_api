@@ -25,7 +25,7 @@ public class ChannelEntity {
     @Enumerated(EnumType.STRING)
     private ChannelType type;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     private String hashtag;
 
     @Column(nullable = false, length = 255)

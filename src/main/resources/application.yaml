@@ -44,7 +44,8 @@ spring:
 security:
   jwt:
     secret-key: bWUtaHllb25pYy1teS1wbGktbWUtaHllb25pYy1teS1wbGktbWUtaHllb25pYy1teS1wbGktbWUtaHllb25pYy1teS1wbGk=
-    access-token-expire: 300000
+    #access-token-expire: 300000
+    access-token-expire: 86400000
     refresh-token-expire: 86400000
   cors:
     allowed-origins: http://localhost:3000

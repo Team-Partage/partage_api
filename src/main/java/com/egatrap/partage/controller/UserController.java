@@ -45,7 +45,7 @@ public class UserController {
             return new ResponseEntity<>(ErrorMessageDto.builder()
                     .code(409)
                     .status("CONFLICT")
-                    .message("Email is already registered")
+                    .message("The resource already exists")
                     .build(),
                     HttpStatus.CONFLICT);
         }
@@ -67,7 +67,7 @@ public class UserController {
             return new ResponseEntity<>(ErrorMessageDto.builder()
                     .code(409)
                     .status("CONFLICT")
-                    .message("Nickname is already registered")
+                    .message("The resource already exists")
                     .build(),
                     HttpStatus.CONFLICT);
         }
@@ -106,5 +106,18 @@ public class UserController {
                 userService.isExistNickname(params.getNickname()) ||
                 !params.getPassword().equals(params.getPasswordConfirm()) ||
                 !userService.checkAuthNumber(params.getEmail(), params.getAuthNumber());
+    }
+
+    /**
+     * 회원가입 백도어 - 이메일인증 X
+     */
+    @PostMapping("/join-backdoor")
+    public ResponseEntity<?> joinBackdoor(@Valid @RequestBody RequestJoinDto params) {
+
+        // 회원가입
+        userService.join(params);
+        return new ResponseEntity<>(
+                new ResponseDto(ResponseType.SUCCESS),
+                HttpStatus.OK);
     }
 }
