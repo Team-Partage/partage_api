@@ -3,6 +3,7 @@ package com.egatrap.partage.controller;
 import com.egatrap.partage.constants.ResponseType;
 import com.egatrap.partage.model.dto.ErrorMessageDto;
 import com.egatrap.partage.model.dto.RequestCreateChannelDto;
+import com.egatrap.partage.model.dto.ResponseCreateChannelDto;
 import com.egatrap.partage.model.dto.ResponseDto;
 import com.egatrap.partage.service.ChannelService;
 import lombok.RequiredArgsConstructor;
@@ -48,11 +49,11 @@ public class ChannelController {
         }
 
         // 채널 생성 및 채널 부가 정보 생성
-        channelService.createChannel(params, userNo);
+        ResponseCreateChannelDto responseCreateChannelDto = channelService.createChannel(params, userNo);
 
         // ToDo. 응답 데이터 정의 및 응답 수정 필요
         return new ResponseEntity<>(
-                new ResponseDto(ResponseType.SUCCESS),
+                responseCreateChannelDto,
                 HttpStatus.OK);
     }
 }

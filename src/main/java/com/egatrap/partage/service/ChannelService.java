@@ -2,6 +2,7 @@ package com.egatrap.partage.service;
 
 import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.model.dto.RequestCreateChannelDto;
+import com.egatrap.partage.model.dto.ResponseCreateChannelDto;
 import com.egatrap.partage.model.entity.*;
 import com.egatrap.partage.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -33,7 +35,7 @@ public class ChannelService {
     }
 
     @Transactional
-    public void createChannel(RequestCreateChannelDto params, Long userNo) {
+    public ResponseCreateChannelDto createChannel(RequestCreateChannelDto params, Long userNo) {
 
         // 채널 생성 및 저장
         ChannelEntity channel = params.toEntity(makeChannelUrl());
@@ -65,6 +67,26 @@ public class ChannelService {
             ChannelPermissionMappingEntity channelPermissionMapping = new ChannelPermissionMappingEntity(channelPermissionMappingId, channelPermission, channel);
             channelPermissionMappingRepository.save(channelPermissionMapping);
         }
+
+        // 응답 생성
+        ResponseCreateChannelDto responseCreateChannelDto = new ResponseCreateChannelDto();
+        responseCreateChannelDto.setUserInfo(ResponseCreateChannelDto.UserInfo.builder()
+                .userNo(user.getUserNo())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .profileColor(user.getProfileColor())
+                .profileImage(user.getProfileImage()).build());
+        responseCreateChannelDto.setChannelInfo(ResponseCreateChannelDto.ChannelInfo.builder()
+                .channelNo(channel.getChannelNo())
+                .name(channel.getName())
+                .type(channel.getType())
+                .hashtag(channel.getHashtag())
+                .channelUrl(channel.getChannelUrl())
+                .channelColor(channel.getChannelColor())
+                .createAt(channel.getCreateAt())
+                .channelPermissionMappingList(channelPermissionEntityList).build());
+
+        return responseCreateChannelDto;
     }
 
     private String makeChannelUrl() {
