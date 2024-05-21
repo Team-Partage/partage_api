@@ -16,7 +16,6 @@ public enum ChannelPermissionType {
     VIEWER_CHATSEND("C0107"),
     VIEWER_CHATDELETE("C0108"),
     VIEWER_BAN("C0109"),
-
     MODERATOR_ADD("C0201"),
     MODERATOR_REMOVE("C0202"),
     MODERATOR_MOVE("C0203"),
@@ -26,8 +25,6 @@ public enum ChannelPermissionType {
     MODERATOR_CHATSEND("C0207"),
     MODERATOR_CHATDELETE("C0208"),
     MODERATOR_BAN("C0209"),
-
-
     OWNER_ADD("C0301"),
     OWNER_REMOVE("C0302"),
     OWNER_MOVE("C0303"),

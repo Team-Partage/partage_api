@@ -16,7 +16,6 @@ import java.io.Serializable;
 @Embeddable
 public class UserRoleMappingId implements Serializable {
 
-    @Enumerated(EnumType.STRING)
-    private UserRoleType roleId;
+    private String roleId;
     private Long userNo;
 }

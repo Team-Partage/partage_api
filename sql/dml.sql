@@ -1,7 +1,7 @@
 -- TB_USER_ROLE 테이블 DML
-insert into tb_user_role(role_id, role_name) values('R0000', 'SUPER_ADMIN');
-insert into tb_user_role(role_id, role_name) values('R0100', 'ADMIN');
-insert into tb_user_role(role_id, role_name) values('R0200', 'USER');
+insert into tb_user_role(role_id, role_name) values('R0000', 'ROLE_SUPER_ADMIN');
+insert into tb_user_role(role_id, role_name) values('R0100', 'ROLE_ADMIN');
+insert into tb_user_role(role_id, role_name) values('R0200', 'ROLE_USER');
 
 
 -- TB_CHANNEL_ROLE 테이블 DML

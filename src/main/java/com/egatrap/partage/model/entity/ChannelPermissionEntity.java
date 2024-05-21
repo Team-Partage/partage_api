@@ -1,6 +1,7 @@
 package com.egatrap.partage.model.entity;
 
 import com.egatrap.partage.constants.ChannelPermissionType;
+import com.egatrap.partage.constants.ChannelRoleType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,8 +15,7 @@ import java.util.List;
 @Table(name = "tb_channel_permission")
 public class ChannelPermissionEntity {
     @Id
-    @Enumerated(EnumType.STRING)
-    private ChannelPermissionType permissionId;
+    private String permissionId;
 
     @Column(nullable = false, length = 50)
     private String permission_name;
@@ -23,4 +23,9 @@ public class ChannelPermissionEntity {
     @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ChannelPermissionMappingEntity> channelPermissionMappings;
+
+    public ChannelPermissionEntity(ChannelPermissionType roleType) {
+        this.permissionId = roleType.getROLE_ID();
+        this.permission_name = roleType.name();
+    }
 }

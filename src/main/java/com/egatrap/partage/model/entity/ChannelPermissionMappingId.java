@@ -13,7 +13,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Embeddable
 public class ChannelPermissionMappingId implements Serializable {
-    @Enumerated(EnumType.STRING)
-    private ChannelPermissionType permissionId;
+    private String permissionId;
     private Long channelNo;
 }

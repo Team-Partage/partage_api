@@ -14,8 +14,7 @@ import java.util.List;
 @Table(name = "tb_user_role")
 public class UserRoleEntity {
     @Id
-    @Enumerated(EnumType.STRING)
-    private UserRoleType roleId;
+    private String roleId;
 
     @Column(nullable = false, length = 20)
     private String roleName;
@@ -25,7 +24,7 @@ public class UserRoleEntity {
     private List<UserRoleMappingEntity> userRoleMappings;
 
     public UserRoleEntity(UserRoleType roleType) {
-        this.roleId = roleType;
+        this.roleId = roleType.getROLE_ID();
         this.roleName = roleType.name();
     }
 }
