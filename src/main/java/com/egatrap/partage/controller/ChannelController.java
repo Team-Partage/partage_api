@@ -1,10 +1,7 @@
 package com.egatrap.partage.controller;
 
 import com.egatrap.partage.constants.ResponseType;
-import com.egatrap.partage.model.dto.ErrorMessageDto;
-import com.egatrap.partage.model.dto.RequestCreateChannelDto;
-import com.egatrap.partage.model.dto.ResponseCreateChannelDto;
-import com.egatrap.partage.model.dto.ResponseDto;
+import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -38,7 +32,7 @@ public class ChannelController {
 
         // 사용자가 생성한 활성화 채널이 있는지 체크
         //  - 채널이 있다면 409 에러코드 반환
-        if (channelService.isActiveChannelByUserNo(userNo))
+        if (channelService.isExistsActiveChannelByUserNo(userNo))
         {
             return new ResponseEntity<>(ErrorMessageDto.builder()
                     .code(409)
@@ -48,12 +42,68 @@ public class ChannelController {
                     HttpStatus.CONFLICT);
         }
 
-        // 채널 생성 및 채널 부가 정보 생성
+        // 채널 생성 및 채널 권한 설정 정보 생성
         ResponseCreateChannelDto responseCreateChannelDto = channelService.createChannel(params, userNo);
-
-        // ToDo. 응답 데이터 정의 및 응답 수정 필요
         return new ResponseEntity<>(
                 responseCreateChannelDto,
+                HttpStatus.OK);
+    }
+
+    /**
+     * 채널 수정
+     */
+    @PutMapping("/{channelNo}")
+    public ResponseEntity<?> updateChannel(@PathVariable("channelNo") Long channelNo,
+                                           @RequestBody RequestUpdateChannelDto params) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userNo = Long.parseLong(authentication.getName());
+
+        // 수정한 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
+        //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우
+        if (!channelService.isActiveChannelByUserNoAndChannelNo(userNo, channelNo))
+        {
+            return new ResponseEntity<>(
+                    ErrorMessageDto.builder()
+                            .code(400)
+                            .status("BAD REQUEST")
+                            .message("Invalid update channel request")
+                            .build(),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        // 채널 생성 및 채널 권한 설정 정보 생성
+        ResponseUpdateChannelDto responseUpdateChannelDto = channelService.updateChannel(channelNo, params);
+        return new ResponseEntity<>(
+                responseUpdateChannelDto,
+                HttpStatus.OK);
+    }
+
+    /**
+     * 채널 삭제
+     */
+    @DeleteMapping("/{channelNo}")
+    public ResponseEntity<?> deleteChannel(@PathVariable("channelNo") Long channelNo) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userNo = Long.parseLong(authentication.getName());
+
+        // 수정한 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
+        //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우
+        if (!channelService.isActiveChannelByUserNoAndChannelNo(userNo, channelNo))
+        {
+            return new ResponseEntity<>(
+                    ErrorMessageDto.builder()
+                            .code(400)
+                            .status("BAD REQUEST")
+                            .message("Invalid update channel request")
+                            .build(),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        channelService.deleteChannel(channelNo);
+        return new ResponseEntity<>(
+                new ResponseDto(ResponseType.SUCCESS),
                 HttpStatus.OK);
     }
 }

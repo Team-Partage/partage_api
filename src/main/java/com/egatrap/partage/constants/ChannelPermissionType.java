@@ -1,7 +1,11 @@
 package com.egatrap.partage.constants;
 
+import com.egatrap.partage.model.entity.ChannelPermissionEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -44,5 +48,32 @@ public enum ChannelPermissionType {
             }
         }
         throw new IllegalArgumentException("Unknown user role id: " + id);
+    }
+
+
+    public static List<ChannelPermissionType> defaultChannelPermissionList() {
+
+        ChannelPermissionType[] channelPermissionTypes = {
+                ChannelPermissionType.VIEWER_ADD,
+                ChannelPermissionType.VIEWER_CHATSEND,
+                ChannelPermissionType.MODERATOR_ADD,
+                ChannelPermissionType.MODERATOR_REMOVE,
+                ChannelPermissionType.MODERATOR_MOVE,
+                ChannelPermissionType.MODERATOR_PLAYANDPAUSE,
+                ChannelPermissionType.MODERATOR_SEEK,
+                ChannelPermissionType.MODERATOR_SKIP,
+                ChannelPermissionType.MODERATOR_CHATSEND,
+                ChannelPermissionType.OWNER_ADD,
+                ChannelPermissionType.OWNER_REMOVE,
+                ChannelPermissionType.OWNER_MOVE,
+                ChannelPermissionType.OWNER_PLAYANDPAUSE,
+                ChannelPermissionType.OWNER_SEEK,
+                ChannelPermissionType.OWNER_SKIP,
+                ChannelPermissionType.OWNER_CHATSEND,
+                ChannelPermissionType.OWNER_CHATDELETE,
+                ChannelPermissionType.OWNER_BAN
+        };
+
+        return new ArrayList<>(List.of(channelPermissionTypes));
     }
 }

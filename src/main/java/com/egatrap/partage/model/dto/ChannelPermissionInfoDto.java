@@ -6,15 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseCreateChannelDto {
+public class ChannelPermissionInfoDto {
 
-    private ChannelInfoDto channelInfo;
-    private List<ChannelUserInfoDto> uerInfo;
-    private List<ChannelPermissionType> channelPermissionTypeInfo;
+    private ChannelPermissionType channelPermissionType;
 }

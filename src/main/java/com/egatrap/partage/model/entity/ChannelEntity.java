@@ -4,6 +4,8 @@ import com.egatrap.partage.constants.ChannelType;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -72,5 +74,17 @@ public class ChannelEntity {
     @PreUpdate
     protected void onUpdate() {
         this.updateAt = LocalDateTime.now();
+    }
+
+    public void updateChannelInfo(String name, ChannelType type, String hashtag, String channelColor) {
+        this.name = name;
+        this.type = type;
+        this.hashtag = hashtag;
+        this.channelColor = channelColor;
+        this.updateAt = LocalDateTime.now();
+    }
+
+    public void deleteChannel() {
+        this.isActive = false;
     }
 }

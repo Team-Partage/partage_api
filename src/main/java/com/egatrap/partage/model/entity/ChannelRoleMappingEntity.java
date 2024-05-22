@@ -31,4 +31,7 @@ public class ChannelRoleMappingEntity {
     @JoinColumn(name = "role_id")
     @ToString.Exclude
     private ChannelRoleEntity role;
+
+    @Column(nullable = false)
+    private Boolean isActive;
 }
