@@ -1,6 +1,6 @@
 package com.egatrap.partage.model.entity;
 
-import com.egatrap.partage.constants.ChannelRoleType;
+import com.egatrap.partage.constants.ChannelPermissionType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,12 +10,11 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.io.Serializable;
 
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 @Embeddable
-public class ChannelRoleMappingId implements Serializable {
-    private String roleId;
+public class ChannelPermissionMappingId implements Serializable {
+    private String permissionId;
     private Long channelNo;
-    private Long userNo;
 }

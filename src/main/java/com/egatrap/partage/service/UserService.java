@@ -14,7 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.egatrap.partage.repository.AuthEmailRepository;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -35,7 +35,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final AuthEmailRepository authEmailRepository;
     private final UserRoleMappingRepository userRoleMappingRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -92,11 +92,7 @@ public class UserService {
     }
 
     @Transactional
-    public boolean join(RequestJoinDto params) {
-
-        boolean isCheckedAuthNumber = checkAuthNumber(params.getEmail(), params.getAuthNumber());
-        if (!isCheckedAuthNumber)
-            return false;
+    public void join(RequestJoinDto params) {
 
         params.setPassword(passwordEncoder.encode(params.getPassword()));
         UserEntity user = params.toEntity();
@@ -110,15 +106,24 @@ public class UserService {
 
         UserRoleMappingEntity userRoleMappingEntity = new UserRoleMappingEntity(userRoleMappingId, user, userRole);
         userRoleMappingRepository.save(userRoleMappingEntity);
-
-        return true;
     }
 
-    private boolean checkAuthNumber(String email, String authNumber) {
+    public boolean checkAuthNumber(String email, String authNumber) {
 
         Optional<AuthEmail> optionalAuthEmail = authEmailRepository.findById(email);
         return optionalAuthEmail.isPresent() &&
                 email.equals(optionalAuthEmail.get().getEmail()) &&
                 authNumber.equals(optionalAuthEmail.get().getAuthNum());
+    }
+
+    @Transactional
+    public boolean isExistEmail(String email) {
+
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    @Transactional
+    public boolean isExistNickname(String nickname) {
+        return userRepository.findByNickname(nickname).isPresent();
     }
 }

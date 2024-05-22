@@ -25,10 +25,13 @@ public class PlaylistEntity {
     private Integer sequence;
 
     @Column(nullable = false, length = 255)
-    private String name;
+    private String title;
 
     @Column(nullable = false, length = 255)
     private String url;
+
+    @Column(nullable = false, length = 255)
+    private String thumbnail;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createAt;
