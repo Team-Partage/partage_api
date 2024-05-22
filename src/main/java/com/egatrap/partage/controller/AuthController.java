@@ -27,7 +27,7 @@ public class AuthController {
 
     @PostMapping(value = "/login", produces = "application/json")
     public ResponseEntity<?> login(@Validated @RequestBody RequestLoginDto params) {
-
+//    @TODO 유저 별 최대 활성화 토큰수 체크 및 제안 로직 필요
         // Get authentication
         Authentication authentication = userService.login(params);
 
