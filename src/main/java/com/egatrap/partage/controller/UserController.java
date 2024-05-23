@@ -104,7 +104,6 @@ public class UserController {
 
         return userService.isExistEmail(params.getEmail()) ||
                 userService.isExistNickname(params.getNickname()) ||
-                !params.getPassword().equals(params.getPasswordConfirm()) ||
                 !userService.checkAuthNumber(params.getEmail(), params.getAuthNumber());
     }
 
