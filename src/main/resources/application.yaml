@@ -50,6 +50,9 @@ security:
   cors:
     allowed-origins: http://localhost:3000
 
+youtube:
+  apikey: ENC(mxSVPKW3rn1s+YYZOmOxKBS3fmRdXy/iKswIpOdjGQ2ty9TzmpBC8bMWrhYxYn7V)
+
 logging:
   level:
     root: error
