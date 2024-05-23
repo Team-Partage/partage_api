@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.NotBlank;
@@ -19,6 +20,7 @@ public class RequestAddPlaylistDto {
     private Long channelNo;
 
     @URL
+    @Length(max = 255)
     @NotBlank
     private String url;
 

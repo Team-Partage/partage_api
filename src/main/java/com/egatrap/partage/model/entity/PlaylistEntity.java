@@ -21,6 +21,7 @@ public class PlaylistEntity {
     @ToString.Exclude
     private ChannelEntity channel;
 
+    @Setter
     @Column(nullable = false)
     private Integer sequence;
 
@@ -36,6 +37,7 @@ public class PlaylistEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createAt;
 
+    @Setter
     @Column(nullable = false)
     private Boolean isActive;
 

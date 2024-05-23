@@ -1,6 +1,7 @@
 package com.egatrap.partage.common.config;
 
 import com.egatrap.partage.common.util.DateTimeFormatterAdapter;
+import com.egatrap.partage.common.util.LocalDateTimeAdapter;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Configuration
@@ -18,7 +20,7 @@ public class AppConfig {
     @Bean
     public Gson gson() {
         return new GsonBuilder()
-                .registerTypeAdapter(DateTimeFormatter.class, new DateTimeFormatterAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .setFieldNamingStrategy(new FieldNamingStrategy() {
                     //                    convert camelCase to snake_case
                     @Override
