@@ -34,6 +34,32 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorMessage, getHeaders(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<?> handleException(BadRequestException e) {
+        log.error(e.getMessage());
+
+        ErrorMessageDto errorMessage = ErrorMessageDto.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .status(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(e.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorMessage, getHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<?> handleException(ConflictException e) {
+        log.error(e.getMessage());
+
+        ErrorMessageDto errorMessage = ErrorMessageDto.builder()
+                .code(HttpStatus.CONFLICT.value())
+                .status(HttpStatus.CONFLICT.getReasonPhrase())
+                .message(e.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorMessage, getHeaders(), HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleException(HttpMessageNotReadableException e) {
         log.error(e.getMessage());

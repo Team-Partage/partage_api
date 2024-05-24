@@ -1,5 +1,7 @@
 package com.egatrap.partage.service;
 
+import com.egatrap.partage.exception.BadRequestException;
+import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.exception.VideoNotFoundException;
 import com.egatrap.partage.model.dto.ErrorMessageDto;
 import com.egatrap.partage.model.dto.PlaylistDto;
@@ -47,20 +49,20 @@ public class PlaylistService {
     public void addPlaylist(Long channelNo, String videoId) throws GeneralSecurityException, IOException {
         VideoListResponse response;
 
-        // isActive가 true인 Channel이 가지고 있는 채널 수가 50개 이하인지 확인
+//        채널 플레이리스트 조회
         ChannelEntity channelEntity = channelRepository.findByChannelNoAndIsActive(channelNo, true)
-                .orElseThrow(() -> new IllegalArgumentException("Channel not found. channelNo=" + channelNo));
-        log.debug("channelEntity={}", gson.toJson(channelEntity));
+                .orElseThrow(() -> new BadRequestException("Channel not found. channelNo=" + channelNo));
+        log.debug("channelEntity={}", channelEntity);
 
-        // 채널이 가지고 있는 플레이리스트 수 조회
+        // 채널이 가지고 있는 플레이리스트 개수 조회
         int playlistCount = playlistRepository.countByChannel_ChannelNoAndIsActive(channelNo, true);
 
         // 플레이리스트 수가 50개 이상인 경우 예외 처리
         if (playlistCount >= 50) {
-            throw new IllegalArgumentException("The number of playlists exceeds the limit. channelNo=" + channelNo);
+            throw new ConflictException("The number of playlists exceeds the limit. channelNo=" + channelNo);
         }
 
-        // videoId에 해당하는 비디오 정보 조회
+        // videoId에 해당하는 비디오 정보 조회 (YouTube Data API)
         Video video = getVideoById(videoId);
 
         // 플레이리스트 엔티티 생성
@@ -68,10 +70,11 @@ public class PlaylistService {
                 .channel(channelEntity)
                 .sequence(playlistCount)
                 .title(video.getSnippet().getTitle())
-                .url("https://www.youtube.com/" + videoId)
+                .url(videoId) // @TODO: URL 생성 로직 수정
                 .thumbnail(video.getSnippet().getThumbnails().getDefault().getUrl())
+                .isActive(true)
                 .build();
-        log.debug("playlistEntity={}", gson.toJson(playlistEntity));
+        log.debug("playlistEntity={}", playlistEntity);
 
         // 플레이리스트 저장
         playlistRepository.save(playlistEntity);
@@ -92,7 +95,7 @@ public class PlaylistService {
 
             // videoId에 해당하는 비디오가 없는 경우 예외 처리
             if (response.getItems().isEmpty())
-                throw new VideoNotFoundException("YouTube video not found. videoId=" + id);
+                throw new BadRequestException("YouTube video not found. videoId=" + id);
 
             return response.getItems().get(0);
         } catch (GeneralSecurityException | IOException e) {
@@ -121,7 +124,10 @@ public class PlaylistService {
     @Transactional(rollbackFor = Exception.class, timeout = 10)
     public void deletePlaylist(Long playlistNo) {
         PlaylistEntity playlistEntity = playlistRepository.findById(playlistNo)
-                .orElseThrow(() -> new IllegalArgumentException("Playlist not found. playlistNo=" + playlistNo));
+                .orElseThrow(() -> new BadRequestException("Playlist not found. playlistNo=" + playlistNo));
+
+        if (!playlistEntity.getIsActive())
+            throw new ConflictException("Playlist is already deleted. playlistNo=" + playlistNo);
 
         playlistEntity.setIsActive(false);
         playlistRepository.save(playlistEntity);
@@ -140,9 +146,10 @@ public class PlaylistService {
         // 플레이리스트 전체 조회 (채널별로 isActive가 true인 것만)
         List<PlaylistEntity> playlistEntities = playlistRepository.findByChannel_ChannelNoAndIsActiveOrderBySequence(
                 playlistRepository.findById(playlistNo)
-                        .orElseThrow(() -> new IllegalArgumentException("Playlist not found. playlistNo=" + playlistNo))
+                        .orElseThrow(() -> new BadRequestException("Playlist not found. playlistNo=" + playlistNo))
                         .getChannel().getChannelNo(), true, Pageable.unpaged());
 
-        // @TODO: 플레이리스트 이동 처리
+        // @TODO: 플레이리스트 이동 처리 로직 추가 필요
+
     }
 }

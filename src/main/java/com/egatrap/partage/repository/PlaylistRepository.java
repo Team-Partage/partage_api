@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface PlaylistRepository extends JpaRepository<PlaylistEntity, Long> {
-    int countByChannel_ChannelNoAndIsActive(Long channelNo, boolean b);
+    int countByChannel_ChannelNoAndIsActive(Long channelNo, boolean isActive);
 
     List<PlaylistEntity> findByChannel_ChannelNoAndIsActiveOrderBySequence(long channelId, boolean isActive, Pageable pageable);
 }

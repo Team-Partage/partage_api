@@ -30,12 +30,12 @@ public class PlaylistController {
     private static final String VIDEO_ID_PATTERN = "^[a-zA-Z0-9_-]{11}$";
 
     @PostMapping(value = "", produces = "application/json")
-    public ResponseEntity<?> addPlaylist(@Validated @RequestBody RequestAddPlaylistDto params) {
+    public ResponseEntity<?> addPlaylist(@Validated @RequestBody RequestAddPlaylistDto params) throws Exception {
         String videoId = null;
         String url = params.getUrl();
 
 //        비디오 아이디 추출
-        if (url.startsWith("https://www.youtube.com/"))
+        if (!url.startsWith("https://www.youtube.com/"))
             throw new IllegalArgumentException("Invalid URL : Not Youtube URL");
 
         // URL에서 비디오 아이디 추출 (유튜브)
@@ -54,14 +54,8 @@ public class PlaylistController {
             throw new IllegalArgumentException("Invalid URL : Not Found Video ID");
         log.debug("[videoId]=[{}]", videoId);
 
-        try {
-            playlistService.addPlaylist(params.getChannelNo(), videoId);
-        } catch (GeneralSecurityException | IOException e) {
-            log.error("Failed to youtube connection error", e);
-            return ResponseEntity.badRequest().body(new ErrorMessageDto(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to youtube connection error"));
-        }
+        // 플레이리스트 추가
+        playlistService.addPlaylist(params.getChannelNo(), videoId);
 
 
         return ResponseEntity.ok(ResponseDto.builder()
@@ -74,7 +68,7 @@ public class PlaylistController {
     public ResponseEntity<?> getPlaylist(
             @NotNull @PathVariable("channelId") Long channelId,
             @Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
-            @Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+            @Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) throws Exception {
 
         long totalPlaylist = playlistService.getTotalPlaylist(channelId);
 
@@ -90,7 +84,7 @@ public class PlaylistController {
 
     @DeleteMapping(value = "/{playlistNo}", produces = "application/json")
     public ResponseEntity<?> deletePlaylist(
-            @NotNull @PathVariable("playlistNo") Long playlistNo) {
+            @NotNull @PathVariable("playlistNo") Long playlistNo) throws Exception {
 
         playlistService.deletePlaylist(playlistNo);
 
@@ -100,15 +94,14 @@ public class PlaylistController {
                 .build());
     }
 
-    @PostMapping(value = "/{playlistNo}/move", produces = "application/json")
-    public ResponseEntity<?> movePlaylist(@NotNull @PathVariable("playlistNo") Long playlistNo,
-                                          @Validated @RequestBody RequestMovePlaylistDto params) {
+    @PutMapping(value = "/move", produces = "application/json")
+    public ResponseEntity<?> movePlaylist(@Validated @RequestBody RequestMovePlaylistDto params) throws Exception {
 
-        playlistService.movePlaylist(playlistNo, params.getSequence());
+        playlistService.movePlaylist(params.getPlaylistNo(), params.getSequence());
 
         return ResponseEntity.ok(ResponseDto.builder()
                 .status(true)
-                .message("Success to move playlist, playlist no: " + playlistNo)
+                .message("Success to move playlist, playlist no: " + params.getPlaylistNo())
                 .build());
     }
 }

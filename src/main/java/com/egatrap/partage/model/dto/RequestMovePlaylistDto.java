@@ -15,6 +15,9 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class RequestMovePlaylistDto {
 
+    @NotNull
+    private long playlistNo;
+
     @Min(0)
     @Max(100)
     private int sequence;
