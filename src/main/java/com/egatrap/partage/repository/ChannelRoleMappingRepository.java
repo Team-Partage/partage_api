@@ -4,12 +4,14 @@ import com.egatrap.partage.model.dto.ChannelUserInfoDto;
 import com.egatrap.partage.model.entity.ChannelRoleMappingEntity;
 import com.egatrap.partage.model.entity.ChannelRoleMappingId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleMappingEntity, ChannelRoleMappingId> {
@@ -55,4 +57,14 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "AND crm.id.userNo = :userNo " +
             "AND crm.isActive = true")
     ChannelUserInfoDto findActiveUserByChannelNoAndUserNo(@Param("channelNo") Long channelNo, @Param("userNo") Long userNo);
+
+    Optional<ChannelRoleMappingEntity> findByUser_UserNo(Long userNo);
+
+    Optional<ChannelRoleMappingEntity> findByUser_UserNoAndChannel_ChannelNo(Long userNo, Long channelNo);
+
+    @Modifying
+    @Query("UPDATE ChannelRoleMappingEntity crm SET crm.id.roleId = :roleId " +
+            "WHERE crm.id.channelNo = :channelNo " +
+            "AND crm.id.userNo = :userNo")
+    int updateRoleId(@Param("channelNo") Long channelNo, @Param("userNo") Long userNo, @Param("roleId") String roleId);
 }

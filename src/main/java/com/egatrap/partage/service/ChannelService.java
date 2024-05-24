@@ -199,4 +199,9 @@ public class ChannelService {
         //  - 채팅 정보
         //  - 현재 플레이중인 영상 정보
     }
+
+    @Transactional
+    public void updateUserChannelRole(Long channelNo, RequestUpdateUserChannelRoleDto params) {
+        channelRoleMappingRepository.updateRoleId(channelNo, params.getUserNo(), params.getRoleId());
+    }
 }
