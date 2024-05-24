@@ -12,9 +12,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseCreateChannelDto {
+public class ResponseGetChannelDetailInfoDto {
 
     private ChannelInfoDto channel;
+    private ChannelUserInfoDto user;
     private List<ChannelUserInfoDto> channelUsers;
+    private List<PlaylistDto> playlists;
     private List<ChannelPermissionType> channelPermissionTypes;
 }

@@ -1,7 +1,6 @@
 package com.egatrap.partage.model.entity;
 
 import com.egatrap.partage.constants.ChannelPermissionType;
-import com.egatrap.partage.constants.ChannelRoleType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -26,7 +25,7 @@ public class ChannelPermissionEntity {
     private List<ChannelPermissionMappingEntity> channelPermissionMappings;
 
     public ChannelPermissionEntity(ChannelPermissionType roleType) {
-        this.permissionId = roleType.getROLE_ID();
+        this.permissionId = roleType.getPERMISSION_ID();
         this.permission_name = roleType.name();
     }
 

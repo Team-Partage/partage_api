@@ -1,6 +1,5 @@
 package com.egatrap.partage.constants;
 
-import com.egatrap.partage.model.entity.ChannelPermissionEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -39,11 +38,11 @@ public enum ChannelPermissionType {
     OWNER_CHATDELETE("C0308"),
     OWNER_BAN("C0309");
 
-    private final String ROLE_ID;
+    private final String PERMISSION_ID;
 
     public static ChannelPermissionType of(String id) {
         for (ChannelPermissionType channelRoleType : values()) {
-            if (channelRoleType.ROLE_ID.equals(id)) {
+            if (channelRoleType.PERMISSION_ID.equals(id)) {
                 return channelRoleType;
             }
         }

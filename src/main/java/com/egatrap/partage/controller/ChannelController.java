@@ -6,6 +6,7 @@ import com.egatrap.partage.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,9 +32,8 @@ public class ChannelController {
         Long userNo = Long.parseLong(authentication.getName());
 
         // 사용자가 생성한 활성화 채널이 있는지 체크
-        //  - 채널이 있다면 409 에러코드 반환
-        if (channelService.isExistsActiveChannelByUserNo(userNo))
-        {
+        //  - 채널이 있다면 409 상태코드 반환
+        if (channelService.isExistsActiveChannelByUserNo(userNo)) {
             return new ResponseEntity<>(ErrorMessageDto.builder()
                     .code(409)
                     .status("CONFLICT")
@@ -59,10 +59,9 @@ public class ChannelController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userNo = Long.parseLong(authentication.getName());
 
-        // 수정한 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
-        //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우
-        if (!channelService.isActiveChannelByUserNoAndChannelNo(userNo, channelNo))
-        {
+        // 대상 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
+        //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우 400 상태코드 반환
+        if (channelService.isActiveChannelByOwnerUserNoAndChannelNo(userNo, channelNo) == null) {
             return new ResponseEntity<>(
                     ErrorMessageDto.builder()
                             .code(400)
@@ -88,15 +87,14 @@ public class ChannelController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userNo = Long.parseLong(authentication.getName());
 
-        // 수정한 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
-        //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우
-        if (!channelService.isActiveChannelByUserNoAndChannelNo(userNo, channelNo))
-        {
+        // 대상 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
+        //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우 상태코드 반환
+        if (channelService.isActiveChannelByOwnerUserNoAndChannelNo(userNo, channelNo) == null) {
             return new ResponseEntity<>(
                     ErrorMessageDto.builder()
                             .code(400)
                             .status("BAD REQUEST")
-                            .message("Invalid update channel request")
+                            .message("Invalid delete channel request")
                             .build(),
                     HttpStatus.BAD_REQUEST);
         }
@@ -104,6 +102,33 @@ public class ChannelController {
         channelService.deleteChannel(channelNo);
         return new ResponseEntity<>(
                 new ResponseDto(ResponseType.SUCCESS),
+                HttpStatus.OK);
+    }
+
+    /**
+     * 채널 상세 정보 조회
+     */
+    @GetMapping("/{channelNo}")
+    public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelNo") Long channelNo) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userNo = Long.parseLong(authentication.getName());
+
+        // 대상 채널이 활성화 중이고 채널 사용자가 요청했는지 체크
+        //  - 채널이 비활성화이거나 채널 사용자가 아닌 경우 400 상태코드 반환
+        if (channelService.isActiveChannelByUserNoAndChannelNo(userNo, channelNo) == null) {
+            return new ResponseEntity<>(
+                    ErrorMessageDto.builder()
+                            .code(400)
+                            .status("BAD REQUEST")
+                            .message("Invalid get channel info request")
+                            .build(),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        ResponseGetChannelDetailInfoDto responseGetChannelDetailInfoDto = channelService.getChannelDetailInfo(userNo, channelNo);
+        return new ResponseEntity<>(
+                responseGetChannelDetailInfoDto,
                 HttpStatus.OK);
     }
 }
