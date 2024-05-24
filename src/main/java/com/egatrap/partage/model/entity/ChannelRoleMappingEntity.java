@@ -26,6 +26,7 @@ public class ChannelRoleMappingEntity {
     @ToString.Exclude
     private UserEntity user;
 
+    @Setter
     @MapsId("roleId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
@@ -34,4 +35,8 @@ public class ChannelRoleMappingEntity {
 
     @Column(nullable = false)
     private Boolean isActive;
+
+    public void updateChannelRoleEntity(ChannelRoleEntity channelRoleEntity) {
+        this.role = channelRoleEntity;
+    }
 }

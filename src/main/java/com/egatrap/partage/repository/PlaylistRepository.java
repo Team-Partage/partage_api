@@ -13,4 +13,6 @@ public interface PlaylistRepository extends JpaRepository<PlaylistEntity, Long> 
     int countByChannel_ChannelNoAndIsActive(Long channelNo, boolean isActive);
 
     List<PlaylistEntity> findByChannel_ChannelNoAndIsActiveOrderBySequence(long channelId, boolean isActive, Pageable pageable);
+
+    List<PlaylistEntity> findAllByChannel_ChannelNoAndIsActiveOrderBySequence(long channelId, boolean isActive);
 }

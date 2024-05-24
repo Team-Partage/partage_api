@@ -7,6 +7,7 @@ import com.egatrap.partage.model.entity.*;
 import com.egatrap.partage.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("channelService")
@@ -24,6 +26,8 @@ public class ChannelService {
     private final UserRepository userRepository;
     private final ChannelRoleMappingRepository channelRoleMappingRepository;
     private final ChannelPermissionMappingRepository channelPermissionMappingRepository;
+    private final PlaylistRepository playlistRepository;
+    private final ModelMapper modelMapper;
 
     @Transactional
     public boolean isExistsActiveChannelByUserNo(Long userNo) {
@@ -49,22 +53,22 @@ public class ChannelService {
 
             ChannelPermissionMappingId channelPermissionMappingId = new ChannelPermissionMappingId();
             channelPermissionMappingId.setChannelNo(channel.getChannelNo());
-            channelPermissionMappingId.setPermissionId(channelPermissionType.getROLE_ID());
+            channelPermissionMappingId.setPermissionId(channelPermissionType.getPERMISSION_ID());
 
             ChannelPermissionMappingEntity channelPermissionMapping = new ChannelPermissionMappingEntity(channelPermissionMappingId, new ChannelPermissionEntity(channelPermissionType), channel);
             channelPermissionMappingRepository.save(channelPermissionMapping);
         }
 
-        // set userInfo
+        // set usersInfo
         List<ChannelUserInfoDto> channelUserInfo = channelRoleMappingRepository.findActiveUsersByChannelNo(channel.getChannelNo());
         // set channelInfo
         ChannelInfoDto channelInfo = setChannelInfo(channel);
 
         // response 생성
         ResponseCreateChannelDto responseCreateChannelDto = new ResponseCreateChannelDto();
-        responseCreateChannelDto.setChannelInfo(channelInfo);
-        responseCreateChannelDto.setUerInfo(channelUserInfo);
-        responseCreateChannelDto.setChannelPermissionTypeInfo(channelPermissionTypes);
+        responseCreateChannelDto.setChannel(channelInfo);
+        responseCreateChannelDto.setChannelUsers(channelUserInfo);
+        responseCreateChannelDto.setChannelPermissionTypes(channelPermissionTypes);
 
         return responseCreateChannelDto;
     }
@@ -108,8 +112,8 @@ public class ChannelService {
     }
 
     @Transactional
-    public boolean isActiveChannelByUserNoAndChannelNo(Long userNo, Long channelNo) {
-        return channelRoleMappingRepository.isActiveChannelByUserNoAndChannelNo(userNo, ChannelRoleType.ROLE_OWNER.getROLE_ID(), channelNo);
+    public Boolean isActiveChannelByOwnerUserNoAndChannelNo(Long userNo, Long channelNo) {
+        return channelRoleMappingRepository.isActiveChannelByOwnerUserNoAndChannelNo(userNo, ChannelRoleType.ROLE_OWNER.getROLE_ID(), channelNo);
     }
 
     @Transactional
@@ -129,10 +133,11 @@ public class ChannelService {
         // response 생성
         ResponseUpdateChannelDto responseUpdateChannelDto = new ResponseUpdateChannelDto();
         ChannelInfoDto channelInfo = setChannelInfo(channel);
-        responseUpdateChannelDto.setChannelInfo(channelInfo);
+        responseUpdateChannelDto.setChannel(channelInfo);
         return responseUpdateChannelDto;
     }
 
+    @Transactional
     public void deleteChannel(Long channelNo) {
 
         // 채널 조회
@@ -143,6 +148,60 @@ public class ChannelService {
         channelRepository.save(channel);
 
         // ToDo. 채널이 종료되면 이후에 추가 로직이 필요하지 않은지
+        //  - 채널 권한 매핑 설정 테이블의 활성화 상태 == flase
         //  - 채팅 로그 백업 등
+    }
+
+    @Transactional
+    public Boolean isActiveChannelByUserNoAndChannelNo(Long userNo, Long channelNo) {
+        return channelRoleMappingRepository.isActiveChannelByUserNoAndChannelNo(userNo, channelNo);
+    }
+
+    @Transactional
+    public ResponseGetChannelDetailInfoDto getChannelDetailInfo(Long userNo, Long channelNo) {
+
+        // 채널 정보 조회
+        ChannelEntity channel = channelRepository.findById(channelNo).get();
+        ChannelInfoDto channelInfo = setChannelInfo(channel);
+
+        // 사용자 정보 조회
+        UserEntity user = userRepository.findById(userNo).get();
+        ChannelUserInfoDto channelUserInfo = channelRoleMappingRepository.findActiveUserByChannelNoAndUserNo(channelNo, userNo);
+        
+        // 채널 사용자 목록 정보 조회
+        List<ChannelUserInfoDto> channelUserInfos = channelRoleMappingRepository.findActiveUsersByChannelNo(channel.getChannelNo());
+
+        // 플레이리스트 목록 정보 조회
+        List<PlaylistDto> playlistInfos = playlistRepository.findAllByChannel_ChannelNoAndIsActiveOrderBySequence(channelNo, true)
+                .stream()
+                .map(playlistEntity -> modelMapper.map(playlistEntity, PlaylistDto.class))
+                .toList();
+
+        // 채널 권한 설정 목록 정보 조회
+        List<ChannelPermissionType> channelPermissionTypes = channelPermissionMappingRepository.findByChannel_ChannelNo(channelNo)
+                .stream()
+                .map(channelPermissionMappingEntity -> {
+                    String permissionId = channelPermissionMappingEntity.getPermission().getPermissionId();
+                    return ChannelPermissionType.of(permissionId);
+                })
+                .collect(Collectors.toList());
+
+        ResponseGetChannelDetailInfoDto responseDto = new ResponseGetChannelDetailInfoDto();
+        responseDto.setChannel(channelInfo);
+        responseDto.setUser(channelUserInfo);
+        responseDto.setChannelUsers(channelUserInfos);
+        responseDto.setPlaylists(playlistInfos);
+        responseDto.setChannelPermissionTypes(channelPermissionTypes);
+
+        return responseDto;
+
+        // ToDo. 추후 추가 예정 (Redis)
+        //  - 채팅 정보
+        //  - 현재 플레이중인 영상 정보
+    }
+
+    @Transactional
+    public void updateUserChannelRole(Long channelNo, RequestUpdateUserChannelRoleDto params) {
+        channelRoleMappingRepository.updateRoleId(channelNo, params.getUserNo(), params.getRoleId());
     }
 }

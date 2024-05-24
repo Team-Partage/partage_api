@@ -34,10 +34,6 @@ public class RequestJoinDto {
     @NotBlank(message = "비밀번호를 입력해주세요.")
     private String password;
 
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,16}$", message = "비밀번호는 8-16 자리이면서 1개 이상의 알파벳, 숫자, 특수문자를 포함해야합니다.")
-    @NotBlank(message = "비밀번호 확인을 입력해주세요.")
-    private String passwordConfirm;
-
     public UserEntity toEntity() {
         return UserEntity.builder()
                 .email(email)
