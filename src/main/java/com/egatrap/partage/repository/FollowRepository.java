@@ -10,10 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
-    List<FollowEntity> findByFromUser_UserNo(Long userNo);
     List<FollowEntity> findByToUser_UserNo(Long userNo);
+    List<FollowEntity> findByFromUser_UserNo(Long userNo);
 
-    //Optional<FollowEntity> findByFromUserAndToUser(UserEntity fromUser, UserEntity toUser);
     boolean existsByFromUserAndToUser(UserEntity fromUser, UserEntity toUser);
     void deleteFollowByFromUserAndToUser(UserEntity fromUser, UserEntity toUser);
 }

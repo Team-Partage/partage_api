@@ -106,7 +106,7 @@ public class UserController {
 
         // 자기 자신 팔로우인지 체크
         if (fromUserNo.equals(toUserNo))
-            throw new BadRequestException("Following yourself is not allowed.");
+            throw new BadRequestException("Cannot follow/unfollow yourself.");
 
         // 팔로우
         followService.follow(fromUserNo, toUserNo);
@@ -125,7 +125,7 @@ public class UserController {
 
         // 자기 자신 언팔로우인지 체크
         if (fromUserNo.equals(toUserNo))
-            throw new BadRequestException("Unfollowing yourself is not allowed.");
+            throw new BadRequestException("Cannot follow/unfollow yourself.");
 
         // 언팔로우
         followService.unfollow(fromUserNo, toUserNo);
@@ -133,11 +133,30 @@ public class UserController {
     }
 
     /**
-     * 팔로우 조회
+     * 팔로잉 목록 조회
+     *  - 팔로잉: 내가 팔로우 한 사람
      */
-    @GetMapping("/follow")
-    public ResponseEntity<?> getFollowStatus() {
+    @GetMapping("/followings")
+    public ResponseEntity<?> getFollowingList() {
 
-        return null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userNo = Long.parseLong(authentication.getName());
+
+        ResponseGetFollowingListDto response = followService.getFollowingList(userNo);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 팔로워 목록 조회
+     *  - 팔로워: 나를 팔로우 한 사람
+     */
+    @GetMapping("/followers")
+    public ResponseEntity<?> getFollowerList() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userNo = Long.parseLong(authentication.getName());
+
+        ResponseGetFollowerListDto response = followService.getFollowerList(userNo);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
