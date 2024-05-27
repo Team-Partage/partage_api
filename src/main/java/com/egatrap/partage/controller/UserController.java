@@ -1,6 +1,8 @@
 package com.egatrap.partage.controller;
 
 import com.egatrap.partage.constants.ResponseType;
+import com.egatrap.partage.exception.BadRequestException;
+import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,18 @@ public class UserController {
 
         // 인증 메일 발송
         userService.sendAuthEmail(params);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
+    /**
+     * 인증 번호 체크
+     */
+    @PostMapping("/auth-number")
+    public ResponseEntity<?> checkAuthNumber(@Valid @RequestBody RequestCheckAuthNumberDto params) {
+
+        // 인증 번호 체크
+        if (!userService.checkAuthNumber(params.getEmail(), params.getAuthNumber()))
+            throw new BadRequestException("Invalid auth number.");
 
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
@@ -41,14 +55,8 @@ public class UserController {
         boolean isExisted = userService.isExistEmail(email);
 
         // 이메일 중복
-        if (isExisted) {
-            return new ResponseEntity<>(ErrorMessageDto.builder()
-                    .code(409)
-                    .status("CONFLICT")
-                    .message("The resource already exists")
-                    .build(),
-                    HttpStatus.CONFLICT);
-        }
+        if (isExisted)
+            throw new ConflictException("The resource already exists. email=" + email);
 
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
@@ -63,14 +71,8 @@ public class UserController {
         boolean isExisted = userService.isExistNickname(nickname);
 
         // 닉네임 중복
-        if (isExisted) {
-            return new ResponseEntity<>(ErrorMessageDto.builder()
-                    .code(409)
-                    .status("CONFLICT")
-                    .message("The resource already exists")
-                    .build(),
-                    HttpStatus.CONFLICT);
-        }
+        if (isExisted)
+            throw new ConflictException("The resource already exists. nickname=" + nickname);
 
         return new ResponseEntity<>(
                 new ResponseDto(ResponseType.SUCCESS),
@@ -83,35 +85,8 @@ public class UserController {
     @PostMapping("/join")
     public ResponseEntity<?> join(@Valid @RequestBody RequestJoinDto params) {
 
-        if (isInvalidJoinRequest(params)) {
-            return new ResponseEntity<>(
-                    ErrorMessageDto.builder()
-                    .code(400)
-                    .status("BAD REQUEST")
-                    .message("Invalid join request")
-                    .build(),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        // 회원가입
-        userService.join(params);
-        return new ResponseEntity<>(
-                new ResponseDto(ResponseType.SUCCESS),
-                HttpStatus.OK);
-    }
-
-    private boolean isInvalidJoinRequest(RequestJoinDto params) {
-
-        return userService.isExistEmail(params.getEmail()) ||
-                userService.isExistNickname(params.getNickname()) ||
-                !userService.checkAuthNumber(params.getEmail(), params.getAuthNumber());
-    }
-
-    /**
-     * 회원가입 백도어 - 이메일인증 X
-     */
-    @PostMapping("/join-backdoor")
-    public ResponseEntity<?> joinBackdoor(@Valid @RequestBody RequestJoinDto params) {
+        if (userService.isExistEmail(params.getEmail()) || userService.isExistNickname(params.getNickname()))
+            throw new ConflictException("The user already exists. Please check the email and nickname again.");
 
         // 회원가입
         userService.join(params);
