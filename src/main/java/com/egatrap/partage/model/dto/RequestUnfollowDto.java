@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestFollowDto {
+public class RequestUnfollowDto {
 
     @NotNull
     private Long userNo;

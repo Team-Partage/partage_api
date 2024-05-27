@@ -1,6 +1,7 @@
 package com.egatrap.partage.service;
 
 import com.egatrap.partage.constants.UserRoleType;
+import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.model.dto.RequestJoinDto;
 import com.egatrap.partage.model.dto.RequestLoginDto;
 import com.egatrap.partage.model.dto.RequestSendAuthEmailDto;

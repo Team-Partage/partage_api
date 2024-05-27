@@ -4,11 +4,14 @@ import com.egatrap.partage.constants.ResponseType;
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
+import com.egatrap.partage.service.FollowService;
 import com.egatrap.partage.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,6 +23,7 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final FollowService followService;
 
     /**
      * 인증 메일 전송
@@ -73,10 +77,7 @@ public class UserController {
         // 닉네임 중복
         if (isExisted)
             throw new ConflictException("The resource already exists. nickname=" + nickname);
-
-        return new ResponseEntity<>(
-                new ResponseDto(ResponseType.SUCCESS),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
     /**
@@ -90,8 +91,53 @@ public class UserController {
 
         // 회원가입
         userService.join(params);
-        return new ResponseEntity<>(
-                new ResponseDto(ResponseType.SUCCESS),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
+    /**
+     * 팔로우
+     */
+    @PostMapping("/follow")
+    public ResponseEntity<?> follow(@Valid @RequestBody RequestFollowDto params) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long fromUserNo = Long.parseLong(authentication.getName());
+        Long toUserNo = params.getUserNo();
+
+        // 자기 자신 팔로우인지 체크
+        if (fromUserNo.equals(toUserNo))
+            throw new BadRequestException("Following yourself is not allowed.");
+
+        // 팔로우
+        followService.follow(fromUserNo, toUserNo);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
+    /**
+     * 언팔로우
+     */
+    @DeleteMapping("/follow")
+    public ResponseEntity<?> unfollow(@Valid @RequestBody RequestUnfollowDto params) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long fromUserNo = Long.parseLong(authentication.getName());
+        Long toUserNo = params.getUserNo();
+
+        // 자기 자신 언팔로우인지 체크
+        if (fromUserNo.equals(toUserNo))
+            throw new BadRequestException("Unfollowing yourself is not allowed.");
+
+        // 언팔로우
+        followService.unfollow(fromUserNo, toUserNo);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
+    /**
+     * 팔로우 조회
+     */
+    @GetMapping("/follow")
+    public ResponseEntity<?> getFollowStatus() {
+
+        return null;
     }
 }
