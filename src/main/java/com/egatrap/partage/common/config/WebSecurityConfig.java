@@ -38,7 +38,8 @@ public class WebSecurityConfig {
             "/api/v1/user/check-nickname/{nickname}",
             "/api/v1/user/auth-email",
             "/api/v1/user/join",
-            "/api/v1/user/join-backdoor"
+            "/api/v1/user/join-backdoor",
+            "/ws"
     };
 
     private final JwtSecurityConfig jwtSecurityConfig;
