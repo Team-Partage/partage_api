@@ -2,6 +2,7 @@ package com.egatrap.partage.service;
 
 import com.egatrap.partage.constants.UserRoleType;
 import com.egatrap.partage.exception.BadRequestException;
+import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.model.entity.*;
 import com.egatrap.partage.repository.UserRepository;
@@ -145,6 +146,19 @@ public class UserService {
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
         userEntity.deactive();
+        userRepository.save(userEntity);
+    }
+
+    @Transactional
+    public void updateNickname(Long userNo, String nickname) {
+
+        if (userRepository.findByNicknameAndIsActive(nickname, true).isPresent())
+            throw new ConflictException("Nickname is already in exists or is currently in use.");
+
+        UserEntity userEntity = userRepository.findById(userNo)
+                .orElseThrow(() -> new BadRequestException("User not found."));
+
+        userEntity.updateNickname(nickname);
         userRepository.save(userEntity);
     }
 }

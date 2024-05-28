@@ -89,4 +89,8 @@ public class UserEntity {
     public void deactive() {
         this.isActive = false;
     }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }

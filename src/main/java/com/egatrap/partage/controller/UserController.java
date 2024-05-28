@@ -185,4 +185,17 @@ public class UserController {
         userService.deactiveUser(userNo);
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
+
+    /**
+     * 닉네임 수정
+     */
+    @PatchMapping("/me/nickname")
+    public ResponseEntity<?> updateNickname(@Valid @RequestBody RequestUpdateNicknameDto params) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userNo = Long.parseLong(authentication.getName());
+
+        userService.updateNickname(userNo, params.getNickname());
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
 }
