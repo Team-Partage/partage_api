@@ -137,4 +137,14 @@ public class UserService {
         UserDto userDto = modelMapper.map(userEntity, UserDto.class);
         return new ResponseGetUserInfoDto(userDto);
     }
+
+    @Transactional
+    public void deactiveUser(Long userNo) {
+
+        UserEntity userEntity = userRepository.findById(userNo)
+                .orElseThrow(() -> new BadRequestException("User not found."));
+
+        userEntity.deactive();
+        userRepository.save(userEntity);
+    }
 }

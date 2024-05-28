@@ -134,7 +134,7 @@ public class UserController {
 
     /**
      * 팔로잉 목록 조회
-     *  - 팔로잉: 내가 팔로우 한 사람
+     * - 팔로잉: 내가 팔로우 한 사람
      */
     @GetMapping("/followings")
     public ResponseEntity<?> getFollowingList() {
@@ -148,7 +148,7 @@ public class UserController {
 
     /**
      * 팔로워 목록 조회
-     *  - 팔로워: 나를 팔로우 한 사람
+     * - 팔로워: 나를 팔로우 한 사람
      */
     @GetMapping("/followers")
     public ResponseEntity<?> getFollowerList() {
@@ -176,4 +176,13 @@ public class UserController {
     /**
      * 회원 탈퇴
      */
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deactiveUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userNo = Long.parseLong(authentication.getName());
+
+        userService.deactiveUser(userNo);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
 }
