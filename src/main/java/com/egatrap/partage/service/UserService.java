@@ -2,14 +2,13 @@ package com.egatrap.partage.service;
 
 import com.egatrap.partage.constants.UserRoleType;
 import com.egatrap.partage.exception.BadRequestException;
-import com.egatrap.partage.model.dto.RequestJoinDto;
-import com.egatrap.partage.model.dto.RequestLoginDto;
-import com.egatrap.partage.model.dto.RequestSendAuthEmailDto;
+import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.model.entity.*;
 import com.egatrap.partage.repository.UserRepository;
 import com.egatrap.partage.repository.UserRoleMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -38,6 +37,7 @@ public class UserService {
     private final UserRoleMappingRepository userRoleMappingRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
+    private final ModelMapper modelMapper;
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
@@ -126,5 +126,15 @@ public class UserService {
     @Transactional
     public boolean isExistNickname(String nickname) {
         return userRepository.findByNickname(nickname).isPresent();
+    }
+
+    @Transactional
+    public ResponseGetUserInfoDto findUser(Long userNo) {
+
+        UserEntity userEntity = userRepository.findById(userNo)
+                .orElseThrow(() -> new BadRequestException("User not found."));
+
+        UserDto userDto = modelMapper.map(userEntity, UserDto.class);
+        return new ResponseGetUserInfoDto(userDto);
     }
 }

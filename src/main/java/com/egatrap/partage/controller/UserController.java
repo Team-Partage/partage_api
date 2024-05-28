@@ -159,4 +159,17 @@ public class UserController {
         ResponseGetFollowerListDto response = followService.getFollowerList(userNo);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    /**
+     * 회원 정보 조회
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> getUserInfo() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userNo = Long.parseLong(authentication.getName());
+
+        ResponseGetUserInfoDto response = userService.findUser(userNo);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
