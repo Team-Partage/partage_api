@@ -172,4 +172,8 @@ public class UserController {
         ResponseGetUserInfoDto response = userService.findUser(userNo);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    /**
+     * 회원 탈퇴
+     */
 }

@@ -65,6 +65,7 @@ public class FollowService {
         // 팔로잉 목록 조회
         List<FollowDto> followings = followRepository.findByFromUser_UserNo(userNo)
                 .stream()
+                .filter(followEntity -> followEntity.getToUser().getIsActive())
                 .map(followEntity -> {
                     FollowDto followDto = modelMapper.map(followEntity.getToUser(), FollowDto.class);
                     followDto.setFollowStatus(followRepository.existsByFromUserAndToUser(requestUser, followEntity.getToUser()));
@@ -87,6 +88,7 @@ public class FollowService {
         // 팔로워 목록 조회
         List<FollowDto> followers = followRepository.findByToUser_UserNo(userNo)
                 .stream()
+                .filter(followEntity -> followEntity.getFromUser().getIsActive())
                 .map(followEntity -> {
                     FollowDto followDto = modelMapper.map(followEntity.getFromUser(), FollowDto.class);
                     followDto.setFollowStatus(followRepository.existsByFromUserAndToUser(requestUser, followEntity.getFromUser()));
