@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.net.http.HttpHeaders;
 import java.util.Map;
 
 @Slf4j
@@ -21,8 +22,7 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/test/ws")
-    public String wsPage() throws Exception{
-        log.debug("wsPage");
+    public String wsPage() {
         return "/ws.html";
     }
 
