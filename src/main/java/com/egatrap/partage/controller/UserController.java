@@ -23,7 +23,6 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
-    private final FollowService followService;
 
     /**
      * 인증 메일 전송
@@ -52,15 +51,14 @@ public class UserController {
     /**
      * 이메일 중복 확인
      */
-    @GetMapping("/check-email/{email}")
-    public ResponseEntity<?> checkDuplicateEmail(@PathVariable("email") String email) {
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkDuplicateEmail(@Valid @RequestBody RequestCheckDuplicateEmailDto params) {
 
         // 이메일 중복 확인
-        boolean isExisted = userService.isExistEmail(email);
-
+        boolean isExisted = userService.isExistEmail(params.getEmail());
         // 이메일 중복
         if (isExisted)
-            throw new ConflictException("The resource already exists. email=" + email);
+            throw new ConflictException("The resource already exists. email=" + params.getEmail());
 
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
@@ -68,15 +66,15 @@ public class UserController {
     /**
      * 닉네임 중복 확인
      */
-    @GetMapping("/check-nickname/{nickname}")
-    public ResponseEntity<?> checkDuplicateNickname(@PathVariable("nickname") String nickname) {
+    @GetMapping("/check-nickname")
+    public ResponseEntity<?> checkDuplicateNickname(@Valid @RequestBody RequestCheckDuplicateNicknameDto params) {
 
         // 닉네임 중복 확인
-        boolean isExisted = userService.isExistNickname(nickname);
-
+        boolean isExisted = userService.isExistNickname(params.getNickname());
         // 닉네임 중복
         if (isExisted)
-            throw new ConflictException("The resource already exists. nickname=" + nickname);
+            throw new ConflictException("The resource already exists. nickname=" + params.getNickname());
+
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
@@ -92,72 +90,6 @@ public class UserController {
         // 회원가입
         userService.join(params);
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
-    }
-
-    /**
-     * 팔로우
-     */
-    @PostMapping("/follow")
-    public ResponseEntity<?> follow(@Valid @RequestBody RequestFollowDto params) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long fromUserNo = Long.parseLong(authentication.getName());
-        Long toUserNo = params.getUserNo();
-
-        // 자기 자신 팔로우인지 체크
-        if (fromUserNo.equals(toUserNo))
-            throw new BadRequestException("Cannot follow/unfollow yourself.");
-
-        // 팔로우
-        followService.follow(fromUserNo, toUserNo);
-        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
-    }
-
-    /**
-     * 언팔로우
-     */
-    @DeleteMapping("/follow")
-    public ResponseEntity<?> unfollow(@Valid @RequestBody RequestUnfollowDto params) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long fromUserNo = Long.parseLong(authentication.getName());
-        Long toUserNo = params.getUserNo();
-
-        // 자기 자신 언팔로우인지 체크
-        if (fromUserNo.equals(toUserNo))
-            throw new BadRequestException("Cannot follow/unfollow yourself.");
-
-        // 언팔로우
-        followService.unfollow(fromUserNo, toUserNo);
-        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
-    }
-
-    /**
-     * 팔로잉 목록 조회
-     * - 팔로잉: 내가 팔로우 한 사람
-     */
-    @GetMapping("/followings")
-    public ResponseEntity<?> getFollowingList() {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
-
-        ResponseGetFollowingListDto response = followService.getFollowingList(userNo);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    /**
-     * 팔로워 목록 조회
-     * - 팔로워: 나를 팔로우 한 사람
-     */
-    @GetMapping("/followers")
-    public ResponseEntity<?> getFollowerList() {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
-
-        ResponseGetFollowerListDto response = followService.getFollowerList(userNo);
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**

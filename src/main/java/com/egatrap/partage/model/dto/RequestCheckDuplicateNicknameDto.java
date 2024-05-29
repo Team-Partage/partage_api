@@ -1,11 +1,14 @@
 package com.egatrap.partage.model.dto;
 
-import lombok.Getter;
+import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-@Getter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RequestCheckDuplicateNicknameDto {
 
     @NotBlank(message = "닉네임을 입력해주세요.")

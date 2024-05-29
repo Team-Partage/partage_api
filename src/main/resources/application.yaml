@@ -17,15 +17,15 @@ spring:
     url: jdbc:mysql://183.96.35.71:4406/partage?useSSL=false&serverTimezone=Asia/Seoul
     username: ENC(kCK23Aq6Hb3NfP8FQ/Nd4A==)
     password: ENC(pxWqfCD/p9PPsWa12DXBlg==)
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost/partage?useSSL=false&serverTimezone=Asia/Seoul
-#    username: root
-#    password: asd123
+  # data.sql
+  sql:
+    init:
+      mode: never  # 데이터베이스 초기화 시 always, 이후 never
   # jpa
   jpa:
     hibernate:
       ddl-auto: update
+    defer-datasource-initialization: true
   # redis
   redis:
     host: 183.96.35.71
