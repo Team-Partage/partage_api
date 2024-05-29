@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  chouxkream:
+    container_name: partage
+    build: .
+    image: partage:latest
+    ports:
+      - "9090:9090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JVM_OPTS=-Xmx1g -Xms1g
+      - TZ=Asia/Seoul
+      - "--jasypt.encryptor.key=${KEY}"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

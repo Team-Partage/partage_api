@@ -11,6 +11,10 @@ java {
     sourceCompatibility = '17'
 }
 
+jar {
+    enabled = false // Disable the default JAR task # plain JAR 제외
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
