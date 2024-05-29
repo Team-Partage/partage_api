@@ -27,11 +27,11 @@ public class FollowService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public void follow(Long fromUserNo, Long toUserNo) {
+    public void follow(String fromUserId, String toUserId) {
 
-        UserEntity fromUser = userRepository.findById(fromUserNo)
+        UserEntity fromUser = userRepository.findById(fromUserId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
-        UserEntity toUser = userRepository.findById(toUserNo)
+        UserEntity toUser = userRepository.findById(toUserId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
         // 중복 팔로우 체크
@@ -46,24 +46,24 @@ public class FollowService {
     }
 
     @Transactional
-    public void unfollow(Long fromUserNo, Long toUserNo) {
+    public void unfollow(String fromUserId, String toUserId) {
 
-        UserEntity fromUser = userRepository.findById(fromUserNo)
+        UserEntity fromUser = userRepository.findById(fromUserId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
-        UserEntity toUser = userRepository.findById(toUserNo)
+        UserEntity toUser = userRepository.findById(toUserId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
         followRepository.deleteFollowByFromUserAndToUser(fromUser, toUser);
     }
 
     @Transactional
-    public ResponseGetFollowingListDto getFollowingList(Long userNo) {
+    public ResponseGetFollowingListDto getFollowingList(String userId) {
 
-        UserEntity requestUser = userRepository.findById(userNo)
+        UserEntity requestUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
         // 팔로잉 목록 조회
-        List<FollowDto> followings = followRepository.findByFromUser_UserNo(userNo)
+        List<FollowDto> followings = followRepository.findByFromUser_UserId(userId)
                 .stream()
                 .filter(followEntity -> followEntity.getToUser().getIsActive())
                 .map(followEntity -> {
@@ -80,13 +80,13 @@ public class FollowService {
     }
 
     @Transactional
-    public ResponseGetFollowerListDto getFollowerList(Long userNo) {
+    public ResponseGetFollowerListDto getFollowerList(String userId) {
 
-        UserEntity requestUser = userRepository.findById(userNo)
+        UserEntity requestUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
         // 팔로워 목록 조회
-        List<FollowDto> followers = followRepository.findByToUser_UserNo(userNo)
+        List<FollowDto> followers = followRepository.findByToUser_UserId(userId)
                 .stream()
                 .filter(followEntity -> followEntity.getFromUser().getIsActive())
                 .map(followEntity -> {

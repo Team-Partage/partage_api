@@ -31,15 +31,15 @@ public class ChannelController {
     public ResponseEntity<?> createChannel(@Valid @RequestBody RequestCreateChannelDto params) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
         // 사용자가 생성한 활성화 채널이 있는지 체크
         //  - 채널이 있다면 409 상태코드 반환
-        if (channelService.isExistsActiveChannelByUserNo(userNo))
+        if (channelService.isExistsActiveChannelByUserId(userId))
             throw new ConflictException("The user's channel already exists.");
 
         // 채널 생성 및 채널 권한 설정 정보 생성
-        ResponseCreateChannelDto responseCreateChannelDto = channelService.createChannel(params, userNo);
+        ResponseCreateChannelDto responseCreateChannelDto = channelService.createChannel(params, userId);
         return new ResponseEntity<>(
                 responseCreateChannelDto,
                 HttpStatus.OK);
@@ -48,20 +48,20 @@ public class ChannelController {
     /**
      * 채널 수정
      */
-    @PutMapping("/{channelNo}")
-    public ResponseEntity<?> updateChannel(@PathVariable("channelNo") Long channelNo,
+    @PutMapping("/{channelId}")
+    public ResponseEntity<?> updateChannel(@PathVariable("channelId") String channelId,
                                            @RequestBody RequestUpdateChannelDto params) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
         // 대상 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
         //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우 400 상태코드 반환
-        if (channelService.isActiveChannelByOwnerUserNoAndChannelNo(userNo, channelNo) == null)
+        if (channelService.isActiveChannelByOwnerUserIdAndChannelId(userId, channelId) == null)
                 throw new BadRequestException("Invalid update channel request.");
 
         // 채널 생성 및 채널 권한 설정 정보 생성
-        ResponseUpdateChannelDto responseUpdateChannelDto = channelService.updateChannel(channelNo, params);
+        ResponseUpdateChannelDto responseUpdateChannelDto = channelService.updateChannel(channelId, params);
         return new ResponseEntity<>(
                 responseUpdateChannelDto,
                 HttpStatus.OK);
@@ -70,18 +70,18 @@ public class ChannelController {
     /**
      * 채널 삭제
      */
-    @DeleteMapping("/{channelNo}")
-    public ResponseEntity<?> deleteChannel(@PathVariable("channelNo") Long channelNo) {
+    @DeleteMapping("/{channelId}")
+    public ResponseEntity<?> deleteChannel(@PathVariable("channelId") String channelId) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
         // 대상 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
         //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우 400 상태코드 반환
-        if (channelService.isActiveChannelByOwnerUserNoAndChannelNo(userNo, channelNo) == null)
+        if (channelService.isActiveChannelByOwnerUserIdAndChannelId(userId, channelId) == null)
             throw new BadRequestException("Invalid delete channel request.");
 
-        channelService.deleteChannel(channelNo);
+        channelService.deleteChannel(channelId);
         return new ResponseEntity<>(
                 new ResponseDto(ResponseType.SUCCESS),
                 HttpStatus.OK);
@@ -90,18 +90,18 @@ public class ChannelController {
     /**
      * 채널 상세 정보 조회
      */
-    @GetMapping("/{channelNo}")
-    public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelNo") Long channelNo) {
+    @GetMapping("/{channelId}")
+    public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
         // 대상 채널이 활성화 중이고 채널 사용자가 요청했는지 체크
         //  - 채널이 비활성화이거나 채널 사용자가 아닌 경우 400 상태코드 반환
-        if (channelService.isActiveChannelByUserNoAndChannelNo(userNo, channelNo) == null)
+        if (channelService.isActiveChannelByUserIdAndChannelId(userId, channelId) == null)
             throw new BadRequestException("Invalid get channel info request.");
 
-        ResponseGetChannelDetailInfoDto responseGetChannelDetailInfoDto = channelService.getChannelDetailInfo(userNo, channelNo);
+        ResponseGetChannelDetailInfoDto responseGetChannelDetailInfoDto = channelService.getChannelDetailInfo(userId, channelId);
         return new ResponseEntity<>(
                 responseGetChannelDetailInfoDto,
                 HttpStatus.OK);
@@ -110,12 +110,12 @@ public class ChannelController {
     /**
      * 채널 권한 수정
      */
-    @PatchMapping("/role/{channelNo}")
-    public ResponseEntity<?> updateUserChannelRole(@PathVariable("channelNo") Long channelNo,
+    @PatchMapping("/role/{channelId}")
+    public ResponseEntity<?> updateUserChannelRole(@PathVariable("channelId") String channelId,
                                                    @Valid @RequestBody RequestUpdateUserChannelRoleDto params) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
         // 1. 대상 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
         //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우 400 상태코드 반환
@@ -123,14 +123,14 @@ public class ChannelController {
         // 3. 일반 사용자를 owner로 요청한 경우 400 상태코드 반환
         // 4. 대상 채널이 활성화 중이고 채널 사용자가 타겟인지 체크
         //   - 사용자가 대상 채널에 비활성화 중이거나 대상 채널에 존재 하지 않는 경우 400 상태코드 반환
-        if (channelService.isActiveChannelByOwnerUserNoAndChannelNo(userNo, channelNo) == null ||
-            channelService.isActiveChannelByUserNoAndChannelNo(params.getUserNo(), channelNo) == null ||
-            params.getUserNo().equals(userNo) || params.getRoleId().equals(ChannelRoleType.ROLE_OWNER.getROLE_ID()) ) {
+        if (channelService.isActiveChannelByOwnerUserIdAndChannelId(userId, channelId) == null ||
+            channelService.isActiveChannelByUserIdAndChannelId(params.getUserId(), channelId) == null ||
+            params.getUserId().equals(userId) || params.getRoleId().equals(ChannelRoleType.ROLE_OWNER.getROLE_ID()) ) {
 
             throw new BadRequestException("Invalid userChannelRole update request.");
         }
 
-        channelService.updateUserChannelRole(channelNo, params);
+        channelService.updateUserChannelRole(channelId, params);
         return new ResponseEntity<>(
                 new ResponseDto(ResponseType.SUCCESS),
                 HttpStatus.OK);

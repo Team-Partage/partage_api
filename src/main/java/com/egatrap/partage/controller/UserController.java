@@ -99,9 +99,9 @@ public class UserController {
     public ResponseEntity<?> getUserInfo() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
-        ResponseGetUserInfoDto response = userService.findUser(userNo);
+        ResponseGetUserInfoDto response = userService.findUser(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -112,9 +112,9 @@ public class UserController {
     public ResponseEntity<?> deactiveUser() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
-        userService.deactiveUser(userNo);
+        userService.deactiveUser(userId);
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
@@ -125,9 +125,9 @@ public class UserController {
     public ResponseEntity<?> updateNickname(@Valid @RequestBody RequestUpdateNicknameDto params) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
-        userService.updateNickname(userNo, params.getNickname());
+        userService.updateNickname(userId, params.getNickname());
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 }

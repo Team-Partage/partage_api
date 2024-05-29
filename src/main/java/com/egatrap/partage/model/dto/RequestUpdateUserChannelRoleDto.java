@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 public class RequestUpdateUserChannelRoleDto {
 
     @NotNull
-    private Long userNo;
+    private String userId;
 
     @NotBlank
     private String roleId;

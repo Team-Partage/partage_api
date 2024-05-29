@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ChannelRepository extends JpaRepository<ChannelEntity, Long> {
-    Optional<ChannelEntity> findByChannelNoAndIsActive(Long channelNo, boolean isActive);
+public interface ChannelRepository extends JpaRepository<ChannelEntity, String> {
+    Optional<ChannelEntity> findByChannelIdAndIsActive(String channelId, boolean isActive);
 }

@@ -1,6 +1,5 @@
 package com.egatrap.partage.model.dto;
 
-import com.egatrap.partage.constants.ChannelPermissionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,5 +17,5 @@ public class ResponseGetChannelDetailInfoDto {
     private ChannelUserInfoDto user;
     private List<ChannelUserInfoDto> channelUsers;
     private List<PlaylistDto> playlists;
-    private List<ChannelPermissionType> channelPermissionTypes;
+    private ChannelPermissionInfoDto channelPermissions;
 }

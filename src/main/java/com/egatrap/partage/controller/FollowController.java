@@ -29,15 +29,15 @@ public class FollowController {
     public ResponseEntity<?> follow(@Valid @RequestBody RequestFollowDto params) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long fromUserNo = Long.parseLong(authentication.getName());
-        Long toUserNo = params.getUserNo();
+        String fromUserId = authentication.getName();
+        String toUserId = params.getUserId();
 
         // 자기 자신 팔로우인지 체크
-        if (fromUserNo.equals(toUserNo))
+        if (fromUserId.equals(toUserId))
             throw new BadRequestException("Cannot follow/unfollow yourself.");
 
         // 팔로우
-        followService.follow(fromUserNo, toUserNo);
+        followService.follow(fromUserId, toUserId);
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
@@ -48,15 +48,15 @@ public class FollowController {
     public ResponseEntity<?> unfollow(@Valid @RequestBody RequestUnfollowDto params) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long fromUserNo = Long.parseLong(authentication.getName());
-        Long toUserNo = params.getUserNo();
+        String fromUserId = authentication.getName();
+        String toUserId = params.getUserId();
 
         // 자기 자신 언팔로우인지 체크
-        if (fromUserNo.equals(toUserNo))
+        if (fromUserId.equals(toUserId))
             throw new BadRequestException("Cannot follow/unfollow yourself.");
 
         // 언팔로우
-        followService.unfollow(fromUserNo, toUserNo);
+        followService.unfollow(fromUserId, toUserId);
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
@@ -68,9 +68,9 @@ public class FollowController {
     public ResponseEntity<?> getFollowingList() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
-        ResponseGetFollowingListDto response = followService.getFollowingList(userNo);
+        ResponseGetFollowingListDto response = followService.getFollowingList(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -82,9 +82,9 @@ public class FollowController {
     public ResponseEntity<?> getFollowerList() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userNo = Long.parseLong(authentication.getName());
+        String userId = authentication.getName();
 
-        ResponseGetFollowerListDto response = followService.getFollowerList(userNo);
+        ResponseGetFollowerListDto response = followService.getFollowerList(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

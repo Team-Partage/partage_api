@@ -55,7 +55,7 @@ public class PlaylistController {
         log.debug("[videoId]=[{}]", videoId);
 
         // 플레이리스트 추가
-        playlistService.addPlaylist(params.getChannelNo(), videoId);
+        playlistService.addPlaylist(params.getChannelId(), videoId);
 
 
         return ResponseEntity.ok(ResponseDto.builder()
@@ -66,7 +66,7 @@ public class PlaylistController {
 
     @GetMapping(value = "/{channelId}", produces = "application/json")
     public ResponseEntity<?> getPlaylist(
-            @NotNull @PathVariable("channelId") Long channelId,
+            @NotNull @PathVariable("channelId") String channelId,
             @Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
             @Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) throws Exception {
 

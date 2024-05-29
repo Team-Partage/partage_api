@@ -16,9 +16,10 @@ import java.util.List;
         @Index(name = "idx_user_nickname", columnList = "nickname")
 })
 public class UserEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userNo;
+    @Column(columnDefinition = "CHAR(32)", nullable = false)
+    private String userId;
 
     @Column(nullable = false, unique = true, length = 100)
     private String email;

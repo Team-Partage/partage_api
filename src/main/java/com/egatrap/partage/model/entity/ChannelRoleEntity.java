@@ -15,6 +15,7 @@ import java.util.List;
 @Table(name = "tb_channel_role")
 public class ChannelRoleEntity {
     @Id
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
     private String roleId;
 
     @Column(nullable = false, length = 20)

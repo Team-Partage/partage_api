@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class ChannelUserInfoDto {
 
     private String roleId;
-    private Long userNo;
+    private String userId;
     private String email;
     private String nickname;
     private String profileColor;

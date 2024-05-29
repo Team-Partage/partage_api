@@ -17,12 +17,12 @@ public class ChattingEntity {
     private Long chattingNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "channel_no", nullable = false)
+    @JoinColumn(name = "channel_id", nullable = false)
     @ToString.Exclude
     private ChannelEntity channel;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_no", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
     private UserEntity user;
 

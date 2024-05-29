@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class PlaylistDto {
 
     private Long playlistNo;
-    private Long channelNo;
+    private String channelId;
     private Integer sequence;
     private String title;
     private String url;

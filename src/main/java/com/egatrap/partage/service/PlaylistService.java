@@ -46,20 +46,20 @@ public class PlaylistService {
     private final Gson gson;
 
     @Transactional(rollbackFor = Exception.class, timeout = 10)
-    public void addPlaylist(Long channelNo, String videoId) throws GeneralSecurityException, IOException {
+    public void addPlaylist(String channelId, String videoId) throws GeneralSecurityException, IOException {
         VideoListResponse response;
 
 //        채널 플레이리스트 조회
-        ChannelEntity channelEntity = channelRepository.findByChannelNoAndIsActive(channelNo, true)
-                .orElseThrow(() -> new BadRequestException("Channel not found. channelNo=" + channelNo));
+        ChannelEntity channelEntity = channelRepository.findByChannelIdAndIsActive(channelId, true)
+                .orElseThrow(() -> new BadRequestException("Channel not found. channelId=" + channelId));
         log.debug("channelEntity={}", channelEntity);
 
         // 채널이 가지고 있는 플레이리스트 개수 조회
-        int playlistCount = playlistRepository.countByChannel_ChannelNoAndIsActive(channelNo, true);
+        int playlistCount = playlistRepository.countByChannel_ChannelIdAndIsActive(channelId, true);
 
         // 플레이리스트 수가 50개 이상인 경우 예외 처리
         if (playlistCount >= 50) {
-            throw new ConflictException("The number of playlists exceeds the limit. channelNo=" + channelNo);
+            throw new ConflictException("The number of playlists exceeds the limit. channelId=" + channelId);
         }
 
         // videoId에 해당하는 비디오 정보 조회 (YouTube Data API)
@@ -103,11 +103,11 @@ public class PlaylistService {
         }
     }
 
-    public long getTotalPlaylist(Long channelId) {
-        return playlistRepository.countByChannel_ChannelNoAndIsActive(channelId, true);
+    public long getTotalPlaylist(String channelId) {
+        return playlistRepository.countByChannel_ChannelIdAndIsActive(channelId, true);
     }
 
-    public List<PlaylistDto> getPlaylists(long channelId, int page, int pageSize) {
+    public List<PlaylistDto> getPlaylists(String channelId, int page, int pageSize) {
 
         Pageable pageable = Pageable.ofSize(pageSize).withPage(page - 1);
 
@@ -115,7 +115,7 @@ public class PlaylistService {
         // - 페이징 처리
         // - isActive가 true인 것만
         // - 조회 sequence 순으로 내림차순 정렬
-        return playlistRepository.findByChannel_ChannelNoAndIsActiveOrderBySequence(channelId, true, pageable)
+        return playlistRepository.findByChannel_ChannelIdAndIsActiveOrderBySequence(channelId, true, pageable)
                 .stream()
                 .map(playlistEntity -> modelMapper.map(playlistEntity, PlaylistDto.class))
                 .toList();
@@ -133,7 +133,7 @@ public class PlaylistService {
         playlistRepository.save(playlistEntity);
 
         // sequence 재정렬 처리 (삭제된 플레이리스트 이후의 sequence를 -1씩 수정)
-        playlistRepository.findByChannel_ChannelNoAndIsActiveOrderBySequence(playlistEntity.getChannel().getChannelNo(), true, Pageable.unpaged())
+        playlistRepository.findByChannel_ChannelIdAndIsActiveOrderBySequence(playlistEntity.getChannel().getChannelId(), true, Pageable.unpaged())
                 .stream()
                 .filter(entity -> entity.getSequence() > playlistEntity.getSequence())
                 .forEach(entity -> {
@@ -144,10 +144,10 @@ public class PlaylistService {
 
     public void movePlaylist(Long playlistNo, int sequence) {
         // 플레이리스트 전체 조회 (채널별로 isActive가 true인 것만)
-        List<PlaylistEntity> playlistEntities = playlistRepository.findByChannel_ChannelNoAndIsActiveOrderBySequence(
+        List<PlaylistEntity> playlistEntities = playlistRepository.findByChannel_ChannelIdAndIsActiveOrderBySequence(
                 playlistRepository.findById(playlistNo)
                         .orElseThrow(() -> new BadRequestException("Playlist not found. playlistNo=" + playlistNo))
-                        .getChannel().getChannelNo(), true, Pageable.unpaged());
+                        .getChannel().getChannelId(), true, Pageable.unpaged());
 
         // @TODO: 플레이리스트 이동 처리 로직 추가 필요
 
