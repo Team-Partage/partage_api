@@ -8,13 +8,16 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ChatMessageDto {
 
-    private Long chattingNo;
-    private Long userNo;
-    private Long channelNo;
-    private String message;
-    private String createAt;
+    private String channelId;
+    private String sender;
+    private String content;
+    private MessageType type;
 
+    public enum MessageType {
+        CHAT,
+        JOIN,
+        LEAVE
+    }
 }

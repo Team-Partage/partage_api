@@ -40,7 +40,8 @@ public class WebSecurityConfig {
             "/api/v1/user/auth-number",
             "/api/v1/user/join",
             "/api/v1/user/join-backdoor",
-            "/ws"
+            "/ws",
+            "/test/**",
     };
 
     private final JwtSecurityConfig jwtSecurityConfig;
