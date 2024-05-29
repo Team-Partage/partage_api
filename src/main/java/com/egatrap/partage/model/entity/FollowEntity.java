@@ -29,9 +29,6 @@ public class FollowEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createAt;
 
-    @Column(nullable = false)
-    private Boolean isActive;
-
     @PrePersist
     protected void onCreate() {
         this.createAt = LocalDateTime.now();

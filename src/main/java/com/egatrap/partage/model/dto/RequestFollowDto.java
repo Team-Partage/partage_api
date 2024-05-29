@@ -5,16 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChannelUserInfoDto {
+public class RequestFollowDto {
 
-    private String roleId;
+    @NotNull
     private Long userNo;
-    private String email;
-    private String nickname;
-    private String profileColor;
-    private String profileImage;
 }

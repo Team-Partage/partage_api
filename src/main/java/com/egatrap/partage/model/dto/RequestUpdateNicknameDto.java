@@ -5,16 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChannelUserInfoDto {
+@Builder
+public class RequestUpdateNicknameDto {
 
-    private String roleId;
-    private Long userNo;
-    private String email;
+    @NotBlank(message = "닉네임을 입력해주세요.")
     private String nickname;
-    private String profileColor;
-    private String profileImage;
 }

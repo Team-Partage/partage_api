@@ -81,4 +81,16 @@ public class UserEntity {
     protected void onUpdate() {
         this.updateAt = LocalDateTime.now();
     }
+
+    public void active() {
+        this.isActive = true;
+    }
+
+    public void deactive() {
+        this.isActive = false;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }
