@@ -4,8 +4,6 @@ import com.egatrap.partage.constants.ChannelType;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,8 +16,8 @@ import java.util.List;
 @Table(name = "tb_channel")
 public class ChannelEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long channelNo;
+    @Column(columnDefinition = "CHAR(32)", nullable = false)
+    private String channelId;
 
     @Column(nullable = false, length = 255)
     private String name;
@@ -50,9 +48,10 @@ public class ChannelEntity {
     @ToString.Exclude
     private List<ChannelRoleMappingEntity> channelRoleMappings;
 
-    @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "channel_id")
     @ToString.Exclude
-    private List<ChannelPermissionMappingEntity> channelPermissionMappings;
+    private ChannelPermissionEntity channelPermission;
 
     @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude

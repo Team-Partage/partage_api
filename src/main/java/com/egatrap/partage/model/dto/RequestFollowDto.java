@@ -14,5 +14,5 @@ import javax.validation.constraints.NotNull;
 public class RequestFollowDto {
 
     @NotNull
-    private Long userNo;
+    private String userId;
 }

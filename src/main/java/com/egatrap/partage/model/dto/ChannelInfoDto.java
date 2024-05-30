@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ChannelInfoDto {
 
-    private Long channelNo;
+    private String channelId;
     private String name;
     private ChannelType type;
     private String hashtag;

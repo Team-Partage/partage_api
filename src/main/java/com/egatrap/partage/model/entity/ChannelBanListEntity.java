@@ -17,17 +17,17 @@ public class ChannelBanListEntity {
     private Long banNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "channel_no", nullable = false)
+    @JoinColumn(name = "channel_id", nullable = false)
     @ToString.Exclude
     private ChannelEntity channel;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "banned_user_no", nullable = false)
+    @JoinColumn(name = "banned_user_id", nullable = false)
     @ToString.Exclude
     private UserEntity bannedUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "banned_by_user_no", nullable = false)
+    @JoinColumn(name = "banned_by_user_id", nullable = false)
     @ToString.Exclude
     private UserEntity bannedByUser;
 

@@ -1,11 +1,11 @@
 package com.egatrap.partage.model.entity;
 
-import com.egatrap.partage.constants.ChannelPermissionType;
+import com.egatrap.partage.constants.ChannelRoleType;
+import com.egatrap.partage.model.dto.ChannelPermissionInfoDto;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -14,51 +14,65 @@ import java.util.List;
 @Entity
 @Table(name = "tb_channel_permission")
 public class ChannelPermissionEntity {
+
     @Id
-    private String permissionId;
+    @Column(columnDefinition = "CHAR(32)", nullable = false)
+    private String channelId;
 
-    @Column(nullable = false, length = 50)
-    private String permission_name;
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
+    private String playlistAdd;
 
-    @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private List<ChannelPermissionMappingEntity> channelPermissionMappings;
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
+    private String playlistRemove;
 
-    public ChannelPermissionEntity(ChannelPermissionType roleType) {
-        this.permissionId = roleType.getPERMISSION_ID();
-        this.permission_name = roleType.name();
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
+    private String playlistMove;
+
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
+    private String videoPlay;
+
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
+    private String videoSeek;
+
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
+    private String videoSkip;
+
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
+    private String chatSend;
+
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
+    private String chatDelete;
+
+    @Column(columnDefinition = "CHAR(5)", nullable = false)
+    private String ban;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @MapsId
+    @JoinColumn(name = "channelId")
+    private ChannelEntity channel;
+
+    @PrePersist
+    protected void onCreate() {
+        this.playlistAdd = ChannelRoleType.ROLE_OWNER.getROLE_ID();
+        this.playlistRemove = ChannelRoleType.ROLE_OWNER.getROLE_ID();
+        this.playlistMove = ChannelRoleType.ROLE_OWNER.getROLE_ID();
+        this.videoPlay = ChannelRoleType.ROLE_MODERATOR.getROLE_ID();
+        this.videoSeek = ChannelRoleType.ROLE_MODERATOR.getROLE_ID();
+        this.videoSkip = ChannelRoleType.ROLE_MODERATOR.getROLE_ID();
+        this.chatSend = ChannelRoleType.ROLE_VIEWER.getROLE_ID();
+        this.chatDelete = ChannelRoleType.ROLE_MODERATOR.getROLE_ID();
+        this.ban = ChannelRoleType.ROLE_OWNER.getROLE_ID();
     }
 
-    public List<ChannelPermissionEntity> defaultChannelPermissionList() {
-
-        ChannelPermissionType[] channelPermissionTypes = {
-                ChannelPermissionType.VIEWER_ADD,
-                ChannelPermissionType.VIEWER_CHATSEND,
-                ChannelPermissionType.MODERATOR_ADD,
-                ChannelPermissionType.MODERATOR_REMOVE,
-                ChannelPermissionType.MODERATOR_MOVE,
-                ChannelPermissionType.MODERATOR_PLAYANDPAUSE,
-                ChannelPermissionType.MODERATOR_SEEK,
-                ChannelPermissionType.MODERATOR_SKIP,
-                ChannelPermissionType.MODERATOR_CHATSEND,
-                ChannelPermissionType.OWNER_ADD,
-                ChannelPermissionType.OWNER_REMOVE,
-                ChannelPermissionType.OWNER_MOVE,
-                ChannelPermissionType.OWNER_PLAYANDPAUSE,
-                ChannelPermissionType.OWNER_SEEK,
-                ChannelPermissionType.OWNER_SKIP,
-                ChannelPermissionType.OWNER_CHATSEND,
-                ChannelPermissionType.OWNER_CHATDELETE,
-                ChannelPermissionType.OWNER_BAN
-        };
-
-        List<ChannelPermissionEntity> defaultChannelPermissionList = new ArrayList<>();
-        for (ChannelPermissionType channelPermissionType : channelPermissionTypes) {
-
-            ChannelPermissionEntity channelPermission = new ChannelPermissionEntity(channelPermissionType);
-            defaultChannelPermissionList.add(channelPermission);
-        }
-
-        return defaultChannelPermissionList;
+    public void onUpdate(ChannelPermissionInfoDto channelPermission) {
+        this.playlistAdd = channelPermission.getPlaylistAdd();
+        this.playlistRemove = channelPermission.getPlaylistRemove();
+        this.playlistMove = channelPermission.getPlaylistMove();
+        this.videoPlay = channelPermission.getVideoPlay();
+        this.videoSeek = channelPermission.getVideoSeek();
+        this.videoSkip = channelPermission.getVideoSkip();
+        this.chatSend = channelPermission.getChatSend();
+        this.chatDelete = channelPermission.getChatDelete();
+        this.ban = channelPermission.getBan();
     }
 }

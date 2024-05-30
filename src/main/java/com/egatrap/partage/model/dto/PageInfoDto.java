@@ -5,14 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
-
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestUnfollowDto {
+@Builder
+public class PageInfoDto {
 
-    @NotNull
-    private String userId;
+    private int cursor;
+    private int perPage;
+    private int totalPage;
+    private Long totalCount;
 }

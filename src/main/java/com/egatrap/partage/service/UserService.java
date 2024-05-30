@@ -1,5 +1,6 @@
 package com.egatrap.partage.service;
 
+import com.egatrap.partage.common.util.CodeGenerator;
 import com.egatrap.partage.constants.UserRoleType;
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
@@ -96,14 +97,20 @@ public class UserService {
     @Transactional
     public void join(RequestJoinDto params) {
 
-        params.setPassword(passwordEncoder.encode(params.getPassword()));
-        UserEntity user = params.toEntity();
+        UserEntity user = UserEntity.builder()
+                .userId(CodeGenerator.generateID("U"))
+                .email(params.getEmail())
+                .username(params.getUsername())
+                .nickname(params.getNickname())
+                .password(passwordEncoder.encode(params.getPassword()))
+                .isActive(true)
+                .build();
         userRepository.save(user);
 
         UserRoleEntity userRole = new UserRoleEntity(UserRoleType.ROLE_USER);
 
         UserRoleMappingId userRoleMappingId = new UserRoleMappingId();
-        userRoleMappingId.setUserNo(user.getUserNo());
+        userRoleMappingId.setUserId(user.getUserId());
         userRoleMappingId.setRoleId(userRole.getRoleId());
 
         UserRoleMappingEntity userRoleMappingEntity = new UserRoleMappingEntity(userRoleMappingId, user, userRole);
@@ -130,9 +137,9 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseGetUserInfoDto findUser(Long userNo) {
+    public ResponseGetUserInfoDto findUser(String userId) {
 
-        UserEntity userEntity = userRepository.findById(userNo)
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
         UserDto userDto = modelMapper.map(userEntity, UserDto.class);
@@ -140,9 +147,9 @@ public class UserService {
     }
 
     @Transactional
-    public void deactiveUser(Long userNo) {
+    public void deactiveUser(String userId) {
 
-        UserEntity userEntity = userRepository.findById(userNo)
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
         userEntity.deactive();
@@ -150,12 +157,12 @@ public class UserService {
     }
 
     @Transactional
-    public void updateNickname(Long userNo, String nickname) {
+    public void updateNickname(String userId, String nickname) {
 
         if (userRepository.findByNicknameAndIsActive(nickname, true).isPresent())
             throw new ConflictException("Nickname is already in exists or is currently in use.");
 
-        UserEntity userEntity = userRepository.findById(userNo)
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
         userEntity.updateNickname(nickname);

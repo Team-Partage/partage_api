@@ -17,5 +17,5 @@ import java.io.Serializable;
 public class UserRoleMappingId implements Serializable {
 
     private String roleId;
-    private Long userNo;
+    private String userId;
 }

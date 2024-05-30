@@ -5,14 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestUnfollowDto {
+@Builder
+public class ResponseGetPublicActiveChannelsDto {
 
-    @NotNull
-    private String userId;
+    private PageInfoDto page;
+    private List<ChannelInfoDto> channels;
 }

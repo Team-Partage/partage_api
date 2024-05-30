@@ -1,5 +1,6 @@
 package com.egatrap.partage.model.dto;
 
+import com.egatrap.partage.common.util.CodeGenerator;
 import com.egatrap.partage.model.entity.UserEntity;
 import lombok.Builder;
 import lombok.Data;

@@ -16,6 +16,6 @@ import java.io.Serializable;
 @Embeddable
 public class ChannelRoleMappingId implements Serializable {
     private String roleId;
-    private Long channelNo;
-    private Long userNo;
+    private String channelId;
+    private String userId;
 }

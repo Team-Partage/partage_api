@@ -17,7 +17,7 @@ public class PlaylistEntity {
     private Long playlistNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "channel_no", nullable = false)
+    @JoinColumn(name = "channel_id", nullable = false)
     @ToString.Exclude
     private ChannelEntity channel;
 

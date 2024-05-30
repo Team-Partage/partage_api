@@ -19,52 +19,52 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
     @Query("SELECT CASE WHEN COUNT(crm) > 0 THEN true ELSE false END " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN crm.channel c " +
-            "WHERE crm.id.userNo = :userNo " +
+            "WHERE crm.id.userId = :userId " +
             "AND crm.id.roleId = :roleId " +
             "AND c.isActive = true")
-    boolean isExistsActiveChannelByUserNo(@Param("userNo") Long userNo, @Param("roleId") String roleId);
+    boolean isExistsActiveChannelByUserId(@Param("userId") String userId, @Param("roleId") String roleId);
 
     @Query("SELECT c.isActive " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN crm.channel c " +
-            "WHERE crm.id.userNo = :userNo " +
+            "WHERE crm.id.userId = :userId " +
             "AND crm.id.roleId = :roleId " +
             "AND crm.isActive = true " +
-            "AND c.channelNo = :channelNo")
-    Boolean isActiveChannelByOwnerUserNoAndChannelNo(Long userNo, String roleId, Long channelNo);
+            "AND c.channelId = :channelId")
+    Boolean isActiveChannelByOwnerUserIdAndChannelId(String userId, String roleId, String channelId);
 
-    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.id.roleId, u.userNo, u.email, u.nickname, " +
+    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.id.roleId, u.userId, u.email, u.nickname, " +
             "u.profileColor, u.profileImage) " +
             "FROM ChannelRoleMappingEntity crm " +
-            "JOIN UserEntity u ON crm.id.userNo = u.userNo " +
-            "WHERE crm.id.channelNo = :channelNo " +
+            "JOIN UserEntity u ON crm.id.userId = u.userId " +
+            "WHERE crm.id.channelId = :channelId " +
             "AND crm.isActive = true")
-    List<ChannelUserInfoDto> findActiveUsersByChannelNo(@Param("channelNo") Long channelNo);
+    List<ChannelUserInfoDto> findActiveUsersByChannelId(@Param("channelId") String channelId);
 
     @Query("SELECT c.isActive " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN crm.channel c " +
-            "WHERE crm.id.userNo = :userNo " +
+            "WHERE crm.id.userId = :userId " +
             "AND crm.isActive = true " +
-            "AND c.channelNo = :channelNo")
-    Boolean isActiveChannelByUserNoAndChannelNo(Long userNo, Long channelNo);
+            "AND c.channelId = :channelId")
+    Boolean isActiveChannelByUserIdAndChannelId(String userId, String channelId);
 
-    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.id.roleId, u.userNo, u.email, u.nickname, " +
+    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.id.roleId, u.userId, u.email, u.nickname, " +
             "u.profileColor, u.profileImage) " +
             "FROM ChannelRoleMappingEntity crm " +
-            "JOIN UserEntity u ON crm.id.userNo = u.userNo " +
-            "WHERE crm.id.channelNo = :channelNo " +
-            "AND crm.id.userNo = :userNo " +
+            "JOIN UserEntity u ON crm.id.userId = u.userId " +
+            "WHERE crm.id.channelId = :channelId " +
+            "AND crm.id.userId = :userId " +
             "AND crm.isActive = true")
-    ChannelUserInfoDto findActiveUserByChannelNoAndUserNo(@Param("channelNo") Long channelNo, @Param("userNo") Long userNo);
+    ChannelUserInfoDto findActiveUserByChannelIdAndUserId(@Param("channelId") String channelId, @Param("userId") String userId);
 
-    Optional<ChannelRoleMappingEntity> findByUser_UserNo(Long userNo);
+    Optional<ChannelRoleMappingEntity> findByUser_UserId(String userId);
 
-    Optional<ChannelRoleMappingEntity> findByUser_UserNoAndChannel_ChannelNo(Long userNo, Long channelNo);
+    Optional<ChannelRoleMappingEntity> findByUser_UserIdAndChannel_ChannelId(String userId, String channelId);
 
     @Modifying
     @Query("UPDATE ChannelRoleMappingEntity crm SET crm.id.roleId = :roleId " +
-            "WHERE crm.id.channelNo = :channelNo " +
-            "AND crm.id.userNo = :userNo")
-    int updateRoleId(@Param("channelNo") Long channelNo, @Param("userNo") Long userNo, @Param("roleId") String roleId);
+            "WHERE crm.id.channelId = :channelId " +
+            "AND crm.id.userId = :userId")
+    int updateRoleId(@Param("channelId") String channelId, @Param("userId") String userId, @Param("roleId") String roleId);
 }

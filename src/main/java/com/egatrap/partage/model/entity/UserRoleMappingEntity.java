@@ -14,9 +14,9 @@ public class UserRoleMappingEntity {
     @EmbeddedId
     private UserRoleMappingId id;
 
-    @MapsId("userNo")
+    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_no")
+    @JoinColumn(name = "user_id")
     @ToString.Exclude
     private UserEntity user;
 

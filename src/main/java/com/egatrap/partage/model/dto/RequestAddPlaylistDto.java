@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 public class RequestAddPlaylistDto {
 
     @NotNull
-    private Long channelNo;
+    private String channelId;
 
     @URL
     @Length(max = 255)

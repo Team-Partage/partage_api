@@ -14,15 +14,15 @@ public class ChannelRoleMappingEntity {
     @EmbeddedId
     private ChannelRoleMappingId id;
 
-    @MapsId("channelNo")
+    @MapsId("channelId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "channel_no")
+    @JoinColumn(name = "channel_id")
     @ToString.Exclude
     private ChannelEntity channel;
 
-    @MapsId("userNo")
+    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_no")
+    @JoinColumn(name = "user_id")
     @ToString.Exclude
     private UserEntity user;
 
