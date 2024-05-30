@@ -9,6 +9,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
+@ToString
 @Table(name = "tb_channel_role_mapping")
 public class ChannelRoleMappingEntity {
     @EmbeddedId

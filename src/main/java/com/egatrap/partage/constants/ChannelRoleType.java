@@ -7,14 +7,14 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ChannelRoleType {
 
-    ROLE_VIEWER("C0100", 2),
-    ROLE_MODERATOR("C0200", 1),
-    ROLE_OWNER("C0300", 0);
+    ROLE_OWNER("C0000", 0),
+    ROLE_MODERATOR("C0100", 1),
+    ROLE_VIEWER("C0200", 2);
 
     private final String ROLE_ID;
     private final int ROLE_PRIORITY;
 
-    public static ChannelRoleType getRoleTypeByRoleId(String roleId) {
+    public static ChannelRoleType get(String roleId) {
         for (ChannelRoleType roleType : ChannelRoleType.values()) {
             if (roleType.ROLE_ID.equals(roleId)) {
                 return roleType;
@@ -22,5 +22,6 @@ public enum ChannelRoleType {
         }
         return null;
     }
+
 
 }
