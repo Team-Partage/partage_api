@@ -26,7 +26,7 @@ public class WebSocketController {
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload ChatMessageDto chatMessage) {
         log.info("Sending message to channel {}: {}", chatMessage.getChannelId(), chatMessage.getContent());
-        messagingTemplate.convertAndSend("/channel/" + chatMessage.getChannelId(), chatMessage);
+        messagingTemplate.convertAndSend("/topic/" + chatMessage.getChannelId(), chatMessage);
     }
 
     @MessageMapping("/chat.addUser")
@@ -34,14 +34,14 @@ public class WebSocketController {
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
         log.info("User {} joined channel {}", chatMessage.getSender(), chatMessage.getChannelId());
         chatMessage.setType(ChatMessageDto.MessageType.JOIN);
-        messagingTemplate.convertAndSend("/channel/" + chatMessage.getChannelId(), chatMessage);
+        messagingTemplate.convertAndSend("/topic/" + chatMessage.getChannelId(), chatMessage);
     }
 
     @MessageMapping("/chat.leaveUser")
     public void leaveUser(@Payload ChatMessageDto chatMessage, SimpMessageHeaderAccessor headerAccessor) {
         log.info("User {} left channel {}", chatMessage.getSender(), chatMessage.getChannelId());
         chatMessage.setType(ChatMessageDto.MessageType.LEAVE);
-        messagingTemplate.convertAndSend("/channel/" + chatMessage.getChannelId(), chatMessage);
+        messagingTemplate.convertAndSend("/topic/" + chatMessage.getChannelId(), chatMessage);
     }
 
 }
