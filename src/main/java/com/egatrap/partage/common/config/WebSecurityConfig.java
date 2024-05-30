@@ -42,6 +42,7 @@ public class WebSecurityConfig {
             "/api/v1/user/join-backdoor",
             "/ws",
             "/test/**",
+            "/api/test/**",
     };
 
     private final JwtSecurityConfig jwtSecurityConfig;
