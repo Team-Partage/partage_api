@@ -144,4 +144,17 @@ public class ChannelController {
         channelService.updateChannelPermissions(channelId, params);
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
+
+    /**
+     * 채널 목록 조회
+     *  - 공개 채널이면서 현재 활성화중인 채널 목록 조회
+     *  - 10개씩 페이징해서 보여줄것?
+     */
+    @GetMapping("/search")
+    public ResponseEntity<?> getActivePublicChannels(@RequestParam("cursor") int cursor,
+                                                     @RequestParam("perPage") int perPage) {
+
+        ResponseGetPublicActiveChannelsDto response = channelService.getActivePublicChannels(cursor, perPage);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

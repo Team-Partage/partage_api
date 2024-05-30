@@ -2,13 +2,18 @@ package com.egatrap.partage.service;
 
 import com.egatrap.partage.common.util.CodeGenerator;
 import com.egatrap.partage.constants.ChannelRoleType;
+import com.egatrap.partage.constants.ChannelType;
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.model.entity.*;
 import com.egatrap.partage.repository.*;
+import com.google.api.services.youtube.model.PageInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -192,14 +197,14 @@ public class ChannelService {
         ChannelPermissionEntity channelPermission = channelPermissionRepository.findById(channelId)
                 .orElseThrow(() -> new BadRequestException("Channel permission config not found."));
 
-        ResponseGetChannelDetailInfoDto responseDto = new ResponseGetChannelDetailInfoDto();
-        responseDto.setChannel(channelInfo);
-        responseDto.setUser(channelUserInfo);
-        responseDto.setChannelUsers(channelUserInfos);
-        responseDto.setPlaylists(playlistInfos);
-        responseDto.setChannelPermissions(new ChannelPermissionInfoDto(channelPermission));
+        ResponseGetChannelDetailInfoDto response = new ResponseGetChannelDetailInfoDto();
+        response.setChannel(channelInfo);
+        response.setUser(channelUserInfo);
+        response.setChannelUsers(channelUserInfos);
+        response.setPlaylists(playlistInfos);
+        response.setChannelPermissions(new ChannelPermissionInfoDto(channelPermission));
 
-        return responseDto;
+        return response;
 
         // ToDo. 추후 추가 예정 (Redis)
         //  - 채팅 정보
@@ -220,5 +225,40 @@ public class ChannelService {
         // 채널 permission update
         channelPermission.onUpdate(params.getChannelPermissions());
         channelPermissionRepository.save(channelPermission);
+    }
+
+    @Transactional
+    public ResponseGetPublicActiveChannelsDto getActivePublicChannels(int cursor, int perPage) {
+
+        // 정렬 조건 - default: 최근 생성일
+        // Pageable 객체 생성
+        Sort sort = Sort.by(Sort.Direction.DESC, "createAt");
+        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+
+        // 활성화 중인 공개 채널 조회
+        Page<ChannelEntity> pagingChannels = channelRepository.findByTypeAndIsActive(ChannelType.PUBLIC, true, pageRequest);
+
+        // 페이지 정보 생성
+        PageInfoDto page = PageInfoDto.builder()
+                .cursor(cursor)
+                .perPage(perPage)
+                .totalPage(pagingChannels.getTotalPages())
+                .totalCount(pagingChannels.getTotalElements()).build();
+
+        // 채널 목록 정보 생성
+        List<ChannelInfoDto> channels = pagingChannels
+                .stream()
+                .map(channelEntity -> modelMapper.map(channelEntity, ChannelInfoDto.class))
+                .toList();
+
+        // response 생성
+        ResponseGetPublicActiveChannelsDto response = new ResponseGetPublicActiveChannelsDto();
+        response.setPage(page);
+        response.setChannels(channels);
+
+        return response;
+
+        // ToDo. 영상 썸네일 정보 추가 전송 필요
+        //  - 현재 플레이중인 영상 기준으로 썸네일이 전송되어야 하는데 현재 플레이중인 영상 정보는 추후 레디스에 저장될 예정
     }
 }
