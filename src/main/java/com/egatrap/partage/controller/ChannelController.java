@@ -40,9 +40,7 @@ public class ChannelController {
 
         // 채널 생성 및 채널 권한 설정 정보 생성
         ResponseCreateChannelDto responseCreateChannelDto = channelService.createChannel(params, userId);
-        return new ResponseEntity<>(
-                responseCreateChannelDto,
-                HttpStatus.OK);
+        return new ResponseEntity<>(responseCreateChannelDto, HttpStatus.OK);
     }
 
     /**
@@ -58,13 +56,11 @@ public class ChannelController {
         // 대상 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
         //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우 400 상태코드 반환
         if (channelService.isActiveChannelByOwnerUserIdAndChannelId(userId, channelId) == null)
-                throw new BadRequestException("Invalid update channel request.");
+            throw new BadRequestException("Invalid update channel request.");
 
         // 채널 생성 및 채널 권한 설정 정보 생성
         ResponseUpdateChannelDto responseUpdateChannelDto = channelService.updateChannel(channelId, params);
-        return new ResponseEntity<>(
-                responseUpdateChannelDto,
-                HttpStatus.OK);
+        return new ResponseEntity<>(responseUpdateChannelDto, HttpStatus.OK);
     }
 
     /**
@@ -82,9 +78,7 @@ public class ChannelController {
             throw new BadRequestException("Invalid delete channel request.");
 
         channelService.deleteChannel(channelId);
-        return new ResponseEntity<>(
-                new ResponseDto(ResponseType.SUCCESS),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
     /**
@@ -101,16 +95,14 @@ public class ChannelController {
         if (channelService.isActiveChannelByUserIdAndChannelId(userId, channelId) == null)
             throw new BadRequestException("Invalid get channel info request.");
 
-        ResponseGetChannelDetailInfoDto responseGetChannelDetailInfoDto = channelService.getChannelDetailInfo(userId, channelId);
-        return new ResponseEntity<>(
-                responseGetChannelDetailInfoDto,
-                HttpStatus.OK);
+        ResponseGetChannelDetailInfoDto response = channelService.getChannelDetailInfo(userId, channelId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
      * 채널 권한 수정
      */
-    @PatchMapping("/role/{channelId}")
+    @PatchMapping("/{channelId}/role")
     public ResponseEntity<?> updateUserChannelRole(@PathVariable("channelId") String channelId,
                                                    @Valid @RequestBody RequestUpdateUserChannelRoleDto params) {
 
@@ -124,15 +116,32 @@ public class ChannelController {
         // 4. 대상 채널이 활성화 중이고 채널 사용자가 타겟인지 체크
         //   - 사용자가 대상 채널에 비활성화 중이거나 대상 채널에 존재 하지 않는 경우 400 상태코드 반환
         if (channelService.isActiveChannelByOwnerUserIdAndChannelId(userId, channelId) == null ||
-            channelService.isActiveChannelByUserIdAndChannelId(params.getUserId(), channelId) == null ||
-            params.getUserId().equals(userId) || params.getRoleId().equals(ChannelRoleType.ROLE_OWNER.getROLE_ID()) ) {
+                channelService.isActiveChannelByUserIdAndChannelId(params.getUserId(), channelId) == null ||
+                params.getUserId().equals(userId) || params.getRoleId().equals(ChannelRoleType.ROLE_OWNER.getROLE_ID())) {
 
-            throw new BadRequestException("Invalid userChannelRole update request.");
+            throw new BadRequestException("Invalid update channel role request.");
         }
 
         channelService.updateUserChannelRole(channelId, params);
-        return new ResponseEntity<>(
-                new ResponseDto(ResponseType.SUCCESS),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
+    /**
+     * 채널 Permission 권한 수정
+     */
+    @PutMapping("/{channelId}/permission")
+    public ResponseEntity<?> updateChannelPermissions(@PathVariable("channelId") String channelId,
+                                                      @Valid @RequestBody RequestUpdateChannelPermissionsDto params) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+
+        // 대상 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
+        //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우 400 상태코드 반환
+        if (channelService.isActiveChannelByOwnerUserIdAndChannelId(userId, channelId) == null)
+            throw new BadRequestException("Invalid update channel permission request.");
+
+        channelService.updateChannelPermissions(channelId, params);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 }

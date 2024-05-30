@@ -210,4 +210,15 @@ public class ChannelService {
     public void updateUserChannelRole(String channelId, RequestUpdateUserChannelRoleDto params) {
         channelRoleMappingRepository.updateRoleId(channelId, params.getUserId(), params.getRoleId());
     }
+
+    @Transactional
+    public void updateChannelPermissions(String channelId, RequestUpdateChannelPermissionsDto params) {
+
+        ChannelPermissionEntity channelPermission = channelPermissionRepository.findById(channelId)
+                .orElseThrow(() -> new BadRequestException("Not found channel permission. channelId=" + channelId));
+
+        // 채널 permission update
+        channelPermission.onUpdate(params.getChannelPermissions());
+        channelPermissionRepository.save(channelPermission);
+    }
 }
