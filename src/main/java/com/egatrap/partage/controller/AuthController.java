@@ -2,6 +2,7 @@ package com.egatrap.partage.controller;
 
 import com.egatrap.partage.constants.ResponseType;
 import com.egatrap.partage.model.dto.*;
+import com.egatrap.partage.security.JwtTokenProvider;
 import com.egatrap.partage.service.JwtTokenService;
 import com.egatrap.partage.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class AuthController {
 
     private final UserService userService;
     private final JwtTokenService jwtTokenService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping(value = "/login", produces = "application/json")
     public ResponseEntity<?> login(@Validated @RequestBody RequestLoginDto params) {
@@ -46,6 +48,7 @@ public class AuthController {
 
         // Return token to client
         return new ResponseEntity<>(ResponseLoginDto.builder()
+                .userId(jwtTokenProvider.getUserId(authentication)) // test code
                 .accessToken(jwtTokenMappingDto.getAccessToken())
                 .refreshToken(jwtTokenMappingDto.getRefreshToken())
                 .build(), HttpStatus.OK);

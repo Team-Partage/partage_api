@@ -11,120 +11,147 @@
 </head>
 
 <body class="bg-gray-100">
-<div class="container mx-auto p-4">
-    <div class="bg-white p-6 rounded-lg shadow-lg">
-        <h1 class="text-2xl font-bold mb-4">Real-time Chat</h1>
-        <div class="mb-4">
-            <input id="channelId" type="text" placeholder="Enter Channel ID" class="border p-2 w-full rounded"/>
-            <button id="connectBtn" class="bg-blue-500 text-white p-2 rounded mt-2 w-full">Connect</button>
-        </div>
-        <div id="chatWindow" class="border p-4 h-80 overflow-y-scroll mb-4 rounded bg-gray-50"></div>
-        <div class="flex">
-            <input id="messageInput" type="text" placeholder="Enter your message"
-                   class="border p-2 flex-grow rounded-l"/>
-            <button id="sendBtn" class="bg-green-500 text-white p-2 rounded-r">Send</button>
+    <div class="container mx-auto p-4">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <div class="mb-4">
+                <input id="email" type="text" placeholder="Enter your email" class="border p-2 w-full rounded mb-2" />
+                <input id="password" type="password" placeholder="Enter your password"
+                    class="border p-2 w-full rounded mb-2" />
+                <button id="loginBtn" class="bg-blue-500 text-white p-2 rounded w-full">Login</button>
+            </div>
+            <div class="mb-4">
+                <input id="channelId" type="text" placeholder="Enter Channel ID" class="border p-2 w-full rounded" />
+                <button id="connectBtn" class="bg-blue-500 text-white p-2 rounded mt-2 w-full">Connect</button>
+            </div>
+            <div id="chatWindow" class="border p-4 h-80 overflow-y-scroll mb-4 rounded bg-gray-50"></div>
+            <div class="flex">
+                <input id="messageInput" type="text" placeholder="Enter your message"
+                    class="border p-2 flex-grow rounded-l" />
+                <button id="sendBtn" class="bg-green-500 text-white p-2 rounded-r">Send</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    let stompClient = null;
-    let currentChannelId = null;
-    const userId = generateRandomId();
+    <script>
+        let stompClient = null;
+        let currentChannelId = null;
+        let accessToken = null;
+        let userId = null;
 
-    function generateRandomId() {
-        return Math.random().toString(36).substring(2, 7);
-    }
+        function login() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
 
-    function connect(channelId) {
-        const socket = new SockJS('/ws');
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, () => {
-            console.log('Connected to channel ' + channelId);
-            currentChannelId = channelId;
+            fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    accessToken = data.access_token;
+                    userId = data.user_id;
+                    console.log('Logged in as:', userId);
+                    alert('Logged in as: ' + userId);
+                })
+                .catch(error => alert('Login failed: ' + error));
+        }
 
-            // 채널에 구독
-            stompClient.subscribe('/topic/' + channelId, (message) => {
-                showMessage(JSON.parse(message.body));
+        function connect(channelId) {
+            const socket = new SockJS('/ws?token=' + accessToken);
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, () => {
+                console.log('Connected to channel ' + channelId);
+                currentChannelId = channelId;
+
+                // 채널에 구독
+                stompClient.subscribe('/topic/' + channelId, (message) => {
+                    showMessage(JSON.parse(message.body));
+                });
+
+                // 사용자 추가 메시지 전송
+                const joinMessage = {
+                    channel_id: channelId,
+                    sender: userId,
+                    content: `${userId} joined the channel`,
+                    type: 'USER_JOIN'
+                };
+                stompClient.send("/app/user.join", {}, JSON.stringify(joinMessage));
             });
+        }
 
-            // 사용자 추가 메시지 전송
-            const joinMessage = {
-                channel_id: channelId,
-                sender: userId,
-                content: `${userId} joined the channel`,
-                type: 'JOIN'
-            };
-            stompClient.send("/app/chat.addUser", {}, JSON.stringify(joinMessage));
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const messageContent = messageInput.value.trim();
+
+            if (messageContent && stompClient) {
+                const chatMessage = {
+                    channel_id: currentChannelId,
+                    sender: userId,
+                    content: messageContent,
+                    type: 'USER_CHAT'
+                };
+                stompClient.send("/app/user.chat", {}, JSON.stringify(chatMessage));
+                messageInput.value = '';
+            }
+        }
+
+        function showMessage(message) {
+            const chatWindow = document.getElementById('chatWindow');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message p-2 mb-2 rounded bg-gray-200';
+
+            if (message.type === 'JOIN') {
+                messageElement.innerText = `[${message.sender} joined the channel]`;
+                messageElement.classList.add('text-green-500');
+            } else if (message.type === 'LEAVE') {
+                messageElement.innerText = `[${message.sender} left the channel]`;
+                messageElement.classList.add('text-red-500');
+            } else {
+                messageElement.innerText = `[${message.sender}]: ${message.content}`;
+            }
+
+            chatWindow.appendChild(messageElement);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            login();
         });
-    }
 
-    function sendMessage() {
-        const messageInput = document.getElementById('messageInput');
-        const messageContent = messageInput.value.trim();
+        document.getElementById('connectBtn').addEventListener('click', () => {
+            const channelId = document.getElementById('channelId').value.trim();
+            if (channelId) {
+                connect(channelId);
+            }
+        });
 
-        if (messageContent && stompClient) {
-            const chatMessage = {
-                channel_id: currentChannelId,
-                sender: userId,
-                content: messageContent,
-                type: 'CHAT'
-            };
-            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
-            messageInput.value = '';
-        }
-    }
-
-    function showMessage(message) {
-        const chatWindow = document.getElementById('chatWindow');
-        const messageElement = document.createElement('div');
-        messageElement.className = 'message p-2 mb-2 rounded bg-gray-200';
-
-        if (message.type === 'JOIN') {
-            messageElement.innerText = `[${message.sender} joined the channel]`;
-            messageElement.classList.add('text-green-500');
-        } else if (message.type === 'LEAVE') {
-            messageElement.innerText = `[${message.sender} left the channel]`;
-            messageElement.classList.add('text-red-500');
-        } else {
-            messageElement.innerText = `[${message.sender}]: ${message.content}`;
-        }
-
-        chatWindow.appendChild(messageElement);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-    }
-
-    document.getElementById('connectBtn').addEventListener('click', () => {
-        const channelId = document.getElementById('channelId').value.trim();
-        if (channelId) {
-            connect(channelId);
-        }
-    });
-
-    document.getElementById('sendBtn').addEventListener('click', () => {
-        sendMessage();
-    });
-
-    document.getElementById('messageInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+        document.getElementById('sendBtn').addEventListener('click', () => {
             sendMessage();
-        }
-    });
+        });
 
-    window.onbeforeunload = function () {
-        // 사용자 나가기 메시지 전송
-        if (stompClient && currentChannelId) {
-            const leaveMessage = {
-                channel_id: currentChannelId,
-                sender: userId,
-                content: `${userId} left the channel`,
-                type: 'LEAVE'
-            };
-            stompClient.send("/app/chat.leaveUser", {}, JSON.stringify(leaveMessage));
-            stompClient.disconnect();
-        }
-    };
-</script>
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        window.onbeforeunload = function () {
+            // 사용자 나가기 메시지 전송
+            if (stompClient && currentChannelId) {
+                const leaveMessage = {
+                    channel_id: currentChannelId,
+                    sender: userId,
+                    content: `${userId} left the channel`,
+                    type: 'USER_LEAVE'
+                };
+                stompClient.send("/app/user.leave", {}, JSON.stringify(leaveMessage));
+                stompClient.disconnect();
+            }
+        };
+    </script>
 </body>
 
 </html>

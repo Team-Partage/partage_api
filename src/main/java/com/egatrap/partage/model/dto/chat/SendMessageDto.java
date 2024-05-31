@@ -1,17 +1,16 @@
 package com.egatrap.partage.model.dto.chat;
 
 import com.egatrap.partage.constants.MessageType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageDto {
+@Builder
+public class SendMessageDto {
 
-    private String channelId;
     private String sender;
     private String content;
+    private MessageType type;
 
 }

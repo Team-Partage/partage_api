@@ -1,7 +1,9 @@
 package com.egatrap.partage.controller;
 
+import com.egatrap.partage.common.aspect.MessagePermission;
 import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.model.dto.chat.MessageDto;
+import com.egatrap.partage.model.dto.chat.SendMessageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -22,48 +24,37 @@ public class StompController {
         return "/ws.html";
     }
 
-
     @MessageMapping("/user.chat")
+    @MessagePermission(permision = MessageType.USER_CHAT)
     public void sendMessage(@Payload MessageDto message) {
         log.debug("Sending message to channel {}: {}", message.getChannelId(), message.getContent());
-        message.setType(MessageType.USER_CHAT);
-        messagingTemplate.convertAndSend("/topic/" + message.getChannelId(), message);
+        messagingTemplate.convertAndSend("/topic/" + message.getChannelId(), SendMessageDto.builder()
+                .content(message.getContent())
+                .sender(message.getSender())
+                .type(MessageType.USER_CHAT)
+                .build());
     }
 
     @MessageMapping("/user.join")
+    @MessagePermission(permision = MessageType.USER_JOIN)
     public void addUser(@Payload MessageDto message) {
         log.info("User {} joined channel {}", message.getSender(), message.getChannelId());
-        message.setType(MessageType.USER_JOIN);
-        messagingTemplate.convertAndSend("/topic/" + message.getChannelId(), message);
+        messagingTemplate.convertAndSend("/topic/" + message.getChannelId(), SendMessageDto.builder()
+                .content(message.getContent())
+                .sender(message.getSender())
+                .type(MessageType.USER_JOIN)
+                .build());
     }
 
     @MessageMapping("/user.leave")
+    @MessagePermission(permision = MessageType.USER_LEAVE)
     public void leaveUser(@Payload MessageDto message) {
         log.info("User {} left channel {}", message.getSender(), message.getChannelId());
-        message.setType(MessageType.USER_LEAVE);
-        messagingTemplate.convertAndSend("/topic/" + message.getChannelId(), message);
+        messagingTemplate.convertAndSend("/topic/" + message.getChannelId(), SendMessageDto.builder()
+                .content(message.getContent())
+                .sender(message.getSender())
+                .type(MessageType.USER_LEAVE)
+                .build());
     }
-
-
-//    @MessageMapping("/chat.sendMessage")
-//    public void sendMessage(@Payload MessageDto chatMessage) {
-//        log.info("Sending message to channel {}: {}", chatMessage.getChannelId(), chatMessage.getContent());
-//        messagingTemplate.convertAndSend("/topic/" + chatMessage.getChannelId(), chatMessage);
-//    }
-
-//    @MessageMapping("/chat.addUser")
-//    public void addUser(@Payload MessageDto chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-//        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-//        log.info("User {} joined channel {}", chatMessage.getSender(), chatMessage.getChannelId());
-//        chatMessage.setType(MessageDto.MessageType.JOIN);
-//        messagingTemplate.convertAndSend("/topic/" + chatMessage.getChannelId(), chatMessage);
-//    }
-
-//    @MessageMapping("/chat.leaveUser")
-//    public void leaveUser(@Payload MessageDto chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-//        log.info("User {} left channel {}", chatMessage.getSender(), chatMessage.getChannelId());
-//        chatMessage.setType(MessageDto.MessageType.LEAVE);
-//        messagingTemplate.convertAndSend("/topic/" + chatMessage.getChannelId(), chatMessage);
-//    }
 
 }

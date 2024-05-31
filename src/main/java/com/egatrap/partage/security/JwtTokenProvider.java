@@ -108,4 +108,8 @@ public class JwtTokenProvider implements InitializingBean {
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
+
+    public String getUserId(Authentication authentication) {
+        return authentication.getName();
+    }
 }
