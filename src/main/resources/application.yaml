@@ -14,9 +14,12 @@ spring:
   #  mysql
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://183.96.35.71:4406/partage?useSSL=false&serverTimezone=Asia/Seoul
-    username: ENC(kCK23Aq6Hb3NfP8FQ/Nd4A==)
-    password: ENC(pxWqfCD/p9PPsWa12DXBlg==)
+    #url: jdbc:mysql://183.96.35.71:4406/partage?useSSL=false&serverTimezone=Asia/Seoul
+    #username: ENC(kCK23Aq6Hb3NfP8FQ/Nd4A==)
+    #password: ENC(pxWqfCD/p9PPsWa12DXBlg==)
+    url: jdbc:mysql://localhost:3306/partage?useSSL=false&serverTimezone=Asia/Seoul
+    username: root
+    password: asd123
   # data.sql
   sql:
     init:

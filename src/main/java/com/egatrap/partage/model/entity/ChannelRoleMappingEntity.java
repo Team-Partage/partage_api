@@ -34,9 +34,6 @@ public class ChannelRoleMappingEntity {
     @ToString.Exclude
     private ChannelRoleEntity role;
 
-    @Column(nullable = false)
-    private Boolean isActive;
-
     public void updateChannelRoleEntity(ChannelRoleEntity channelRoleEntity) {
         this.role = channelRoleEntity;
     }

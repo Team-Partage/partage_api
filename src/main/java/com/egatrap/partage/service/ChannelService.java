@@ -111,7 +111,7 @@ public class ChannelService {
         channelRoleMappingId.setChannelId(channel.getChannelId());
         channelRoleMappingId.setUserId(user.getUserId());
 
-        return new ChannelRoleMappingEntity(channelRoleMappingId, channel, user, channelRole, true);
+        return new ChannelRoleMappingEntity(channelRoleMappingId, channel, user, channelRole);
     }
 
     private ChannelInfoDto setChannelInfo(ChannelEntity channel) {

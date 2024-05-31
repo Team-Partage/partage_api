@@ -29,7 +29,6 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "JOIN crm.channel c " +
             "WHERE crm.id.userId = :userId " +
             "AND crm.id.roleId = :roleId " +
-            "AND crm.isActive = true " +
             "AND c.channelId = :channelId")
     Boolean isActiveChannelByOwnerUserIdAndChannelId(String userId, String roleId, String channelId);
 
@@ -37,15 +36,13 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "u.profileColor, u.profileImage) " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN UserEntity u ON crm.id.userId = u.userId " +
-            "WHERE crm.id.channelId = :channelId " +
-            "AND crm.isActive = true")
+            "WHERE crm.id.channelId = :channelId")
     List<ChannelUserInfoDto> findActiveUsersByChannelId(@Param("channelId") String channelId);
 
     @Query("SELECT c.isActive " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN crm.channel c " +
             "WHERE crm.id.userId = :userId " +
-            "AND crm.isActive = true " +
             "AND c.channelId = :channelId")
     Boolean isActiveChannelByUserIdAndChannelId(String userId, String channelId);
 
@@ -54,8 +51,7 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN UserEntity u ON crm.id.userId = u.userId " +
             "WHERE crm.id.channelId = :channelId " +
-            "AND crm.id.userId = :userId " +
-            "AND crm.isActive = true")
+            "AND crm.id.userId = :userId")
     ChannelUserInfoDto findActiveUserByChannelIdAndUserId(@Param("channelId") String channelId, @Param("userId") String userId);
 
     Optional<ChannelRoleMappingEntity> findByUser_UserId(String userId);
