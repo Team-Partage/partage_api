@@ -1,17 +1,14 @@
-package com.egatrap.partage.common.aop;
+package com.egatrap.partage.common.aspect;
 
 import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.model.dto.ChannelPermissionDto;
 import com.egatrap.partage.model.dto.chat.MessageDto;
-import com.egatrap.partage.model.entity.ChannelRoleMappingEntity;
-import com.egatrap.partage.security.JwtTokenProvider;
 import com.egatrap.partage.service.ChannelPermissionService;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Aspect
