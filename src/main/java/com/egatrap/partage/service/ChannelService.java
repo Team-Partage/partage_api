@@ -162,8 +162,10 @@ public class ChannelService {
         channel.deleteChannel();
         channelRepository.save(channel);
 
+        // 채널 사용자 모두 제거
+        channelRoleMappingRepository.deleteByChannel_ChannelId(channelId);
+
         // ToDo. 채널이 종료되면 이후에 추가 로직이 필요하지 않은지
-        //  - 채널 권한 매핑 테이블의 사용자 모두 제거 필요
         //  - 채팅 로그 백업 등
     }
 
