@@ -15,7 +15,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Embeddable
 public class ChannelRoleMappingId implements Serializable {
-    private String roleId;
     private String channelId;
     private String userId;
 }

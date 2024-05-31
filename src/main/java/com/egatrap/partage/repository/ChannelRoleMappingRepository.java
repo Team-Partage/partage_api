@@ -20,7 +20,7 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN crm.channel c " +
             "WHERE crm.id.userId = :userId " +
-            "AND crm.id.roleId = :roleId " +
+            "AND crm.role.roleId = :roleId " +
             "AND c.isActive = true")
     boolean isExistsActiveChannelByUserId(@Param("userId") String userId, @Param("roleId") String roleId);
 
@@ -28,11 +28,11 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN crm.channel c " +
             "WHERE crm.id.userId = :userId " +
-            "AND crm.id.roleId = :roleId " +
+            "AND crm.role.roleId = :roleId " +
             "AND c.channelId = :channelId")
     Boolean isActiveChannelByOwnerUserIdAndChannelId(String userId, String roleId, String channelId);
 
-    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.id.roleId, u.userId, u.email, u.nickname, " +
+    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.role.roleId, u.userId, u.email, u.nickname, " +
             "u.profileColor, u.profileImage) " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN UserEntity u ON crm.id.userId = u.userId " +
@@ -46,7 +46,7 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "AND c.channelId = :channelId")
     Boolean isActiveChannelByUserIdAndChannelId(String userId, String channelId);
 
-    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.id.roleId, u.userId, u.email, u.nickname, " +
+    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.role.roleId, u.userId, u.email, u.nickname, " +
             "u.profileColor, u.profileImage) " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN UserEntity u ON crm.id.userId = u.userId " +
@@ -59,7 +59,7 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
     Optional<ChannelRoleMappingEntity> findByUser_UserIdAndChannel_ChannelId(String userId, String channelId);
 
     @Modifying
-    @Query("UPDATE ChannelRoleMappingEntity crm SET crm.id.roleId = :roleId " +
+    @Query("UPDATE ChannelRoleMappingEntity crm SET crm.role.roleId = :roleId " +
             "WHERE crm.id.channelId = :channelId " +
             "AND crm.id.userId = :userId")
     int updateRoleId(@Param("channelId") String channelId, @Param("userId") String userId, @Param("roleId") String roleId);

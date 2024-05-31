@@ -154,6 +154,8 @@ public class UserService {
 
         userEntity.deactive();
         userRepository.save(userEntity);
+
+        // ToDo. 팔로잉/팔로워 목록 전체 제거 필요
     }
 
     @Transactional

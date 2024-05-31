@@ -23,11 +23,11 @@ spring:
   # data.sql
   sql:
     init:
-      mode: never  # 데이터베이스 초기화 시 always, 이후 never
+      mode: always  # 데이터베이스 초기화 시 always, 이후 never
   # jpa
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     defer-datasource-initialization: true
   # redis
   redis:

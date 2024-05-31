@@ -107,7 +107,6 @@ public class ChannelService {
         ChannelRoleEntity channelRole = new ChannelRoleEntity(roleType);
 
         ChannelRoleMappingId channelRoleMappingId = new ChannelRoleMappingId();
-        channelRoleMappingId.setRoleId(channelRole.getRoleId());
         channelRoleMappingId.setChannelId(channel.getChannelId());
         channelRoleMappingId.setUserId(user.getUserId());
 
@@ -164,7 +163,7 @@ public class ChannelService {
         channelRepository.save(channel);
 
         // ToDo. 채널이 종료되면 이후에 추가 로직이 필요하지 않은지
-        //  - 채널 권한 매핑 설정 테이블의 활성화 상태 == flase
+        //  - 채널 권한 매핑 테이블의 사용자 모두 제거 필요
         //  - 채팅 로그 백업 등
     }
 

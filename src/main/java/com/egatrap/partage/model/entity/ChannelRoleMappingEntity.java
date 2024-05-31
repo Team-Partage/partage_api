@@ -27,8 +27,6 @@ public class ChannelRoleMappingEntity {
     @ToString.Exclude
     private UserEntity user;
 
-    @Setter
-    @MapsId("roleId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     @ToString.Exclude
