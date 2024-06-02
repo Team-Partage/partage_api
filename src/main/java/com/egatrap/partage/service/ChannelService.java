@@ -7,7 +7,6 @@ import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.model.entity.*;
 import com.egatrap.partage.repository.*;
-import com.google.api.services.youtube.model.PageInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -21,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service("channelService")
@@ -34,6 +32,8 @@ public class ChannelService {
     private final ChannelPermissionRepository channelPermissionRepository;
     private final PlaylistRepository playlistRepository;
     private final ModelMapper modelMapper;
+
+    private final ChannelSearchRepository channelSearchRepository;
 
     @Transactional
     public boolean isExistsActiveChannelByUserId(String userId) {
@@ -229,14 +229,14 @@ public class ChannelService {
     }
 
     @Transactional
-    public ResponseGetPublicActiveChannelsDto getActivePublicChannels(int cursor, int perPage) {
+    public ResponseSearchChannelsDto getActivePublicChannels(int cursor, int perPage) {
 
         // 정렬 조건 - default: 최근 생성일
         // Pageable 객체 생성
         Sort sort = Sort.by(Sort.Direction.DESC, "createAt");
         PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
 
-        // 활성화 중인 공개 채널 조회
+        // 활성화 중인 모든 공개 채널 조회
         Page<ChannelEntity> pagingChannels = channelRepository.findByTypeAndIsActive(ChannelType.PUBLIC, true, pageRequest);
 
         // 페이지 정보 생성
@@ -253,7 +253,7 @@ public class ChannelService {
                 .toList();
 
         // response 생성
-        ResponseGetPublicActiveChannelsDto response = new ResponseGetPublicActiveChannelsDto();
+        ResponseSearchChannelsDto response = new ResponseSearchChannelsDto();
         response.setPage(page);
         response.setChannels(channels);
 
@@ -261,5 +261,41 @@ public class ChannelService {
 
         // ToDo. 영상 썸네일 정보 추가 전송 필요
         //  - 현재 플레이중인 영상 기준으로 썸네일이 전송되어야 하는데 현재 플레이중인 영상 정보는 추후 레디스에 저장될 예정
+        //  - 채널 사용자 정보 추가 필요
+    }
+
+    public ResponseSearchChannelsDto searchChannels(int cursor, int perPage, String keyword) {
+
+        // 정렬 조건 - default: 최근 생성일
+        // Pageable 객체 생성
+        Sort sort = Sort.by(Sort.Direction.DESC, "createAt");
+        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+
+        // 활성화 중인 모든 공개 채널 중 키워드가 포함된 채널 검색
+        Page<ChannelSearchEntity> pagingSearchChannels = channelSearchRepository.searchByKeyword(keyword, pageRequest);
+
+        // 페이지 정보 생성
+        PageInfoDto page = PageInfoDto.builder()
+                .cursor(cursor)
+                .perPage(perPage)
+                .totalPage(pagingSearchChannels.getTotalPages())
+                .totalCount(pagingSearchChannels.getTotalElements()).build();
+
+        // 채널 목록 정보 생성
+        List<ChannelInfoDto> channels = pagingSearchChannels
+                .stream()
+                .map(ChannelSearchEntity -> modelMapper.map(ChannelSearchEntity, ChannelInfoDto.class))
+                .toList();
+
+        // response 생성
+        ResponseSearchChannelsDto response = new ResponseSearchChannelsDto();
+        response.setPage(page);
+        response.setChannels(channels);
+
+        return response;
+
+        // ToDo. 영상 썸네일 정보 추가 전송 필요
+        //  - 현재 플레이중인 영상 기준으로 썸네일이 전송되어야 하는데 현재 플레이중인 영상 정보는 추후 레디스에 저장될 예정
+        //  - 채널 사용자 정보 추가 필요
     }
 }

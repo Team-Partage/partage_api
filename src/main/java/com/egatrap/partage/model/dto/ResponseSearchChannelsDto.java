@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseGetPublicActiveChannelsDto {
+public class ResponseSearchChannelsDto {
 
     private PageInfoDto page;
     private List<ChannelInfoDto> channels;
