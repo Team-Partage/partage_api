@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +27,11 @@ public class StompController {
 
     @MessageMapping("/user.chat")
     @MessagePermission(permision = MessageType.USER_CHAT)
-    public void sendMessage(@Payload MessageDto message) {
+    public void sendMessage(SimpMessageHeaderAccessor headerAccessor, @Payload MessageDto message) {
         log.debug("Sending message to channel {}: {}", message.getChannelId(), message.getContent());
+//        log.debug("User: {}", headerAccessor.getUser().getName());
+        log.debug("SessionId: {}", headerAccessor.getSessionId());
+        log.debug("SessionAttributes: {}", headerAccessor.getSessionAttributes());
         messagingTemplate.convertAndSend("/topic/" + message.getChannelId(), SendMessageDto.builder()
                 .content(message.getContent())
                 .sender(message.getSender())
