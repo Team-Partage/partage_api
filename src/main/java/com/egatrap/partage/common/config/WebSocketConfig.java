@@ -1,5 +1,6 @@
 package com.egatrap.partage.common.config;
 
+import com.egatrap.partage.common.interceptor.TokenHandshakeInterceptor;
 import com.egatrap.partage.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,34 +29,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 //        registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS(); // browser only
         registry.addEndpoint("/ws")
                 .withSockJS()
-                .setInterceptors(new HandshakeInterceptor() {
-                    @Override
-                    public boolean beforeHandshake(ServerHttpRequest request,
-                                                   ServerHttpResponse response,
-                                                   WebSocketHandler wsHandler,
-                                                   Map<String, Object> attributes) throws Exception {
-                        // 토큰 검증 로직 추후 암호화 필요
-                        String token = request.getURI().getQuery(); // Query parameters에서 토큰을 가져옵니다.
-                        if (token != null && token.startsWith("token=")) {
-                            token = token.substring(6);
-                            if (jwtTokenProvider.validateToken(token)) {
-                                String userId = jwtTokenProvider.getAuthentication(token).getName();
-                                log.debug("WS Connection userId: {}", userId);
-                                attributes.put("userId", userId);
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-
-                    @Override
-                    public void afterHandshake(ServerHttpRequest request,
-                                               ServerHttpResponse response,
-                                               WebSocketHandler wsHandler,
-                                               Exception exception) {
-
-                    }
-                });
+                .setInterceptors(new TokenHandshakeInterceptor(jwtTokenProvider));
     }
 
     @Override
