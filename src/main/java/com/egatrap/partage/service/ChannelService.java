@@ -35,6 +35,12 @@ public class ChannelService {
     private final PlaylistRepository playlistRepository;
     private final ModelMapper modelMapper;
 
+
+    public boolean isExistsChannel(String channelId) {
+        // 채널아이디를 이용해 해당 채널이 존재하고 엑티브 상태인지 확인
+        return channelRepository.existsByChannelIdAndIsActive(channelId, true);
+    }
+
     @Transactional
     public boolean isExistsActiveChannelByUserId(String userId) {
         return channelRoleMappingRepository.isExistsActiveChannelByUserId(userId, ChannelRoleType.ROLE_OWNER.getROLE_ID());
@@ -140,9 +146,9 @@ public class ChannelService {
 
         // 채널 update
         channel.updateChannelInfo(params.getName(),
-                                  params.getType(),
-                                  params.getHashtag(),
-                                  params.getChannelColor());
+                params.getType(),
+                params.getHashtag(),
+                params.getChannelColor());
         channelRepository.save(channel);
 
         // response 생성
@@ -184,7 +190,7 @@ public class ChannelService {
         // 사용자 정보 조회
         UserEntity user = userRepository.findById(userId).get();
         ChannelUserInfoDto channelUserInfo = channelRoleMappingRepository.findActiveUserByChannelIdAndUserId(channelId, userId);
-        
+
         // 채널 사용자 목록 정보 조회
         List<ChannelUserInfoDto> channelUserInfos = channelRoleMappingRepository.findActiveUsersByChannelId(channel.getChannelId());
 

@@ -15,4 +15,6 @@ public interface ChannelRepository extends JpaRepository<ChannelEntity, String> 
     Optional<ChannelEntity> findByChannelIdAndIsActive(String channelId, boolean isActive);
 
     Page<ChannelEntity> findByTypeAndIsActive(ChannelType channelType, boolean b, PageRequest pageRequest);
+
+    boolean existsByChannelIdAndIsActive(String channelId, boolean isActive);
 }

@@ -41,7 +41,7 @@ public class StompController {
 
     @MessageMapping("/user.join")
     @MessagePermission(permision = MessageType.USER_JOIN)
-    public void addUser(@Payload MessageDto message) {
+    public void addUser(SimpMessageHeaderAccessor headerAccessor, @Payload MessageDto message) {
         log.info("User {} joined channel {}", message.getSender(), message.getChannelId());
         messagingTemplate.convertAndSend("/topic/" + message.getChannelId(), SendMessageDto.builder()
                 .content(message.getContent())
@@ -52,7 +52,7 @@ public class StompController {
 
     @MessageMapping("/user.leave")
     @MessagePermission(permision = MessageType.USER_LEAVE)
-    public void leaveUser(@Payload MessageDto message) {
+    public void leaveUser(SimpMessageHeaderAccessor headerAccessor, @Payload MessageDto message) {
         log.info("User {} left channel {}", message.getSender(), message.getChannelId());
         messagingTemplate.convertAndSend("/topic/" + message.getChannelId(), SendMessageDto.builder()
                 .content(message.getContent())

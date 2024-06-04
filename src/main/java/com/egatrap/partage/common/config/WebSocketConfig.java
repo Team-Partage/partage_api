@@ -2,6 +2,8 @@ package com.egatrap.partage.common.config;
 
 import com.egatrap.partage.common.interceptor.TokenHandshakeInterceptor;
 import com.egatrap.partage.security.JwtTokenProvider;
+import com.egatrap.partage.service.ChannelPermissionService;
+import com.egatrap.partage.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -23,13 +25,15 @@ import java.util.Map;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final ChannelService channelService;
+    private final ChannelPermissionService channelPermissionService;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
 //        registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS(); // browser only
         registry.addEndpoint("/ws")
                 .withSockJS()
-                .setInterceptors(new TokenHandshakeInterceptor(jwtTokenProvider));
+                .setInterceptors(new TokenHandshakeInterceptor(jwtTokenProvider, channelService, channelPermissionService));
     }
 
     @Override

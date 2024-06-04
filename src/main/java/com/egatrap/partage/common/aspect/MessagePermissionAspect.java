@@ -14,6 +14,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.Objects;
+
 @Slf4j
 @Aspect
 @Component
@@ -22,11 +25,22 @@ public class MessagePermissionAspect {
 
     private final ChannelPermissionService channelPermissionService;
 
-    @Before("@annotation(messagePermission) && args(message,..)")
-    public void checkPermission(JoinPoint joinPoint, MessagePermission messagePermission, MessageDto message) {
-        String userId = message.getSender();
-        String channelId = message.getChannelId();
+    /**
+     * 메시지 권한 체크 Aspect
+     * @param joinPoint
+     * @param messagePermission
+     * @param headerAccessor
+     */
+    @Before("@annotation(messagePermission) && args(headerAccessor, ..)")
+    public void checkPermission(JoinPoint joinPoint, MessagePermission messagePermission, SimpMessageHeaderAccessor headerAccessor) {
 
+        // Session에서 userId, channelId 가져오기
+        Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
+        String userId = String.valueOf(Objects.requireNonNull(sessionAttributes).get("userId"));
+        String channelId = String.valueOf(Objects.requireNonNull(sessionAttributes).get("channelId"));
+//        log.debug("userId: {}, channelId: {}", userId, channelId);
+
+        // 유저의 채널 권한과 해당 채널의 권한을 가져옴
         ChannelRoleType userChannelRole = channelPermissionService.getChannelRole(channelId, userId);
         ChannelPermissionDto channelPermission = channelPermissionService.getChannelPermission(channelId);
 
@@ -51,8 +65,7 @@ public class MessagePermissionAspect {
 
             // Layer 3
             case PLAYLIST_ADD -> userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistAdd().getROLE_PRIORITY();
-            case PLAYLIST_REMOVE ->
-                    userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistRemove().getROLE_PRIORITY();
+            case PLAYLIST_REMOVE -> userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistRemove().getROLE_PRIORITY();
             case PLAYLIST_MOVE -> userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistMove().getROLE_PRIORITY();
 
             // Layer 4

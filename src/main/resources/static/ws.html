@@ -60,7 +60,7 @@
         }
 
         function connect(channelId) {
-            const socket = new SockJS('/ws?token=' + accessToken);
+            const socket = new SockJS(`/ws?token=${accessToken}&channel=${channelId}`);
             stompClient = Stomp.over(socket);
             stompClient.connect({}, () => {
                 console.log('Connected to channel ' + channelId);
