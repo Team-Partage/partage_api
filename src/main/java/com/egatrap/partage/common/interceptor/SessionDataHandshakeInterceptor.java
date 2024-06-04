@@ -1,7 +1,6 @@
 package com.egatrap.partage.common.interceptor;
 
 import com.egatrap.partage.constants.ChannelRoleType;
-import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.security.JwtTokenProvider;
 import com.egatrap.partage.service.ChannelPermissionService;
 import com.egatrap.partage.service.ChannelService;
@@ -21,7 +20,7 @@ import java.util.Map;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class TokenHandshakeInterceptor implements HandshakeInterceptor {
+public class SessionDataHandshakeInterceptor implements HandshakeInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final ChannelService channelService;
@@ -67,11 +66,12 @@ public class TokenHandshakeInterceptor implements HandshakeInterceptor {
         // 채널 권한 조회
         channelRole = channelPermissionService.getChannelRole(channelId, userId);
 
-        // Handshake에 필요한 정보를 attributes에 저장
+        // 세션에 데이터 저장 (userId, channelId, channelRole)
         attributes.put("userId", userId);
         attributes.put("channelId", channelId);
         attributes.put("channelRole", channelRole); // 채널 권한 정보 저장 커넥션 연결시 or 메세지 전송할때마다확인 중 체크 필요
-        log.info("Handshake attributes={}", attributes);
+
+        log.info("WebSocket init session Data : attributes={}", attributes);
 
         return true;
     }

@@ -4,6 +4,7 @@ import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.model.dto.ChannelPermissionDto;
 import com.egatrap.partage.model.dto.chat.MessageDto;
+import com.egatrap.partage.model.vo.WebSocketSessionDataVo;
 import com.egatrap.partage.service.ChannelPermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class MessagePermissionAspect {
 
     /**
      * 메시지 권한 체크 Aspect
+     *
      * @param joinPoint
      * @param messagePermission
      * @param headerAccessor
@@ -35,17 +37,18 @@ public class MessagePermissionAspect {
     public void checkPermission(JoinPoint joinPoint, MessagePermission messagePermission, SimpMessageHeaderAccessor headerAccessor) {
 
         // Session에서 userId, channelId 가져오기
-        Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
-        String userId = String.valueOf(Objects.requireNonNull(sessionAttributes).get("userId"));
-        String channelId = String.valueOf(Objects.requireNonNull(sessionAttributes).get("channelId"));
-//        log.debug("userId: {}, channelId: {}", userId, channelId);
+        WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);
+        log.debug("Session: {}", session);
+        String userId = session.getUserId();
+        String channelId = session.getChannelId();
+        log.debug("userId: {}, channelId: {}", userId, channelId);
 
         // 유저의 채널 권한과 해당 채널의 권한을 가져옴
         ChannelRoleType userChannelRole = channelPermissionService.getChannelRole(channelId, userId);
         ChannelPermissionDto channelPermission = channelPermissionService.getChannelPermission(channelId);
 
         // 채널에 특정 유저의 권한이 있는지 확인 후 없으면 예외 발생 시킴
-        if (!hasPermission(userChannelRole, messagePermission.permision(), channelPermission)) {
+        if (channelPermission == null ||!hasPermission(userChannelRole, messagePermission.permission(), channelPermission)) {
             throw new SecurityException("No permission to perform this action");
         }
     }
@@ -65,7 +68,8 @@ public class MessagePermissionAspect {
 
             // Layer 3
             case PLAYLIST_ADD -> userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistAdd().getROLE_PRIORITY();
-            case PLAYLIST_REMOVE -> userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistRemove().getROLE_PRIORITY();
+            case PLAYLIST_REMOVE ->
+                    userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistRemove().getROLE_PRIORITY();
             case PLAYLIST_MOVE -> userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistMove().getROLE_PRIORITY();
 
             // Layer 4

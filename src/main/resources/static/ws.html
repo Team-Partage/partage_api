@@ -67,7 +67,7 @@
                 currentChannelId = channelId;
 
                 // 채널에 구독
-                stompClient.subscribe('/topic/' + channelId, (message) => {
+                stompClient.subscribe('/channel/' + channelId, (message) => {
                     showMessage(JSON.parse(message.body));
                 });
 
@@ -78,7 +78,7 @@
                     content: `${userId} joined the channel`,
                     type: 'USER_JOIN'
                 };
-                stompClient.send("/app/user.join", {}, JSON.stringify(joinMessage));
+                stompClient.send("/stomp/user.join", {}, JSON.stringify(joinMessage));
             });
         }
 
@@ -93,7 +93,7 @@
                     content: messageContent,
                     type: 'USER_CHAT'
                 };
-                stompClient.send("/app/user.chat", {}, JSON.stringify(chatMessage));
+                stompClient.send("/stomp/user.chat", {}, JSON.stringify(chatMessage));
                 messageInput.value = '';
             }
         }
@@ -147,7 +147,7 @@
                     content: `${userId} left the channel`,
                     type: 'USER_LEAVE'
                 };
-                stompClient.send("/app/user.leave", {}, JSON.stringify(leaveMessage));
+                stompClient.send("/stomp/user.leave", {}, JSON.stringify(leaveMessage));
                 stompClient.disconnect();
             }
         };
