@@ -14,6 +14,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -35,10 +38,14 @@ public class StompController {
         log.debug("Sending message to channel {}: {}", session.getChannelId(), message.getContent());
         log.debug("SessionId: {}", headerAccessor.getSessionId());
         log.debug("session: {}", session);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("sender", message.getSender());
+        data.put("content", message.getContent());
+
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
-                .content(message.getContent())
-                .sender(message.getSender())
-                .type(MessageType.USER_CHAT)
+                .data(data)
+                .type(MessageType.USER_JOIN)
                 .build());
     }
 
@@ -47,9 +54,13 @@ public class StompController {
         log.debug("user.join");
         WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);
         log.info("User {} joined channel {}", message.getSender(), session.getChannelId());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("sender", message.getSender());
+        data.put("content", message.getContent());
+
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
-                .content(message.getContent())
-                .sender(message.getSender())
+                .data(data)
                 .type(MessageType.USER_JOIN)
                 .build());
     }
@@ -58,10 +69,14 @@ public class StompController {
     public void leaveUser(SimpMessageHeaderAccessor headerAccessor, @Payload MessageDto message) {
         WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);
         log.info("User {} left channel {}", message.getSender(), session.getChannelId());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("sender", message.getSender());
+        data.put("content", message.getContent());
+
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
-                .content(message.getContent())
-                .sender(message.getSender())
-                .type(MessageType.USER_LEAVE)
+                .data(data)
+                .type(MessageType.USER_JOIN)
                 .build());
     }
 

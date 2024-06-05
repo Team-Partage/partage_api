@@ -9,8 +9,7 @@ import lombok.*;
 @Builder
 public class SendMessageDto {
 
-    private String sender;
-    private String content;
     private MessageType type;
+    private Object data;
 
 }
