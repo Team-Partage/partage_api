@@ -4,6 +4,7 @@ import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.model.dto.ChannelPermissionDto;
 import com.egatrap.partage.model.dto.chat.MessageDto;
+import com.egatrap.partage.model.vo.WebSocketSessionDataVo;
 import com.egatrap.partage.service.ChannelPermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.Objects;
+
 @Slf4j
 @Aspect
 @Component
@@ -22,16 +26,29 @@ public class MessagePermissionAspect {
 
     private final ChannelPermissionService channelPermissionService;
 
-    @Before("@annotation(messagePermission) && args(message,..)")
-    public void checkPermission(JoinPoint joinPoint, MessagePermission messagePermission, MessageDto message) {
-        String userId = message.getSender();
-        String channelId = message.getChannelId();
+    /**
+     * 메시지 권한 체크 Aspect
+     *
+     * @param joinPoint
+     * @param messagePermission
+     * @param headerAccessor
+     */
+    @Before("@annotation(messagePermission) && args(headerAccessor, ..)")
+    public void checkPermission(JoinPoint joinPoint, MessagePermission messagePermission, SimpMessageHeaderAccessor headerAccessor) {
 
+        // Session에서 userId, channelId 가져오기
+        WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);
+        log.debug("Session: {}", session);
+        String userId = session.getUserId();
+        String channelId = session.getChannelId();
+        log.debug("userId: {}, channelId: {}", userId, channelId);
+
+        // 유저의 채널 권한과 해당 채널의 권한을 가져옴
         ChannelRoleType userChannelRole = channelPermissionService.getChannelRole(channelId, userId);
         ChannelPermissionDto channelPermission = channelPermissionService.getChannelPermission(channelId);
 
         // 채널에 특정 유저의 권한이 있는지 확인 후 없으면 예외 발생 시킴
-        if (!hasPermission(userChannelRole, messagePermission.permision(), channelPermission)) {
+        if (channelPermission == null ||!hasPermission(userChannelRole, messagePermission.permission(), channelPermission)) {
             throw new SecurityException("No permission to perform this action");
         }
     }
