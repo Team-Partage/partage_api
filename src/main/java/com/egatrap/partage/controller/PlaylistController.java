@@ -2,6 +2,7 @@ package com.egatrap.partage.controller;
 
 import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.service.PlaylistService;
+import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class PlaylistController {
     private final PlaylistService playlistService;
     private static final String VIDEO_ID_PATTERN = "^[a-zA-Z0-9_-]{11}$";
 
+    @ApiOperation(value = "플레이리스트 추가")
     @PostMapping(value = "", produces = "application/json")
     public ResponseEntity<?> addPlaylist(@Validated @RequestBody RequestAddPlaylistDto params) throws Exception {
         String videoId = null;
@@ -64,6 +66,7 @@ public class PlaylistController {
                 .build());
     }
 
+    @ApiOperation(value = "플레이리스트 조회")
     @GetMapping(value = "/{channelId}", produces = "application/json")
     public ResponseEntity<?> getPlaylist(
             @NotNull @PathVariable("channelId") String channelId,
@@ -82,6 +85,7 @@ public class PlaylistController {
                 .build());
     }
 
+    @ApiOperation(value = "플레이리스트 삭제")
     @DeleteMapping(value = "/{playlistNo}", produces = "application/json")
     public ResponseEntity<?> deletePlaylist(
             @NotNull @PathVariable("playlistNo") Long playlistNo) throws Exception {
@@ -94,6 +98,7 @@ public class PlaylistController {
                 .build());
     }
 
+    @ApiOperation(value = "플레이리스트 이동")
     @PutMapping(value = "/move", produces = "application/json")
     public ResponseEntity<?> movePlaylist(@Validated @RequestBody RequestMovePlaylistDto params) throws Exception {
 

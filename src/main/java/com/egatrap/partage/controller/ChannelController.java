@@ -6,6 +6,7 @@ import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.service.ChannelService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,9 +25,7 @@ public class ChannelController {
 
     private final ChannelService channelService;
 
-    /**
-     * 채널 생성
-     */
+    @ApiOperation(value = "채널 생성")
     @PostMapping
     public ResponseEntity<?> createChannel(@Valid @RequestBody RequestCreateChannelDto params) {
 
@@ -43,9 +42,7 @@ public class ChannelController {
         return new ResponseEntity<>(responseCreateChannelDto, HttpStatus.OK);
     }
 
-    /**
-     * 채널 수정
-     */
+    @ApiOperation(value = "채널 수정")
     @PutMapping("/{channelId}")
     public ResponseEntity<?> updateChannel(@PathVariable("channelId") String channelId,
                                            @RequestBody RequestUpdateChannelDto params) {
@@ -63,9 +60,7 @@ public class ChannelController {
         return new ResponseEntity<>(responseUpdateChannelDto, HttpStatus.OK);
     }
 
-    /**
-     * 채널 삭제
-     */
+    @ApiOperation(value = "채널 삭제")
     @DeleteMapping("/{channelId}")
     public ResponseEntity<?> deleteChannel(@PathVariable("channelId") String channelId) {
 
@@ -81,9 +76,7 @@ public class ChannelController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 채널 상세 정보 조회
-     */
+    @ApiOperation(value = "채널 상세 정보 조회")
     @GetMapping("/{channelId}")
     public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId) {
 
@@ -99,9 +92,7 @@ public class ChannelController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    /**
-     * 채널 권한 수정
-     */
+    @ApiOperation(value = "채널 사용자 권한 수정")
     @PatchMapping("/{channelId}/role")
     public ResponseEntity<?> updateUserChannelRole(@PathVariable("channelId") String channelId,
                                                    @Valid @RequestBody RequestUpdateUserChannelRoleDto params) {
@@ -126,9 +117,7 @@ public class ChannelController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 채널 Permission 권한 수정
-     */
+    @ApiOperation(value = "채널 Permission 권한 수정")
     @PutMapping("/{channelId}/permission")
     public ResponseEntity<?> updateChannelPermissions(@PathVariable("channelId") String channelId,
                                                       @Valid @RequestBody RequestUpdateChannelPermissionsDto params) {
@@ -145,9 +134,8 @@ public class ChannelController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 채널 검색
-     */
+
+    @ApiOperation(value = "채널 검색")
     @GetMapping("/search")
     public ResponseEntity<?> searchChannels(@RequestParam(value = "cursor", defaultValue = "1") int cursor,
                                             @RequestParam(value = "perPage", defaultValue = "10") int perPage,

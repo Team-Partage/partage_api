@@ -45,6 +45,7 @@ public class WebSecurityConfig {
             "/channel/**",
             "/test/**",
             "/api/test/**",
+            "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**"
     };
 
     private final JwtSecurityConfig jwtSecurityConfig;

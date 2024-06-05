@@ -6,6 +6,7 @@ import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.service.FollowService;
 import com.egatrap.partage.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,9 +25,7 @@ public class UserController {
 
     private final UserService userService;
 
-    /**
-     * 인증 메일 전송
-     */
+    @ApiOperation(value = "회원가입 - 인증 메일 전송")
     @PostMapping("/auth-email")
     public ResponseEntity<?> sendAuthEmail(@Valid @RequestBody RequestSendAuthEmailDto params) {
 
@@ -35,9 +34,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 인증 번호 체크
-     */
+    @ApiOperation(value = "회원가입 - 인증 번호 체크")
     @PostMapping("/auth-number")
     public ResponseEntity<?> checkAuthNumber(@Valid @RequestBody RequestCheckAuthNumberDto params) {
 
@@ -48,9 +45,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 이메일 중복 확인
-     */
+    @ApiOperation(value = "이메일 중복 확인")
     @GetMapping("/check-email")
     public ResponseEntity<?> checkDuplicateEmail(@Valid @RequestBody RequestCheckDuplicateEmailDto params) {
 
@@ -63,9 +58,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 닉네임 중복 확인
-     */
+    @ApiOperation(value = "닉네임 중복 확인")
     @GetMapping("/check-nickname")
     public ResponseEntity<?> checkDuplicateNickname(@Valid @RequestBody RequestCheckDuplicateNicknameDto params) {
 
@@ -78,9 +71,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 회원가입
-     */
+    @ApiOperation(value = "회원가입")
     @PostMapping("/join")
     public ResponseEntity<?> join(@Valid @RequestBody RequestJoinDto params) {
 
@@ -92,9 +83,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 회원 정보 조회
-     */
+    @ApiOperation(value = "회원 정보 조회")
     @GetMapping("/me")
     public ResponseEntity<?> getUserInfo() {
 
@@ -105,9 +94,7 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    /**
-     * 회원 탈퇴
-     */
+    @ApiOperation(value = "회원 탈퇴")
     @DeleteMapping("/me")
     public ResponseEntity<?> deactiveUser() {
 
@@ -118,9 +105,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 닉네임 수정
-     */
+    @ApiOperation(value = "닉네임 수정")
     @PatchMapping("/me/nickname")
     public ResponseEntity<?> updateNickname(@Valid @RequestBody RequestUpdateNicknameDto params) {
 

@@ -4,6 +4,7 @@ import com.egatrap.partage.constants.ResponseType;
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.service.FollowService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,9 +23,7 @@ public class FollowController {
 
     private final FollowService followService;
 
-    /**
-     * 팔로우
-     */
+    @ApiOperation(value = "팔로우")
     @PostMapping
     public ResponseEntity<?> follow(@Valid @RequestBody RequestFollowDto params) {
 
@@ -41,9 +40,7 @@ public class FollowController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 언팔로우
-     */
+    @ApiOperation(value = "언팔로우")
     @DeleteMapping
     public ResponseEntity<?> unfollow(@Valid @RequestBody RequestUnfollowDto params) {
 
@@ -60,10 +57,7 @@ public class FollowController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    /**
-     * 팔로잉 목록 조회
-     * - 팔로잉: 내가 팔로우 한 사람
-     */
+    @ApiOperation(value = "팔로잉 목록 조회")
     @GetMapping("/followings")
     public ResponseEntity<?> getFollowingList() {
 
@@ -74,10 +68,7 @@ public class FollowController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    /**
-     * 팔로워 목록 조회
-     * - 팔로워: 나를 팔로우 한 사람
-     */
+    @ApiOperation(value = "팔로워 목록 조회")
     @GetMapping("/followers")
     public ResponseEntity<?> getFollowerList() {
 

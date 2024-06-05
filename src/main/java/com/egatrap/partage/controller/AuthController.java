@@ -5,6 +5,7 @@ import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.security.JwtTokenProvider;
 import com.egatrap.partage.service.JwtTokenService;
 import com.egatrap.partage.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ public class AuthController {
     private final JwtTokenService jwtTokenService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @ApiOperation(value = "로그인")
     @PostMapping(value = "/login", produces = "application/json")
     public ResponseEntity<?> login(@Validated @RequestBody RequestLoginDto params) {
 //    @TODO 유저 별 최대 활성화 토큰수 체크 및 제안 로직 필요
