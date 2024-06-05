@@ -80,29 +80,6 @@ public class PlaylistService {
         playlistRepository.save(playlistEntity);
     }
 
-    private Video getVideoById(String id) {
-        try {
-            YouTube client = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();
-
-            // videoId에 해당하는 비디오 정보 조회
-            YouTube.Videos.List request = client.videos()
-                    .list("snippet,contentDetails,statistics")
-                    .setId(id)
-                    .setKey(youtubeApiKey);
-            VideoListResponse response = request.execute();
-
-            // videoId에 해당하는 비디오가 없는 경우 예외 처리
-            if (response.getItems().isEmpty())
-                throw new BadRequestException("YouTube video not found. videoId=" + id);
-
-            return response.getItems().get(0);
-        } catch (GeneralSecurityException | IOException e) {
-            throw new RuntimeException("Failed to youtube connection error", e);
-        }
-    }
-
     public long getTotalPlaylist(String channelId) {
         return playlistRepository.countByChannel_ChannelIdAndIsActive(channelId, true);
     }
@@ -142,6 +119,7 @@ public class PlaylistService {
                 });
     }
 
+    @Transactional(rollbackFor = Exception.class, timeout = 10)
     public void movePlaylist(Long playlistNo, int sequence) {
         // 플레이리스트 전체 조회 (채널별로 isActive가 true인 것만)
         List<PlaylistEntity> playlistEntities = playlistRepository.findByChannel_ChannelIdAndIsActiveOrderBySequence(
@@ -149,7 +127,46 @@ public class PlaylistService {
                         .orElseThrow(() -> new BadRequestException("Playlist not found. playlistNo=" + playlistNo))
                         .getChannel().getChannelId(), true, Pageable.unpaged());
 
-        // @TODO: 플레이리스트 이동 처리 로직 추가 필요
+        // sequence가 플레이리스트 개수보다 큰 경우 마지막으로 이동
+        int location = sequence >= playlistEntities.size() ? playlistEntities.size() - 1 : sequence;
 
+        // 플레이리스트 이동
+        playlistEntities.stream()
+                .filter(entity -> entity.getPlaylistNo().equals(playlistNo))
+                .findFirst()
+                .ifPresent(entity -> {
+                    playlistEntities.remove(entity);
+                    playlistEntities.add(location, entity);
+                });
+
+        // 플레이리스트 sequence 재정렬 후 저장
+        for (int i = 0; i < playlistEntities.size(); i++) {
+            PlaylistEntity entity = playlistEntities.get(i);
+            entity.setSequence(i);
+            playlistRepository.save(entity);
+        }
+    }
+
+    private Video getVideoById(String id) {
+        try {
+            YouTube client = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
+
+            // videoId에 해당하는 비디오 정보 조회
+            YouTube.Videos.List request = client.videos()
+                    .list("snippet,contentDetails,statistics")
+                    .setId(id)
+                    .setKey(youtubeApiKey);
+            VideoListResponse response = request.execute();
+
+            // videoId에 해당하는 비디오가 없는 경우 예외 처리
+            if (response.getItems().isEmpty())
+                throw new BadRequestException("YouTube video not found. videoId=" + id);
+
+            return response.getItems().get(0);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new RuntimeException("Failed to youtube connection error", e);
+        }
     }
 }

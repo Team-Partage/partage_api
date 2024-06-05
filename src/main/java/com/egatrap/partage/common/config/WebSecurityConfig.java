@@ -41,6 +41,8 @@ public class WebSecurityConfig {
             "/api/v1/user/join",
             "/api/v1/channel/search",
             "/ws",
+            "/stomp/**",
+            "/channel/**",
             "/test/**",
             "/api/test/**",
     };

@@ -42,6 +42,10 @@ public class MessagePermissionAspect {
         String userId = session.getUserId();
         String channelId = session.getChannelId();
         log.debug("userId: {}, channelId: {}", userId, channelId);
+        if(userId == null || channelId == null) {
+            log.error("No permission to perform this action");
+            throw new SecurityException("No permission to perform this action");
+        }
 
         // 유저의 채널 권한과 해당 채널의 권한을 가져옴
         ChannelRoleType userChannelRole = channelPermissionService.getChannelRole(channelId, userId);
@@ -49,6 +53,7 @@ public class MessagePermissionAspect {
 
         // 채널에 특정 유저의 권한이 있는지 확인 후 없으면 예외 발생 시킴
         if (channelPermission == null ||!hasPermission(userChannelRole, messagePermission.permission(), channelPermission)) {
+            log.error("No permission to perform this action");
             throw new SecurityException("No permission to perform this action");
         }
     }

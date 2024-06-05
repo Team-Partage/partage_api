@@ -60,7 +60,7 @@
         }
 
         function connect(channelId) {
-            const socket = new SockJS(`/ws?token=${accessToken}&channel=${channelId}`);
+            const socket = new SockJS(`/ws?channel=${channelId}` + (accessToken ? '&token=' + accessToken : ''));
             stompClient = Stomp.over(socket);
             stompClient.connect({}, () => {
                 console.log('Connected to channel ' + channelId);
@@ -89,7 +89,7 @@
             if (messageContent && stompClient) {
                 const chatMessage = {
                     channel_id: currentChannelId,
-                    sender: userId,
+                    sender: userId || 'Anonymous',
                     content: messageContent,
                     type: 'USER_CHAT'
                 };
@@ -143,7 +143,7 @@
             if (stompClient && currentChannelId) {
                 const leaveMessage = {
                     channel_id: currentChannelId,
-                    sender: userId,
+                    sender: userId || 'Anonymous',
                     content: `${userId} left the channel`,
                     type: 'USER_LEAVE'
                 };

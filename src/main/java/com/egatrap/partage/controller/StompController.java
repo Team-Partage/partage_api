@@ -43,8 +43,8 @@ public class StompController {
     }
 
     @MessageMapping("/user.join")
-    @MessagePermission(permission = MessageType.USER_JOIN)
     public void addUser(SimpMessageHeaderAccessor headerAccessor, @Payload MessageDto message) {
+        log.debug("user.join");
         WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);
         log.info("User {} joined channel {}", message.getSender(), session.getChannelId());
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
@@ -55,7 +55,6 @@ public class StompController {
     }
 
     @MessageMapping("/user.leave")
-    @MessagePermission(permission = MessageType.USER_LEAVE)
     public void leaveUser(SimpMessageHeaderAccessor headerAccessor, @Payload MessageDto message) {
         WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);
         log.info("User {} left channel {}", message.getSender(), session.getChannelId());

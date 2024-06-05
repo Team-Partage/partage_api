@@ -37,6 +37,7 @@ public class SessionDataHandshakeInterceptor implements HandshakeInterceptor {
         String userId = null;
         String channelId = null;
         ChannelRoleType channelRole = null;
+        log.debug("WebSocket Handshake Request URL : query={}", query);
 
         // Query parameters에서 userId, channelId을 가져옴
         if (query != null) {
@@ -50,6 +51,7 @@ public class SessionDataHandshakeInterceptor implements HandshakeInterceptor {
                     channelId = keyValue[1];
                     // 채널이 존재하지 않는 경우 Handshake 중단
                     if (!channelService.isExistsChannel(channelId)) {
+                        log.error("Channel not found : channelId={}", channelId);
                         response.setStatusCode(HttpStatus.BAD_REQUEST);
                         return false;
                     }
@@ -57,19 +59,21 @@ public class SessionDataHandshakeInterceptor implements HandshakeInterceptor {
             }
         }
 
-        // userId, channelId이 없는 경우 Handshake 중단
-        if (userId == null || channelId == null) {
+        // channelId이 없는 경우 Handshake 중단
+        if (channelId == null) {
             response.setStatusCode(HttpStatus.BAD_REQUEST);
             return false;
         }
 
         // 채널 권한 조회
-        channelRole = channelPermissionService.getChannelRole(channelId, userId);
+//        if(userId != null) {
+//            channelRole = channelPermissionService.getChannelRole(channelId, userId);
+//        }
 
         // 세션에 데이터 저장 (userId, channelId, channelRole)
         attributes.put("userId", userId);
         attributes.put("channelId", channelId);
-        attributes.put("channelRole", channelRole); // 채널 권한 정보 저장 커넥션 연결시 or 메세지 전송할때마다확인 중 체크 필요
+//        attributes.put("channelRole", channelRole); // 채널 권한 정보 저장 커넥션 연결시 or 메세지 전송할때마다확인 중 체크 필요
 
         log.info("WebSocket init session Data : attributes={}", attributes);
 

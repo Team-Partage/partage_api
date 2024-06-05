@@ -71,17 +71,17 @@ docker logs -f --tail 100 partage
 
 ### 서비스 실행
 ```sh
-docker compose start
+docker start partage
 ```
 
 ### 서비스 중지
 ```sh
-docker compose stop
+docker stop partage
 ```
 
 ### 서비스 재시작
 ```sh
-docker compose restart
+docker restart partage
 ```
 
 ## 4. 도커 컨테이너 및 이미지 삭제

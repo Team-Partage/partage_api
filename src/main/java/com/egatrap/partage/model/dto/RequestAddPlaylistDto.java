@@ -17,11 +17,11 @@ import javax.validation.constraints.NotNull;
 public class RequestAddPlaylistDto {
 
     @NotNull
-    private String channelId;
+    private String channelId; // 채널 ID
 
     @URL
     @Length(max = 255)
     @NotBlank
-    private String url;
+    private String url; // 유튜브 URL
 
 }

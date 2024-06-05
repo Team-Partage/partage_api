@@ -20,7 +20,7 @@ public class WebSocketSessionDataVo {
 
     public WebSocketSessionDataVo(SimpMessageHeaderAccessor headerAccessor) {
         Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
-        this.userId = String.valueOf(Objects.requireNonNull(sessionAttributes).get("userId"));
+        this.userId = sessionAttributes.get("userId") == null ? null : String.valueOf(Objects.requireNonNull(sessionAttributes).get("userId"));
         this.channelId = String.valueOf(Objects.requireNonNull(sessionAttributes).get("channelId"));
         this.channelRole = ChannelRoleType.valueOf(String.valueOf(Objects.requireNonNull(sessionAttributes).get("channelRole")));
     }

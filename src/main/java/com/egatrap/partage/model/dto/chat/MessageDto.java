@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MessageDto {
 
-    private String channelId;
-    private String sender;
     private String content;
+    private String sender;
+    private String targetUserId;
 
 }

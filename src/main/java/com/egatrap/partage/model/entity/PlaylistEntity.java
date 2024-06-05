@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "tb_playlist")
+@ToString
 public class PlaylistEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
