@@ -146,15 +146,20 @@ public class ChannelController {
     }
 
     /**
-     * 채널 목록 조회
-     *  - 공개 채널이면서 현재 활성화중인 채널 목록 조회
-     *  - 10개씩 페이징해서 보여줄것?
+     * 채널 검색
      */
     @GetMapping("/search")
-    public ResponseEntity<?> getActivePublicChannels(@RequestParam("cursor") int cursor,
-                                                     @RequestParam("perPage") int perPage) {
+    public ResponseEntity<?> searchChannels(@RequestParam(value = "cursor", defaultValue = "1") int cursor,
+                                            @RequestParam(value = "perPage", defaultValue = "10") int perPage,
+                                            @RequestParam(value = "keyword", required = false) String keyword) {
 
-        ResponseGetPublicActiveChannelsDto response = channelService.getActivePublicChannels(cursor, perPage);
+        // 검색 키워드가 없을 경우 - 전체 활성화 채널 조회
+        if (keyword == null || keyword.isEmpty()) {
+            ResponseSearchChannelsDto response = channelService.getActivePublicChannels(cursor, perPage);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        ResponseSearchChannelsDto response = channelService.searchChannels(cursor, perPage, keyword);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
