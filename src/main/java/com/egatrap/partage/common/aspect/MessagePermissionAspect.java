@@ -35,6 +35,7 @@ public class MessagePermissionAspect {
      */
     @Before("@annotation(messagePermission) && args(headerAccessor, ..)")
     public void checkPermission(JoinPoint joinPoint, MessagePermission messagePermission, SimpMessageHeaderAccessor headerAccessor) {
+        log.debug("Checking permission");
 
         // Session에서 userId, channelId 가져오기
         WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);

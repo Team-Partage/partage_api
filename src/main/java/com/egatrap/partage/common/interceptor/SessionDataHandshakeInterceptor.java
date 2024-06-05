@@ -71,7 +71,7 @@ public class SessionDataHandshakeInterceptor implements HandshakeInterceptor {
 //        }
 
         // 세션에 데이터 저장 (userId, channelId, channelRole)
-        attributes.put("userId", userId);
+        attributes.put("userId", userId == null ? "NONE" : userId);
         attributes.put("channelId", channelId);
 //        attributes.put("channelRole", channelRole); // 채널 권한 정보 저장 커넥션 연결시 or 메세지 전송할때마다확인 중 체크 필요
 
