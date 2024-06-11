@@ -5,7 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -14,5 +16,5 @@ import java.util.List;
 public class ResponseSearchChannelsDto {
 
     private PageInfoDto page;
-    private List<ChannelInfoDto> channels;
+    private List<ChannelPlaylistDto> channels;
 }

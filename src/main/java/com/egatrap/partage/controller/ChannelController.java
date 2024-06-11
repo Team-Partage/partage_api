@@ -6,6 +6,7 @@ import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.service.ChannelService;
+import com.egatrap.partage.service.PlaylistService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -24,6 +27,7 @@ import javax.validation.Valid;
 public class ChannelController {
 
     private final ChannelService channelService;
+    private final PlaylistService playlistService;
 
     @ApiOperation(value = "채널 생성")
     @PostMapping
@@ -78,18 +82,26 @@ public class ChannelController {
 
     @ApiOperation(value = "채널 상세 정보 조회")
     @GetMapping("/{channelId}")
-    public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId) {
+    public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId,
+                                                  @Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
+                                                  @Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getName();
+        ChannelDto channel = channelService.getChannel(channelId);
+        List<ChannelUserDto> channelUsers = channelService.getChannelUsers(channelId);
+        List<PlaylistDto> playlists = playlistService.getPlaylists(channelId, page, pageSize);
+        ChannelPermissionInfoDto channelPermission = channelService.getChannelPermission(channelId);
 
-        // 대상 채널이 활성화 중이고 채널 사용자가 요청했는지 체크
-        //  - 채널이 비활성화이거나 채널 사용자가 아닌 경우 400 상태코드 반환
-        if (channelService.isActiveChannelByUserIdAndChannelId(userId, channelId) == null)
-            throw new BadRequestException("Invalid get channel info request.");
-
-        ResponseGetChannelDetailInfoDto response = channelService.getChannelDetailInfo(userId, channelId);
+        ResponseGetChannelDetailInfoDto response = ResponseGetChannelDetailInfoDto.builder()
+                .channel(channel)
+                .channelUsers(channelUsers)
+                .playlists(playlists)
+                .channelPermissions(channelPermission)
+                .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
+
+        // ToDo. 추후 추가 예정 (Redis)
+        //  - 채팅 정보
+        //  - 현재 플레이중인 영상 정보
     }
 
     @ApiOperation(value = "채널 사용자 권한 수정")
@@ -100,12 +112,8 @@ public class ChannelController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
 
-        // 1. 대상 채널이 활성화 중이고 채널의 OWNER가 요청했는 지 체크
-        //  - 채널이 없거나 OWNER가 아닌 사용자가 잘못 요청한 경우 400 상태코드 반환
-        // 2. onwer 권한 변경 요청 시 400 상태코드 반환
-        // 3. 일반 사용자를 owner로 요청한 경우 400 상태코드 반환
-        // 4. 대상 채널이 활성화 중이고 채널 사용자가 타겟인지 체크
-        //   - 사용자가 대상 채널에 비활성화 중이거나 대상 채널에 존재 하지 않는 경우 400 상태코드 반환
+        // 채널이 활성화 중이고 요청자 권한 체크
+        // 변경 대상 및 변경 권한 체크
         if (channelService.isActiveChannelByOwnerUserIdAndChannelId(userId, channelId) == null ||
                 channelService.isActiveChannelByUserIdAndChannelId(params.getUserId(), channelId) == null ||
                 params.getUserId().equals(userId) || params.getRoleId().equals(ChannelRoleType.ROLE_OWNER.getROLE_ID())) {
@@ -141,13 +149,7 @@ public class ChannelController {
                                             @RequestParam(value = "perPage", defaultValue = "10") int perPage,
                                             @RequestParam(value = "keyword", required = false) String keyword) {
 
-        // 검색 키워드가 없을 경우 - 전체 활성화 채널 조회
-        if (keyword == null || keyword.isEmpty()) {
-            ResponseSearchChannelsDto response = channelService.getActivePublicChannels(cursor, perPage);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-
-        ResponseSearchChannelsDto response = channelService.searchChannels(cursor, perPage, keyword);
+        ResponseSearchChannelsDto response = channelService.getSearchChannels(cursor, perPage, keyword);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

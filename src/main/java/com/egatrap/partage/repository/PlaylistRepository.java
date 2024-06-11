@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PlaylistRepository extends JpaRepository<PlaylistEntity, Long> {
@@ -15,4 +16,6 @@ public interface PlaylistRepository extends JpaRepository<PlaylistEntity, Long> 
     List<PlaylistEntity> findByChannel_ChannelIdAndIsActiveOrderBySequence(String channelId, boolean isActive, Pageable pageable);
 
     List<PlaylistEntity> findAllByChannel_ChannelIdAndIsActiveOrderBySequence(String channelId, boolean isActive);
+
+    Optional<PlaylistEntity> findFirstByChannel_ChannelIdAndIsActiveAndSequence(String channelId, boolean isActive, int sequence);
 }

@@ -2,12 +2,11 @@ package com.egatrap.partage.controller;
 
 import com.egatrap.partage.common.aspect.MessagePermission;
 import com.egatrap.partage.constants.MessageType;
-import com.egatrap.partage.model.dto.ChannelInfoDto;
-import com.egatrap.partage.model.dto.ResponseGetChannelDetailInfoDto;
 import com.egatrap.partage.model.dto.chat.MessageDto;
 import com.egatrap.partage.model.dto.chat.SendMessageDto;
 import com.egatrap.partage.model.vo.WebSocketSessionDataVo;
 import com.egatrap.partage.service.ChannelService;
+import com.egatrap.partage.service.PlaylistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -27,6 +26,7 @@ public class StompController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChannelService channelService;
+    private final PlaylistService playlistService;
 
     private final String CHANNEL_PREFIX = "/channel/";
 
@@ -43,7 +43,7 @@ public class StompController {
         // Create channel info data
         Map<String, Object> data = new HashMap<>();
         // @todo : 서비스 로직 분리 해야함
-        data.put("channel", channelService.getChannelDetailInfo(session.getUserId(), session.getChannelId()));
+        data.put("channel", channelService.getChannel(session.getChannelId()));
         data.put("playlists", 0);
         data.put("currentPlaylist", 0);
         data.put("currentUsers", 0);

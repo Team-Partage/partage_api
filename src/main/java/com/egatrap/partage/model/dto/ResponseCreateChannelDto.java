@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ResponseCreateChannelDto {
 
-    private ChannelInfoDto channel;
-    private List<ChannelUserInfoDto> channelUsers;
+    private ChannelDto channel;
+    private List<ChannelUserDto> channelUsers;
     private ChannelPermissionInfoDto channelPermissions;
 }

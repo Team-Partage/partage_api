@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChannelInfoDto {
+public class ChannelDto {
 
     private String channelId;
     private String name;

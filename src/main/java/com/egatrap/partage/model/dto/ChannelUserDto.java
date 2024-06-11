@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChannelUserInfoDto {
+public class ChannelUserDto {
 
     private String roleId;
     private String userId;

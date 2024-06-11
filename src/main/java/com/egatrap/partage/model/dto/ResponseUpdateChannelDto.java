@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResponseUpdateChannelDto {
 
-    private ChannelInfoDto channel;
+    private ChannelDto channel;
 }

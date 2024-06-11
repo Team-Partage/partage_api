@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -31,16 +32,15 @@ public class ChannelService {
     private final ChannelRoleMappingRepository channelRoleMappingRepository;
     private final ChannelPermissionRepository channelPermissionRepository;
     private final PlaylistRepository playlistRepository;
+    // private final ChannelSearchRepository channelSearchRepository;
     private final ModelMapper modelMapper;
 
-    private final ChannelSearchRepository channelSearchRepository;
 
     public boolean isExistsChannel(String channelId) {
         // 채널아이디를 이용해 해당 채널이 존재하고 엑티브 상태인지 확인
         return channelRepository.existsByChannelIdAndIsActive(channelId, true);
     }
 
-    @Transactional
     public boolean isExistsActiveChannelByUserId(String userId) {
         return channelRoleMappingRepository.isExistsActiveChannelByUserId(userId, ChannelRoleType.ROLE_OWNER.getROLE_ID());
     }
@@ -66,7 +66,6 @@ public class ChannelService {
         ChannelRoleMappingEntity channelRoleMapping = getChannelRoleMappingEntity(channel, user, ChannelRoleType.ROLE_OWNER);
         channelRoleMappingRepository.save(channelRoleMapping);
 
-
         // 일대일 관계에서 관계 재설정을 위함. (https://pasudo123.tistory.com/493)
         //  - DB에 해당 식별자로 데이터가 저장되어 있음에도 불구하고 또 저장해서 에러가 발생
         //  -> DB에 해당 식별자로 있는 지 한번 더 조회해서 반환된 객체를 기준으로 관계를 재설정
@@ -78,12 +77,10 @@ public class ChannelService {
                 .build();
         channelPermissionRepository.save(channelPermission);
 
-        System.out.println("channelPermission = " + channelPermission);
-
         // set usersInfo
-        List<ChannelUserInfoDto> channelUserInfo = channelRoleMappingRepository.findActiveUsersByChannelId(channel.getChannelId());
+        List<ChannelUserDto> channelUserInfo = channelRoleMappingRepository.findActiveUsersByChannelId(channel.getChannelId());
         // set channelInfo
-        ChannelInfoDto channelInfo = setChannelInfo(channel);
+        ChannelDto channelInfo = setChannelInfo(channel);
 
         // response 생성
         ResponseCreateChannelDto responseCreateChannelDto = new ResponseCreateChannelDto();
@@ -93,7 +90,6 @@ public class ChannelService {
 
         return responseCreateChannelDto;
     }
-
 
     private String makeChannelUrl() {
         byte[] uuidStringBytes = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
@@ -118,8 +114,8 @@ public class ChannelService {
         return new ChannelRoleMappingEntity(channelRoleMappingId, channel, user, channelRole);
     }
 
-    private ChannelInfoDto setChannelInfo(ChannelEntity channel) {
-        ChannelInfoDto channelInfo = new ChannelInfoDto();
+    private ChannelDto setChannelInfo(ChannelEntity channel) {
+        ChannelDto channelInfo = new ChannelDto();
         channelInfo.setChannelId(channel.getChannelId());
         channelInfo.setName(channel.getName());
         channelInfo.setType(channel.getType());
@@ -140,8 +136,7 @@ public class ChannelService {
     public ResponseUpdateChannelDto updateChannel(String channelId, RequestUpdateChannelDto params) {
 
         // 채널 조회
-        ChannelEntity channel = channelRepository.findById(channelId).orElseThrow(
-                () -> new NoSuchElementException());
+        ChannelEntity channel = channelRepository.findById(channelId).orElseThrow(() -> new NoSuchElementException());
 
         // 채널 update
         channel.updateChannelInfo(params.getName(),
@@ -152,7 +147,7 @@ public class ChannelService {
 
         // response 생성
         ResponseUpdateChannelDto responseUpdateChannelDto = new ResponseUpdateChannelDto();
-        ChannelInfoDto channelInfo = setChannelInfo(channel);
+        ChannelDto channelInfo = setChannelInfo(channel);
         responseUpdateChannelDto.setChannel(channelInfo);
         return responseUpdateChannelDto;
     }
@@ -161,8 +156,7 @@ public class ChannelService {
     public void deleteChannel(String channelId) {
 
         // 채널 조회
-        ChannelEntity channel = channelRepository.findById(channelId).orElseThrow(
-                () -> new NoSuchElementException());
+        ChannelEntity channel = channelRepository.findById(channelId).orElseThrow(() -> new NoSuchElementException());
 
         channel.deleteChannel();
         channelRepository.save(channel);
@@ -179,42 +173,21 @@ public class ChannelService {
         return channelRoleMappingRepository.isActiveChannelByUserIdAndChannelId(userId, channelId);
     }
 
-    @Transactional
-    public ResponseGetChannelDetailInfoDto getChannelDetailInfo(String userId, String channelId) {
+    public ChannelDto getChannel(String channelId) {
+        ChannelEntity channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new NoSuchElementException());
+        return setChannelInfo(channel);
+    }
 
-        // 채널 정보 조회
-        ChannelEntity channel = channelRepository.findById(channelId).get();
-        ChannelInfoDto channelInfo = setChannelInfo(channel);
+    public List<ChannelUserDto> getChannelUsers(String channelId) {
+        return channelRoleMappingRepository.findActiveUsersByChannelId(channelId);
+    }
 
-        // 사용자 정보 조회
-        UserEntity user = userRepository.findById(userId).get();
-        ChannelUserInfoDto channelUserInfo = channelRoleMappingRepository.findActiveUserByChannelIdAndUserId(channelId, userId);
-
-        // 채널 사용자 목록 정보 조회
-        List<ChannelUserInfoDto> channelUserInfos = channelRoleMappingRepository.findActiveUsersByChannelId(channel.getChannelId());
-
-        // 플레이리스트 목록 정보 조회
-        List<PlaylistDto> playlistInfos = playlistRepository.findAllByChannel_ChannelIdAndIsActiveOrderBySequence(channelId, true)
-                .stream()
-                .map(playlistEntity -> modelMapper.map(playlistEntity, PlaylistDto.class))
-                .toList();
-
-        // 채널 권한 설정 목록 정보 조회
+    public ChannelPermissionInfoDto getChannelPermission(String channelId) {
         ChannelPermissionEntity channelPermission = channelPermissionRepository.findById(channelId)
                 .orElseThrow(() -> new BadRequestException("Channel permission config not found."));
 
-        ResponseGetChannelDetailInfoDto response = new ResponseGetChannelDetailInfoDto();
-        response.setChannel(channelInfo);
-        response.setUser(channelUserInfo);
-        response.setChannelUsers(channelUserInfos);
-        response.setPlaylists(playlistInfos);
-        response.setChannelPermissions(new ChannelPermissionInfoDto(channelPermission));
-
-        return response;
-
-        // ToDo. 추후 추가 예정 (Redis)
-        //  - 채팅 정보
-        //  - 현재 플레이중인 영상 정보
+        return new ChannelPermissionInfoDto(channelPermission);
     }
 
     @Transactional
@@ -233,16 +206,19 @@ public class ChannelService {
         channelPermissionRepository.save(channelPermission);
     }
 
-    @Transactional
-    public ResponseSearchChannelsDto getActivePublicChannels(int cursor, int perPage) {
+    public ResponseSearchChannelsDto getSearchChannels(int cursor, int perPage, String keyword) {
 
         // 정렬 조건 - default: 최근 생성일
         // Pageable 객체 생성
         Sort sort = Sort.by(Sort.Direction.DESC, "createAt");
         PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
 
-        // 활성화 중인 모든 공개 채널 조회
-        Page<ChannelEntity> pagingChannels = channelRepository.findByTypeAndIsActive(ChannelType.PUBLIC, true, pageRequest);
+        Page<ChannelEntity> pagingChannels = null;
+        // 키워드가 없는 경우 - 전체 목록 조회
+        if (keyword == null || keyword.trim().isEmpty())
+            pagingChannels = channelRepository.findByTypeAndIsActive(ChannelType.PUBLIC, true, pageRequest);
+        else
+            pagingChannels = channelRepository.findBySearchKeywordAndIsActive(keyword, true, pageRequest);
 
         // 페이지 정보 생성
         PageInfoDto page = PageInfoDto.builder()
@@ -251,56 +227,27 @@ public class ChannelService {
                 .totalPage(pagingChannels.getTotalPages())
                 .totalCount(pagingChannels.getTotalElements()).build();
 
-        // 채널 목록 정보 생성
-        List<ChannelInfoDto> channels = pagingChannels
-                .stream()
-                .map(channelEntity -> modelMapper.map(channelEntity, ChannelInfoDto.class))
+        // 채널 및 플레이리스트 정보 생성
+        List<ChannelPlaylistDto> channels = pagingChannels.stream()
+                .map(channelEntity -> {
+                    ChannelDto channelDto = modelMapper.map(channelEntity, ChannelDto.class);
+                    PlaylistDto playlistDto = null;
+                    Optional<PlaylistEntity> playlistEntity =
+                            playlistRepository.findFirstByChannel_ChannelIdAndIsActiveAndSequence(channelDto.getChannelId(), true, 0);
+                    if (playlistEntity.isPresent())
+                        playlistDto = modelMapper.map(playlistEntity.get(), PlaylistDto.class);
+
+                    return ChannelPlaylistDto.builder()
+                            .channel(channelDto)
+                            .playlist(playlistDto)
+                            .build();
+                })
                 .toList();
 
         // response 생성
         ResponseSearchChannelsDto response = new ResponseSearchChannelsDto();
         response.setPage(page);
         response.setChannels(channels);
-
         return response;
-
-        // ToDo. 영상 썸네일 정보 추가 전송 필요
-        //  - 현재 플레이중인 영상 기준으로 썸네일이 전송되어야 하는데 현재 플레이중인 영상 정보는 추후 레디스에 저장될 예정
-        //  - 채널 사용자 정보 추가 필요
-    }
-
-    public ResponseSearchChannelsDto searchChannels(int cursor, int perPage, String keyword) {
-
-        // 정렬 조건 - default: 최근 생성일
-        // Pageable 객체 생성
-        Sort sort = Sort.by(Sort.Direction.DESC, "createAt");
-        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
-
-        // 활성화 중인 모든 공개 채널 중 키워드가 포함된 채널 검색
-        Page<ChannelSearchEntity> pagingSearchChannels = channelSearchRepository.searchByKeyword(keyword, pageRequest);
-
-        // 페이지 정보 생성
-        PageInfoDto page = PageInfoDto.builder()
-                .cursor(cursor)
-                .perPage(perPage)
-                .totalPage(pagingSearchChannels.getTotalPages())
-                .totalCount(pagingSearchChannels.getTotalElements()).build();
-
-        // 채널 목록 정보 생성
-        List<ChannelInfoDto> channels = pagingSearchChannels
-                .stream()
-                .map(ChannelSearchEntity -> modelMapper.map(ChannelSearchEntity, ChannelInfoDto.class))
-                .toList();
-
-        // response 생성
-        ResponseSearchChannelsDto response = new ResponseSearchChannelsDto();
-        response.setPage(page);
-        response.setChannels(channels);
-
-        return response;
-
-        // ToDo. 영상 썸네일 정보 추가 전송 필요
-        //  - 현재 플레이중인 영상 기준으로 썸네일이 전송되어야 하는데 현재 플레이중인 영상 정보는 추후 레디스에 저장될 예정
-        //  - 채널 사용자 정보 추가 필요
     }
 }

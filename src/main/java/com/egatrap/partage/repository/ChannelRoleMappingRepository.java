@@ -1,6 +1,6 @@
 package com.egatrap.partage.repository;
 
-import com.egatrap.partage.model.dto.ChannelUserInfoDto;
+import com.egatrap.partage.model.dto.ChannelUserDto;
 import com.egatrap.partage.model.entity.ChannelRoleMappingEntity;
 import com.egatrap.partage.model.entity.ChannelRoleMappingId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -32,12 +31,12 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "AND c.channelId = :channelId")
     Boolean isActiveChannelByOwnerUserIdAndChannelId(String userId, String roleId, String channelId);
 
-    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.role.roleId, u.userId, u.email, u.nickname, " +
+    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserDto(crm.role.roleId, u.userId, u.email, u.nickname, " +
             "u.profileColor, u.profileImage) " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN UserEntity u ON crm.id.userId = u.userId " +
             "WHERE crm.id.channelId = :channelId")
-    List<ChannelUserInfoDto> findActiveUsersByChannelId(@Param("channelId") String channelId);
+    List<ChannelUserDto> findActiveUsersByChannelId(@Param("channelId") String channelId);
 
     @Query("SELECT c.isActive " +
             "FROM ChannelRoleMappingEntity crm " +
@@ -46,13 +45,13 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "AND c.channelId = :channelId")
     Boolean isActiveChannelByUserIdAndChannelId(String userId, String channelId);
 
-    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserInfoDto(crm.role.roleId, u.userId, u.email, u.nickname, " +
+    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserDto(crm.role.roleId, u.userId, u.email, u.nickname, " +
             "u.profileColor, u.profileImage) " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN UserEntity u ON crm.id.userId = u.userId " +
             "WHERE crm.id.channelId = :channelId " +
             "AND crm.id.userId = :userId")
-    ChannelUserInfoDto findActiveUserByChannelIdAndUserId(@Param("channelId") String channelId, @Param("userId") String userId);
+    ChannelUserDto findActiveUserByChannelIdAndUserId(@Param("channelId") String channelId, @Param("userId") String userId);
 
     Optional<ChannelRoleMappingEntity> findByUser_UserId(String userId);
 

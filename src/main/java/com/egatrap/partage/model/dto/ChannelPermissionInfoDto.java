@@ -1,13 +1,10 @@
 package com.egatrap.partage.model.dto;
 
-import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.model.entity.ChannelPermissionEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Column;
 
 @Data
 @Builder
