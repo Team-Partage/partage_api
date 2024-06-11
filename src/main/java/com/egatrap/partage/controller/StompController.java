@@ -2,9 +2,12 @@ package com.egatrap.partage.controller;
 
 import com.egatrap.partage.common.aspect.MessagePermission;
 import com.egatrap.partage.constants.MessageType;
+import com.egatrap.partage.model.dto.ChannelInfoDto;
+import com.egatrap.partage.model.dto.ResponseGetChannelDetailInfoDto;
 import com.egatrap.partage.model.dto.chat.MessageDto;
 import com.egatrap.partage.model.dto.chat.SendMessageDto;
 import com.egatrap.partage.model.vo.WebSocketSessionDataVo;
+import com.egatrap.partage.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -23,12 +26,36 @@ import java.util.Map;
 public class StompController {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChannelService channelService;
 
     private final String CHANNEL_PREFIX = "/channel/";
 
     @GetMapping("/test/ws")
     public String wsPage() {
         return "/ws.html";
+    }
+
+    @MessageMapping("/channel.info")
+    public void channelInfo(SimpMessageHeaderAccessor headerAccessor) {
+        WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);
+        log.debug("Channel info: {}", session.getChannelId());
+
+        // Create channel info data
+        Map<String, Object> data = new HashMap<>();
+        // @todo : 서비스 로직 분리 해야함
+        data.put("channel", channelService.getChannelDetailInfo(session.getUserId(), session.getChannelId()));
+        data.put("playlists", 0);
+        data.put("currentPlaylist", 0);
+        data.put("currentUsers", 0);
+        data.put("userPermission", 0);
+
+        // Send to user only : channel info
+        messagingTemplate.convertAndSendToUser(session.getSessionId(),
+                CHANNEL_PREFIX + session.getChannelId(),
+                SendMessageDto.builder()
+                        .data(data)
+                        .type(MessageType.CHANNEL_INFO)
+                        .build());
     }
 
     @MessageMapping("/user.chat")
