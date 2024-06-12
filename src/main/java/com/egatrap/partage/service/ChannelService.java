@@ -1,6 +1,7 @@
 package com.egatrap.partage.service;
 
 import com.egatrap.partage.common.util.CodeGenerator;
+import com.egatrap.partage.constants.ChannelColorType;
 import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.constants.ChannelType;
 import com.egatrap.partage.exception.BadRequestException;
@@ -120,7 +121,7 @@ public class ChannelService {
                 .name(params.getName())
                 .type(params.getType())
                 .hashtag(params.getHashtag())
-                .channelColor(params.getChannelColor())
+                .channelColor(ChannelColorType.getChannelColor(params.getChannelColor()))
                 .channelUrl(makeChannelUrl())
                 .isActive(true)
                 .build();
@@ -188,7 +189,7 @@ public class ChannelService {
         channelInfo.setType(channel.getType());
         channelInfo.setHashtag(channel.getHashtag());
         channelInfo.setChannelUrl(channel.getChannelUrl());
-        channelInfo.setChannelColor(channel.getChannelColor());
+        channelInfo.setChannelColor(ChannelColorType.getChannelColor(channel.getChannelColor()));
         channelInfo.setCreateAt(channel.getCreateAt());
 
         return channelInfo;
@@ -209,7 +210,7 @@ public class ChannelService {
         channel.updateChannelInfo(params.getName(),
                 params.getType(),
                 params.getHashtag(),
-                params.getChannelColor());
+                ChannelColorType.getChannelColor(params.getChannelColor()));
         channelRepository.save(channel);
 
         // response 생성

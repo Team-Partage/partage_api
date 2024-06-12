@@ -1,5 +1,6 @@
 package com.egatrap.partage.model.entity;
 
+import com.egatrap.partage.constants.ChannelColorType;
 import com.egatrap.partage.constants.ChannelType;
 import lombok.*;
 

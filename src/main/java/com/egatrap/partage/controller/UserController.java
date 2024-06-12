@@ -101,6 +101,7 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
 
+        // 회원 탈퇴
         userService.deactiveUser(userId);
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
@@ -112,7 +113,44 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
 
+        // 닉네임 수정
         userService.updateNickname(userId, params.getNickname());
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "비밀번호 수정")
+    @PatchMapping("/me/password")
+    public ResponseEntity<?> updatePassword(@Valid @RequestBody RequestUpdatePasswordDto params) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+
+        // 현재 비밀번호와 신규 비밀번호가 같을 때
+        if (params.getCurrentPassword().equals(params.getNewPassword()))
+            throw new BadRequestException("The new password cannot be the same as the current password.");
+
+        // 비밀번호 수정
+        userService.updatePassword(userId, params.getCurrentPassword(), params.getNewPassword());
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "프로필 색상 수정")
+    @PatchMapping("/me/profile-color")
+    public ResponseEntity<?> updateProfileColor(@Valid @RequestBody RequestUpdateProfileColorDto params) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+
+        // 프로필 색상 수정
+        userService.updateProfileColor(userId, params.getProfileColor());
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "비밀번호 찾기 - 임시 비밀번호 발급")
+    @PostMapping("/password")
+    public ResponseEntity<?> findPassword(@Valid @RequestBody RequestFindPasswordDto params) {
+
+        userService.findPassword(params.getEmail());
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 }

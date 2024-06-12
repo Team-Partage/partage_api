@@ -1,5 +1,6 @@
 package com.egatrap.partage.model.entity;
 
+import com.egatrap.partage.constants.ProfileColorType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -93,5 +94,13 @@ public class UserEntity {
 
     public void updateNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateProfileColor(String profileColor) {
+        this.profileColor = profileColor;
     }
 }
