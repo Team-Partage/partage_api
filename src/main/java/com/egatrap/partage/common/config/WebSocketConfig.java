@@ -1,6 +1,7 @@
 package com.egatrap.partage.common.config;
 
 import com.egatrap.partage.common.interceptor.SessionDataHandshakeInterceptor;
+import com.egatrap.partage.common.interceptor.WsHandshakeHandler;
 import com.egatrap.partage.security.JwtTokenProvider;
 import com.egatrap.partage.service.ChannelPermissionService;
 import com.egatrap.partage.service.ChannelService;
@@ -26,6 +27,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
 //        registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS(); // browser only
         registry.addEndpoint("/ws")
+                .setHandshakeHandler(new WsHandshakeHandler())
                 .withSockJS()
                 .setInterceptors(new SessionDataHandshakeInterceptor(jwtTokenProvider, channelService, channelPermissionService));
     }

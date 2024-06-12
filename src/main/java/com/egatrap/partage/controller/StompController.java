@@ -2,9 +2,11 @@ package com.egatrap.partage.controller;
 
 import com.egatrap.partage.common.aspect.MessagePermission;
 import com.egatrap.partage.constants.MessageType;
+import com.egatrap.partage.model.dto.ChannelCacheDataDto;
 import com.egatrap.partage.model.dto.chat.MessageDto;
 import com.egatrap.partage.model.dto.chat.SendMessageDto;
 import com.egatrap.partage.model.vo.WebSocketSessionDataVo;
+import com.egatrap.partage.service.ChannelPermissionService;
 import com.egatrap.partage.service.ChannelService;
 import com.egatrap.partage.service.PlaylistService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Controller
@@ -25,6 +31,7 @@ import java.util.Map;
 public class StompController {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChannelPermissionService channelPermissionService;
     private final ChannelService channelService;
     private final PlaylistService playlistService;
 
@@ -40,17 +47,21 @@ public class StompController {
         WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);
         log.debug("Channel info: {}", session.getChannelId());
 
+        ChannelCacheDataDto channelCacheData = channelService.getChannelCacheData(session.getChannelId());
+
         // Create channel info data
         Map<String, Object> data = new HashMap<>();
-        // @todo : 서비스 로직 분리 해야함
         data.put("channel", channelService.getChannel(session.getChannelId()));
-        data.put("playlists", 0);
-        data.put("currentPlaylist", 0);
-        data.put("currentUsers", 0);
-        data.put("userPermission", 0);
+        data.put("playlists", playlistService.getPlaylists(session.getChannelId(), 1, 10));
+        data.put("currentUsers", channelCacheData.getUsers());
+        data.put("currentPlayTime", channelCacheData.getCurrentPlayTime());
+        data.put("isPlaying", channelCacheData.getIsPlaying());
+        data.put("userRole", channelPermissionService.getChannelRole(session.getChannelId(), session.getUserId()));
+
+        log.debug("[data]=[{}]", data);
 
         // Send to user only : channel info
-        messagingTemplate.convertAndSendToUser(session.getSessionId(),
+        messagingTemplate.convertAndSendToUser(session.getUserId(),
                 CHANNEL_PREFIX + session.getChannelId(),
                 SendMessageDto.builder()
                         .data(data)
@@ -86,6 +97,8 @@ public class StompController {
         data.put("sender", message.getSender());
         data.put("content", message.getContent());
 
+        channelService.joinUserToChannel(session.getChannelId(), session.getUserId());
+
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
                 .data(data)
                 .type(MessageType.USER_JOIN)
@@ -100,6 +113,8 @@ public class StompController {
         Map<String, Object> data = new HashMap<>();
         data.put("sender", message.getSender());
         data.put("content", message.getContent());
+
+        channelService.leaveUserFromChannel(session.getChannelId(), session.getUserId());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
                 .data(data)

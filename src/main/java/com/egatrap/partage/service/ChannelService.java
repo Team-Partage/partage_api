@@ -27,6 +27,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ChannelService {
 
+    private final ChannelCacheDataRepository channelCacheDataRepository;
     private final ChannelRepository channelRepository;
     private final UserRepository userRepository;
     private final ChannelRoleMappingRepository channelRoleMappingRepository;
@@ -35,6 +36,72 @@ public class ChannelService {
     // private final ChannelSearchRepository channelSearchRepository;
     private final ModelMapper modelMapper;
 
+
+    public void joinUserToChannel(String channelId, String userId) {
+
+        ChannelCacheDataEntity channel = channelCacheDataRepository.findById(channelId)
+                .orElseThrow(() -> new BadRequestException("Channel not found. channelId=" + channelId));
+
+        // 사용자 정보 조회
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException("User not found. userId=" + userId));
+
+
+        // 사용자 추가
+        channel.getUsers().add(modelMapper.map(user, UserDto.class));
+    }
+
+    public void leaveUserFromChannel(String channelId, String userId) {
+
+        ChannelCacheDataEntity channel = channelCacheDataRepository.findById(channelId)
+                .orElseThrow(() -> new BadRequestException("Channel not found. channelId=" + channelId));
+
+        // 사용자 정보 조회
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException("User not found. userId=" + userId));
+
+        // 사용자 제거
+        channel.getUsers().remove(modelMapper.map(user, UserDto.class));
+    }
+
+    public ChannelCacheDataDto getChannelCacheData(String channelId) {
+        // 채널 캐시 데이터 조회 없을 경우 생성
+        if (!channelCacheDataRepository.existsById(channelId))
+            return createChannelCacheData(channelId);
+
+        ChannelCacheDataEntity channel = channelCacheDataRepository.findById(channelId)
+                .orElseThrow(() -> new BadRequestException("Channel not found. channelId=" + channelId));
+
+        return modelMapper.map(channel, ChannelCacheDataDto.class);
+    }
+
+    public ChannelCacheDataDto createChannelCacheData(String channelId) {
+
+        if (channelCacheDataRepository.existsById(channelId))
+            throw new BadRequestException("Channel cache data already exists. channelId=" + channelId);
+
+        ChannelCacheDataEntity channel = ChannelCacheDataEntity.builder()
+                .id(channelId)
+                .users(new ArrayList<>())
+                .currentPlayTime(0)
+                .lastUpdateAt(LocalDateTime.now())
+                .build();
+
+        channelCacheDataRepository.save(channel);
+
+        return modelMapper.map(channel, ChannelCacheDataDto.class);
+    }
+
+    public void removeChannelCacheData(String channelId) {
+        channelCacheDataRepository.deleteById(channelId);
+    }
+
+    public int currentUsersCountToChannel(String channelId) {
+        ChannelCacheDataEntity channel = channelCacheDataRepository.findById(channelId)
+                .orElseThrow(() -> new BadRequestException("Channel not found. channelId=" + channelId));
+
+        return channel.getUsers().size();
+    }
 
     public boolean isExistsChannel(String channelId) {
         // 채널아이디를 이용해 해당 채널이 존재하고 엑티브 상태인지 확인

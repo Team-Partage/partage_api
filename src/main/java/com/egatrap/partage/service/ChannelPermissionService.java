@@ -57,7 +57,7 @@ public class ChannelPermissionService {
                 channelRoleMappingRepository.findByChannelIdAndUserId(channelId, userId).orElse(null);
 
         return userChannelRole != null
-                ? ChannelRoleType.get(userChannelRole.getRole().getRoleId()) : ChannelRoleType.ROLE_VIEWER;
+                ? ChannelRoleType.get(userChannelRole.getRole().getRoleId()) : ChannelRoleType.ROLE_NONE;
     }
 
 }
