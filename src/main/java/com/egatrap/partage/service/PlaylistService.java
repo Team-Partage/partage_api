@@ -71,7 +71,7 @@ public class PlaylistService {
                 .sequence(playlistCount)
                 .title(video.getSnippet().getTitle())
                 .url(videoId) // @TODO: URL 생성 로직 수정
-                .thumbnail(video.getSnippet().getThumbnails().getDefault().getUrl())
+                .thumbnail(video.getSnippet().getThumbnails().getMedium().getUrl())
                 .isActive(true)
                 .build();
         log.debug("playlistEntity={}", playlistEntity);
