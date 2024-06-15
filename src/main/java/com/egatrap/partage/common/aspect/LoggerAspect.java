@@ -28,9 +28,9 @@ public class LoggerAspect {
         String type = signature.getDeclaringTypeName();
         String methodName = signature.getName();
 
-        log.debug("### ->> {}.{} ###", type, methodName);
+//        log.debug("### ->> {}.{} ###", type, methodName);
         Object obj = joinPoint.proceed();
-        log.debug("### <<- {}.{} ###", type, methodName);
+//        log.debug("### <<- {}.{} ###", type, methodName);
 
         return obj;
     }

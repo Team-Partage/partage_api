@@ -1,9 +1,12 @@
 package com.egatrap.partage.common.interceptor;
 
+import com.egatrap.partage.common.util.CodeGenerator;
 import com.egatrap.partage.constants.ChannelRoleType;
+import com.egatrap.partage.model.vo.SessionAttributes;
 import com.egatrap.partage.security.JwtTokenProvider;
 import com.egatrap.partage.service.ChannelPermissionService;
 import com.egatrap.partage.service.ChannelService;
+import com.egatrap.partage.service.ChannelUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,11 +23,12 @@ import java.util.Map;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class SessionDataHandshakeInterceptor implements HandshakeInterceptor {
+public class SessionAttributesInterceptor implements HandshakeInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final ChannelService channelService;
     private final ChannelPermissionService channelPermissionService;
+    private final ChannelUserService channelUserService;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request,
@@ -60,22 +64,32 @@ public class SessionDataHandshakeInterceptor implements HandshakeInterceptor {
         }
 
         // channelId이 없는 경우 Handshake 중단
-        if (channelId == null) {
+        if (channelId == null || channelId.isBlank()) {
             response.setStatusCode(HttpStatus.BAD_REQUEST);
             return false;
         }
 
+        // 비회원인 경우 NONE으로 설정
+        if (userId == null || userId.isBlank()) userId = "NONE";
+
         // 채널 권한 조회
-//        if(userId != null) {
-//            channelRole = channelPermissionService.getChannelRole(channelId, userId);
-//        }
+        if (!"NONE".equals(userId)) {
+            channelRole = channelPermissionService.getChannelRole(channelId, userId);
+        } else {
+            channelRole = ChannelRoleType.ROLE_NONE;
+        }
+
+        String sessionId = CodeGenerator.generateID("WS");
 
         // 세션에 데이터 저장 (userId, channelId, channelRole)
-        attributes.put("userId", userId == null ? "NONE" : userId);
+        attributes.put("sessionId", sessionId);
+        attributes.put("userId", userId);
         attributes.put("channelId", channelId);
-//        attributes.put("channelRole", channelRole); // 채널 권한 정보 저장 커넥션 연결시 or 메세지 전송할때마다확인 중 체크 필요
+        attributes.put("channelRole", channelRole); // 채널 권한 정보 저장 커넥션 연결시 or 메세지 전송할때마다확인 중 체크 필요
 
-        log.info("WebSocket init session Data : attributes={}", attributes);
+        SessionAttributes sessionData = new SessionAttributes(userId, channelId, sessionId, channelRole);
+        log.info("WebSocket init session Data : sessionData={}", sessionData);
+        channelUserService.addUsersToChannel(sessionData);
 
         return true;
     }

@@ -3,20 +3,15 @@ package com.egatrap.partage.common.aspect;
 import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.model.dto.ChannelPermissionDto;
-import com.egatrap.partage.model.dto.chat.MessageDto;
-import com.egatrap.partage.model.vo.WebSocketSessionDataVo;
+import com.egatrap.partage.model.vo.SessionAttributes;
 import com.egatrap.partage.service.ChannelPermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @Aspect
@@ -38,7 +33,7 @@ public class MessagePermissionAspect {
         log.debug("Checking permission");
 
         // Session에서 userId, channelId 가져오기
-        WebSocketSessionDataVo session = new WebSocketSessionDataVo(headerAccessor);
+        SessionAttributes session = new SessionAttributes(headerAccessor);
         log.debug("Session: {}", session);
         String userId = session.getUserId();
         String channelId = session.getChannelId();

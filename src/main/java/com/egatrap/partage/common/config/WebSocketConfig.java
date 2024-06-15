@@ -1,10 +1,11 @@
 package com.egatrap.partage.common.config;
 
-import com.egatrap.partage.common.interceptor.SessionDataHandshakeInterceptor;
+import com.egatrap.partage.common.interceptor.SessionAttributesInterceptor;
 import com.egatrap.partage.common.interceptor.WsHandshakeHandler;
 import com.egatrap.partage.security.JwtTokenProvider;
 import com.egatrap.partage.service.ChannelPermissionService;
 import com.egatrap.partage.service.ChannelService;
+import com.egatrap.partage.service.ChannelUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final JwtTokenProvider jwtTokenProvider;
     private final ChannelService channelService;
     private final ChannelPermissionService channelPermissionService;
+    private final ChannelUserService channelUserService;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -29,7 +31,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
                 .setHandshakeHandler(new WsHandshakeHandler())
                 .withSockJS()
-                .setInterceptors(new SessionDataHandshakeInterceptor(jwtTokenProvider, channelService, channelPermissionService));
+                .setInterceptors(new SessionAttributesInterceptor(
+                        jwtTokenProvider,
+                        channelService,
+                        channelPermissionService,
+                        channelUserService));
     }
 
     @Override

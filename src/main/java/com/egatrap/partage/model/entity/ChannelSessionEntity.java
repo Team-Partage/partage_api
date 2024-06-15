@@ -7,29 +7,22 @@ import org.springframework.data.redis.core.index.Indexed;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
-@Getter
+@Data
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
 @ToString
-@RedisHash(value = "channel-cache-data")
-public class ChannelCacheDataEntity {
+@RedisHash(value = "channel-session")
+public class ChannelSessionEntity {
 
     @Id
     private String id; // channelId
 
-    @Indexed
-    private List<UserSessionEntity> users;
+    private LocalDateTime lastActiveTime;
 
-    private Integer currentPlayTime;
-    private Boolean isPlaying;
-
-    private LocalDateTime lastUpdateAt;
-
-
-    public void updateLastUpdateAt() {
-        this.lastUpdateAt = LocalDateTime.now();
+    public void updateLastActiveTime() {
+        this.lastActiveTime = LocalDateTime.now();
     }
-
 }

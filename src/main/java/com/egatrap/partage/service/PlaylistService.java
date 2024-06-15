@@ -2,8 +2,6 @@ package com.egatrap.partage.service;
 
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
-import com.egatrap.partage.exception.VideoNotFoundException;
-import com.egatrap.partage.model.dto.ErrorMessageDto;
 import com.egatrap.partage.model.dto.PlaylistDto;
 import com.egatrap.partage.model.entity.ChannelEntity;
 import com.egatrap.partage.model.entity.PlaylistEntity;
@@ -20,8 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
