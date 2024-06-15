@@ -7,9 +7,12 @@ import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.service.FileService;
 import com.egatrap.partage.service.UserService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -158,8 +161,8 @@ public class UserController {
     }
 
     @ApiOperation(value = "프로필 이미지 수정")
-    @PostMapping("/me/profile-image")
-    public ResponseEntity<?> updateProfileImage(@RequestParam("profileImage") MultipartFile profileImage) {
+    @PostMapping(value = "/me/profile-image", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateProfileImage(@RequestPart(name = "profileImage") MultipartFile profileImage) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
