@@ -7,15 +7,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ProfileColorType {
 
-    SKYBLUE("#75FBFD"),
-    LIGHTGREEAN("#86F0AE"),
-    GREEAN("#61BC9B"),
-    BLUE("#62AEF9"),
-    VIOLET("#9679F7"),
-    PINK("#EB71B1"),
-    YELLOW("#FAE24C"),
-    ORANGE("#F2A44B"),
-    PEACH("#EE8487");
+    SKYBLUE("#00FFFF"),
+    LIGHTGREEAN("#57F3A8"),
+    GREEAN("#32BF99"),
+    BLUE("#43B0FF"),
+    VIOLET("#9C78FF"),
+    PINK("#FD68B3"),
+    YELLOW("#FFE100"),
+    ORANGE("#FFA030"),
+    PEACH("#FF7D84");
 
     private final String PROFILE_COLOR;
 
