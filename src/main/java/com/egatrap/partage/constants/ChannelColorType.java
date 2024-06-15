@@ -7,11 +7,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ChannelColorType {
 
-    SKYBLUE("#75FBFD"),
-    LIGHTGREEAN("#86F0AE"),
-    YELLOW("#FAE24C"),
-    PEACH("#EE8487"),
-    VIOLET("#9679F7");
+    SKYBLUE("#00FFFF"),
+    LIGHTGREEAN("#57F3A8"),
+    YELLOW("#FFE100"),
+    PEACH("#FF7D84"),
+    VIOLET("#9C78FF");
 
     private final String CHANNEL_COLOR;
 

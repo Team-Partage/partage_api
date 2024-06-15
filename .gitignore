@@ -36,3 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 .env
+
+### Image File ###
+*.png
+*.jpg
+*.jpeg
