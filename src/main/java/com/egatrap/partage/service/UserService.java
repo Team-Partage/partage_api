@@ -278,4 +278,15 @@ public class UserService {
 
         return password.toString();
     }
+
+    @Transactional
+    public void updateProfileImage(String userId, String saveFilename) {
+
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException("User not found."));
+
+        // 프로필 색상 수정
+        userEntity.updateProfileImage(saveFilename);
+        userRepository.save(userEntity);
+    }
 }

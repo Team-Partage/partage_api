@@ -103,4 +103,8 @@ public class UserEntity {
     public void updateProfileColor(String profileColor) {
         this.profileColor = profileColor;
     }
+
+    public void updateProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 }

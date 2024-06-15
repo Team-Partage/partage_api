@@ -4,6 +4,7 @@ import com.egatrap.partage.constants.ResponseType;
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
+import com.egatrap.partage.service.FileService;
 import com.egatrap.partage.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @Slf4j
@@ -23,6 +26,7 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final FileService fileService;
 
     @ApiOperation(value = "회원가입 - 인증 메일 전송")
     @PostMapping("/auth-email")
@@ -153,10 +157,18 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "프로필 이미지 수정")
-//    @PatchMapping("/me/profile-image")
-//    public ResponseEntity<?> updateProfileImage() {
-//
-//        return null;
-//    }
+    @ApiOperation(value = "프로필 이미지 수정")
+    @PostMapping("/me/profile-image")
+    public ResponseEntity<?> updateProfileImage(@RequestParam("profileImage") MultipartFile profileImage) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+
+        // 프로필 이미지 저장
+        String saveFilename = fileService.saveProgileImage(profileImage);
+
+        // 프로필 이미지 수정
+        userService.updateProfileImage(userId, saveFilename);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
 }

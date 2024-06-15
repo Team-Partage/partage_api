@@ -43,6 +43,14 @@ spring:
     properties:
       mail.smtp.starttls.enable: true
       mail.smtp.auth: true
+  # multipart
+  servlet:
+    multipart:
+      max-file-size: 5MB
+
+# save path
+file:
+  profile-images: files/profile-images/
 
 security:
   jwt:
