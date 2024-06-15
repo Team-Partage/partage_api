@@ -66,6 +66,7 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
     @Query("SELECT crm FROM ChannelRoleMappingEntity crm WHERE crm.channel.channelId = :channelId AND crm.user.userId = :userId")
     Optional<ChannelRoleMappingEntity> findByChannelIdAndUserId(String channelId, String userId);
 
-
     void deleteByChannel_ChannelId(String channelId);
+
+    Optional<ChannelRoleMappingEntity> findByChannel_ChannelIdAndRole_RoleId(String channelId, String roleId);
 }

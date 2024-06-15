@@ -4,7 +4,6 @@ import com.egatrap.partage.constants.ResponseType;
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
-import com.egatrap.partage.service.FollowService;
 import com.egatrap.partage.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -153,4 +152,11 @@ public class UserController {
         userService.findPassword(params.getEmail());
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
+
+//    @ApiOperation(value = "프로필 이미지 수정")
+//    @PatchMapping("/me/profile-image")
+//    public ResponseEntity<?> updateProfileImage() {
+//
+//        return null;
+//    }
 }

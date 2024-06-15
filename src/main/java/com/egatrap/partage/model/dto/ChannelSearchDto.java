@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChannelPlaylistDto {
+public class ChannelSearchDto {
 
     private ChannelDto channel;
     private PlaylistDto playlist;
+    private UserDto owner;
+    private int user_count;
 }

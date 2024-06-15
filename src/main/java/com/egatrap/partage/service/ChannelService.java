@@ -295,19 +295,32 @@ public class ChannelService {
                 .totalPage(pagingChannels.getTotalPages())
                 .totalCount(pagingChannels.getTotalElements()).build();
 
-        // 채널 및 플레이리스트 정보 생성
-        List<ChannelPlaylistDto> channels = pagingChannels.stream()
+        // 채널 검색 정보 목록 생성
+        List<ChannelSearchDto> channels = pagingChannels.stream()
                 .map(channelEntity -> {
+
+                    // 채널 정보
                     ChannelDto channelDto = modelMapper.map(channelEntity, ChannelDto.class);
+
+                    // 현재 재생중인 플레이리스트 정보
                     PlaylistDto playlistDto = null;
                     Optional<PlaylistEntity> playlistEntity =
                             playlistRepository.findFirstByChannel_ChannelIdAndIsActiveAndSequence(channelDto.getChannelId(), true, 0);
                     if (playlistEntity.isPresent())
                         playlistDto = modelMapper.map(playlistEntity.get(), PlaylistDto.class);
 
-                    return ChannelPlaylistDto.builder()
+                    // 채널 생성자 정보
+                    UserDto userDto = null;
+                    Optional<ChannelRoleMappingEntity> channelRoleEntity =
+                            channelRoleMappingRepository.findByChannel_ChannelIdAndRole_RoleId(channelDto.getChannelId(), ChannelRoleType.ROLE_OWNER.getROLE_ID());
+                    if (channelRoleEntity.isPresent())
+                        userDto = modelMapper.map(channelRoleEntity.get().getUser(), UserDto.class);
+
+                    return ChannelSearchDto.builder()
                             .channel(channelDto)
                             .playlist(playlistDto)
+                            .owner(userDto)
+                            .user_count(new Random().nextInt(200) + 1)
                             .build();
                 })
                 .toList();
