@@ -2,6 +2,8 @@ package com.egatrap.partage.service;
 
 import com.egatrap.partage.common.util.CodeGenerator;
 import com.egatrap.partage.exception.BadRequestException;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,11 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,7 +23,13 @@ public class FileService {
     @Value("${file.profile-images}")
     private String profileImageDir;
 
+    @Value("${spring.cloud.gcp.storage.bucket}")
+    private String bucketName;
+
+    private final Storage storage;
+
     private final List<String> ALLOWED_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg");
+    private final String STORAGE_BASE_URL = "https://storage.googleapis.com/";
     // private final int PROFILE_IMAGE_MAX_WIDTH = 1920;
     // private final int PROFILE_IMAGE_MAX_HEIGHT = 1080;
 
@@ -39,19 +43,21 @@ public class FileService {
         // ToDo. 이미지 사이즈 체크
         //  - 이미지 용량 체크를 진행하므로 일단 보류
 
-        // 상대경로 사용을 지양하지만 프로젝트 특성상 OS가 다르고 도커를 사용하기도 하여 일단 프로젝트 내 경로를 사용
-        Path path = Paths.get(profileImageDir).toAbsolutePath().normalize();
-
-        // 이미지 저장
-        String saveFilename = CodeGenerator.generateID("I") + "." + extension;
+        // Cloud에 이미지 업로드
+        String uuid = CodeGenerator.generateID("I");
         try {
-            // directory가 없으면 생성
-            Files.createDirectories(path);
-            profileImage.transferTo(new File(path.toString() + "/" + saveFilename));
+            BlobInfo blobInfo = storage.create(
+                    BlobInfo.newBuilder(bucketName, uuid)
+                            .setContentType(extension)
+                            .build(),
+                    profileImage.getInputStream()
+            );
         } catch (IOException e) {
             throw new RuntimeException("Failed to profile image save error.", e);
         }
-        return saveFilename;
+
+        String url = STORAGE_BASE_URL + bucketName + "/" + uuid;
+        return url;
     }
 
     private boolean isValidExtension(String extension) {

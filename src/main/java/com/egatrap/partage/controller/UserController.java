@@ -52,7 +52,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "이메일 중복 확인")
-    @GetMapping("/check-email")
+    @PostMapping("/check-email")
     public ResponseEntity<?> checkDuplicateEmail(@Valid @RequestBody RequestCheckDuplicateEmailDto params) {
 
         // 이메일 중복 확인
@@ -65,7 +65,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "닉네임 중복 확인")
-    @GetMapping("/check-nickname")
+    @PostMapping("/check-nickname")
     public ResponseEntity<?> checkDuplicateNickname(@Valid @RequestBody RequestCheckDuplicateNicknameDto params) {
 
         // 닉네임 중복 확인
@@ -168,10 +168,10 @@ public class UserController {
         String userId = authentication.getName();
 
         // 프로필 이미지 저장
-        String saveFilename = fileService.saveProgileImage(profileImage);
+        String url = fileService.saveProgileImage(profileImage);
 
         // 프로필 이미지 수정
-        userService.updateProfileImage(userId, saveFilename);
+        userService.updateProfileImage(userId, url);
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 }

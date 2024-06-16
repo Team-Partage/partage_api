@@ -47,6 +47,14 @@ spring:
   servlet:
     multipart:
       max-file-size: 5MB
+  # google cloud storage
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: ENC(bHHtGYCsh4p/QR083sy2qLal6Y2XuxTKac5bKqrEj/tekzzEkjOpiAPZR3AFUWYDNApj5BhA798=)
+        project-id: ENC(McAhjDuntjazqk6+t/xb62AyHYUF1h31pKh/yLQzLv4=)
+        bucket: ENC(HUu0VHh+fSO9J/KwCmORhoaKWc82L6hy)
 
 # save path
 file:

@@ -280,13 +280,13 @@ public class UserService {
     }
 
     @Transactional
-    public void updateProfileImage(String userId, String saveFilename) {
+    public void updateProfileImage(String userId, String url) {
 
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
         // 프로필 색상 수정
-        userEntity.updateProfileImage(saveFilename);
+        userEntity.updateProfileImage(url);
         userRepository.save(userEntity);
     }
 }

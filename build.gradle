@@ -40,6 +40,9 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    //Google Cloud Platform Storage(GCP Storage)
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter', version: '1.2.5.RELEASE'
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-gcp-storage', version: '1.2.5.RELEASE'
 
 
 //	+------------------------------------------------------------------------+
@@ -52,6 +55,11 @@ dependencies {
     implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+
+    // 전체 프로젝트에서 guava-jdk5 제외
+    configurations.all {
+        exclude group: 'com.google.guava', module: 'guava-jdk5'
+    }
 
 //   +------------------------------------------------------------------------+
 //   | Client                                                                 |
