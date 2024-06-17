@@ -45,6 +45,9 @@ public class ChannelEntity {
     @Column(nullable = false)
     private Boolean isActive;
 
+    @Column(nullable = false)
+    private int viewerCount;
+
     @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ChannelRoleMappingEntity> channelRoleMappings;
