@@ -20,6 +20,9 @@ public class ChannelSessionEntity {
     @Id
     private String id; // channelId
 
+    private int currentPlayTime;
+    private boolean isPlaying;
+
     private LocalDateTime lastActiveTime;
 
     public void updateLastActiveTime() {

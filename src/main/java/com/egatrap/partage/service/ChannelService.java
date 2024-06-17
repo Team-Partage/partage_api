@@ -22,6 +22,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service("channelService")
@@ -35,7 +36,7 @@ public class ChannelService {
     private final PlaylistRepository playlistRepository;
     private final ChannelSessionRepository channelSessionRepository;
     private final ModelMapper modelMapper;
-
+    private final UserSessionRepository userSessionRepository;
 
     public boolean isExistsChannel(String channelId) {
         // 채널아이디를 이용해 해당 채널이 존재하고 엑티브 상태인지 확인
@@ -46,10 +47,40 @@ public class ChannelService {
      * 채널 조회수 동기화 : 레디스에 생성된 유저세선을 이용해 조회수를 동기화
      * @return 동기화 된 채널 수
      */
-    public long syncChannelViewCount() {
-        
+    public long syncChannelViewerCount() {
 
-        return 0;
+        long updatedChannel = 0;
+
+        // 시청자 수가 1이상이 채널 조회
+        List<ChannelEntity> channels = channelRepository.findByViewerCountGreaterThan(0);
+
+        // 기존 채널에 저장된 시청자 수와 현재 시청자 수가 다른 경우 동기화
+        for(ChannelEntity channel : channels) {
+            Iterable<UserSessionEntity> users = userSessionRepository.findAllByChannelId(channel.getChannelId());
+            long viewerCount = StreamSupport.stream(users.spliterator(), false).count();
+
+            if(channel.getViewerCount() != viewerCount) {
+                channel.setViewerCount(Integer.parseInt(String.valueOf(viewerCount))); // long 으로 수정
+                channelRepository.save(channel);
+                updatedChannel++;
+            }
+        }
+
+        // 캐싱된 채널에 대한 시청자 수 동기화
+        Iterable<ChannelSessionEntity> channelSessions = channelSessionRepository.findAll();
+        for(ChannelSessionEntity channelSession : channelSessions) {
+            long viewerCount = StreamSupport.stream(userSessionRepository
+                    .findAllByChannelId(channelSession.getId()).spliterator(), false).count();
+
+            ChannelEntity channel = channelRepository.findById(channelSession.getId()).orElse(null);
+            if(channel != null && channel.getViewerCount() != viewerCount) {
+                channel.setViewerCount(Integer.parseInt(String.valueOf(viewerCount))); // long 으로 수정
+                channelRepository.save(channel);
+                updatedChannel++;
+            }
+        }
+
+        return updatedChannel;
     }
 
     public boolean isExistsActiveChannelByUserId(String userId) {

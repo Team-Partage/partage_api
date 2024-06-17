@@ -11,4 +11,7 @@ public interface UserSessionRepository extends CrudRepository<UserSessionEntity,
 
     Iterable<UserSessionEntity> findAllByChannelId(String channelId);
 
+    long countByChannelId(String channelId);
+
+//    long countByChannelId(String channelId);
 }

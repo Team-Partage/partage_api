@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 public class ChannelSessionDto {
 
     private String id;
+    private int currentPlayTime;
+    private boolean isPlaying;
     private String lastActiveTime;
 
 }

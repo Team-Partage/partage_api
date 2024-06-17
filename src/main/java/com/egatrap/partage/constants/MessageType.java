@@ -8,7 +8,9 @@ import lombok.Getter;
 public enum MessageType {
 
     CHANNEL_INFO(1),
-    USER_INFO(2),
+    CHANNEL_VIEWER(2),
+    USER_INFO(3),
+    VIDEO_CURRENT(4),
 
     USER_CHAT(11),
     USER_JOIN(12),
