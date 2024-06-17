@@ -25,6 +25,10 @@ public class MessageScheduler {
     private final ChannelService channelService;
 
 
+    /**
+     * 채널의 시청자 수를 실시간으로 푸시
+     * 10초마다 실행
+     */
     @Scheduled(fixedRate = 10000)
     public void sendPeriodicMessages() {
         for (ChannelSessionDto channel : channelUserService.getChannels()) {
@@ -36,6 +40,10 @@ public class MessageScheduler {
         }
     }
 
+    /**
+     * 채널의 현재 재생 시간을 실시간으로 푸시
+     * 1초마다 실행
+     */
     @Scheduled(fixedRate = 1000)
     public void sendCurrentPlayTime() {
         List<ChannelSessionDto> channels = channelUserService.getChannels();
@@ -47,6 +55,10 @@ public class MessageScheduler {
         }
     }
 
+    /**
+     * 채널의 세션 수를 모니터링
+     * 10초마다 실행
+     */
     @Scheduled(fixedRate = 10000)
     public void ChannelMonitoring() {
         long channels = channelUserService.countChannel();
@@ -54,9 +66,24 @@ public class MessageScheduler {
         log.info(">> Session Check - Channel [{}] : User [{}]", channels, users);
     }
 
+    /**
+     * 채널의 시청자 수를 실시간으로 동기화
+     * 30초마다 실행
+     */
     @Scheduled(fixedRate = 30000)
     public void syncChannelViewerCount() {
         long updatedChannel = channelService.syncChannelViewerCount();
         log.info(">> Sync Channel Viewer Count : {}", updatedChannel);
     }
+
+    /**
+     * 비활성화된 채널 제거
+     * 5분마다 실행
+     */
+    @Scheduled(fixedRate = 300000)
+    public void removeInactiveChannel() {
+        long removedChannel = channelUserService.removeNoneUserChannel();
+        log.info(">> Remove Inactive Channel : {}", removedChannel);
+    }
+
 }

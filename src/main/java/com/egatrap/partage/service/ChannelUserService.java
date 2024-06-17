@@ -3,15 +3,19 @@ package com.egatrap.partage.service;
 
 import com.egatrap.partage.model.dto.ChannelSessionDto;
 import com.egatrap.partage.model.entity.ChannelSessionEntity;
+import com.egatrap.partage.model.entity.UserEntity;
 import com.egatrap.partage.model.entity.UserSessionEntity;
 import com.egatrap.partage.model.vo.SessionAttributes;
+import com.egatrap.partage.model.vo.UserSession;
 import com.egatrap.partage.repository.ChannelSessionRepository;
+import com.egatrap.partage.repository.UserRepository;
 import com.egatrap.partage.repository.UserSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,6 +34,7 @@ public class ChannelUserService {
 
     private final UserSessionRepository userSessionRepository;
     private final ChannelSessionRepository channelSessionRepository;
+    private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
     /**
@@ -49,12 +54,15 @@ public class ChannelUserService {
     public void addUserToChannel(String sessionId, String userId, String channelId) {
         Optional<ChannelSessionEntity> channelSession = channelSessionRepository.findById(channelId);
 
+        UserEntity user = userRepository.findById(userId).orElse(null);
+
         UserSessionEntity userSession = UserSessionEntity.builder()
                 .id(sessionId)
                 .userId(userId)
+                .nickname(user == null ? "NONE" : user.getNickname())
                 .channelId(channelId)
                 .joinTime(LocalDateTime.now())
-                .lastActiveTime(LocalDateTime.now())
+                .lastAccessTime(LocalDateTime.now())
                 .build();
 
         // 채널이 없으면 생성
@@ -91,9 +99,34 @@ public class ChannelUserService {
         return SessionAttributes.builder()
                 .sessionId(channelUserEntity.getId())
                 .userId(channelUserEntity.getUserId())
-//                .channelId(channelUserEntity.getChannelId())
+                .channelId(channelUserEntity.getChannelId())
                 .channelRole(channelUserEntity.getChannelRole())
                 .build();
+    }
+
+    public UserSession getUserSession(SimpMessageHeaderAccessor headerAccessor) {
+        return getUserSession(headerAccessor.getSessionAttributes().get("sessionId").toString());
+    }
+
+    public UserSession getUserSession(String sessionId) {
+        UserSessionEntity userSessionEntity = userSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("UserSessionEntity not found: sessionId=" + sessionId));
+        return UserSession.builder()
+                .id(userSessionEntity.getId())
+                .userId(userSessionEntity.getUserId())
+                .channelId(userSessionEntity.getChannelId())
+                .nickname(userSessionEntity.getNickname())
+                .role(userSessionEntity.getChannelRole())
+                .lastAccessTime(userSessionEntity.getLastAccessTime())
+                .joinTime(userSessionEntity.getJoinTime())
+                .build();
+    }
+
+    public void updateLastAccessTime(String sessionId) {
+        UserSessionEntity userSessionEntity = userSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("UserSessionEntity not found: sessionId=" + sessionId));
+        userSessionEntity.setLastAccessTime(LocalDateTime.now());
+        userSessionRepository.save(userSessionEntity);
     }
 
     // channel session 아이디 리스트 조회
@@ -111,6 +144,23 @@ public class ChannelUserService {
     public long countUserByChannel(String channelId) {
         Iterable<UserSessionEntity> users = userSessionRepository.findAllByChannelId(channelId);
         return StreamSupport.stream(users.spliterator(), false).count();
+    }
+
+    public long removeNoneUserChannel() {
+        Iterable<ChannelSessionEntity> channelSessionEntities = channelSessionRepository.findAll();
+        long removedChannel = 0;
+        for (ChannelSessionEntity channelSessionEntity : channelSessionEntities) {
+            Iterable<UserSessionEntity> users = userSessionRepository.findAllByChannelId(channelSessionEntity.getId());
+            Stream<UserSessionEntity> userStream = StreamSupport.stream(users.spliterator(), false);
+
+            if (userStream.findAny().isEmpty()) {
+                log.info("Remove Channel : {}", channelSessionEntity.getId());
+                channelSessionRepository.deleteById(channelSessionEntity.getId());
+                removedChannel++;
+            }
+        }
+
+        return removedChannel;
     }
 
     public long countUser() {

@@ -3,11 +3,14 @@ package com.egatrap.partage.controller;
 import com.egatrap.partage.common.aspect.MessagePermission;
 import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.model.dto.ChannelCacheDataDto;
+import com.egatrap.partage.model.dto.chat.ChatMessageDto;
 import com.egatrap.partage.model.dto.chat.MessageDto;
 import com.egatrap.partage.model.dto.chat.SendMessageDto;
 import com.egatrap.partage.model.vo.SessionAttributes;
+import com.egatrap.partage.model.vo.UserSession;
 import com.egatrap.partage.service.ChannelPermissionService;
 import com.egatrap.partage.service.ChannelService;
+import com.egatrap.partage.service.ChannelUserService;
 import com.egatrap.partage.service.PlaylistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +19,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.HashMap;
@@ -29,6 +33,7 @@ public class StompController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChannelPermissionService channelPermissionService;
     private final ChannelService channelService;
+    private final ChannelUserService channelUserService;
     private final PlaylistService playlistService;
 
     public static final String CHANNEL_PREFIX = "/channel/";
@@ -67,19 +72,18 @@ public class StompController {
 
     @MessageMapping("/user.chat")
     @MessagePermission(permission = MessageType.USER_CHAT)
-    public void sendMessage(SimpMessageHeaderAccessor headerAccessor, @Payload MessageDto message) {
-        SessionAttributes session = new SessionAttributes(headerAccessor);
-        log.debug("Sending message to channel {}: {}", session.getChannelId(), message.getContent());
-        log.debug("SessionId: {}", headerAccessor.getSessionId());
-        log.debug("session: {}", session);
+    public void sendMessage(SimpMessageHeaderAccessor headerAccessor, @Validated @Payload ChatMessageDto message) {
+        UserSession user = channelUserService.getUserSession(headerAccessor);
+        log.debug("Sending message to channel {}: {}", user.getChannelId(), message.getMessage());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("sender", message.getSender());
-        data.put("content", message.getContent());
+        data.put("userId", user.getUserId());
+        data.put("nickname", user.getNickname());
+        data.put("message", message.getMessage());
 
-        messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
-                .type(MessageType.USER_JOIN)
+                .type(MessageType.USER_CHAT)
                 .build());
     }
 
@@ -114,5 +118,4 @@ public class StompController {
                 .type(MessageType.USER_JOIN)
                 .build());
     }
-
 }

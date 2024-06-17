@@ -24,8 +24,10 @@ public class UserSessionEntity {
     @Indexed
     private String channelId;
 
+    private String nickname;
+
     private ChannelRoleType channelRole;
     private LocalDateTime joinTime;
-    private LocalDateTime lastActiveTime;
+    private LocalDateTime lastAccessTime;
 
 }
