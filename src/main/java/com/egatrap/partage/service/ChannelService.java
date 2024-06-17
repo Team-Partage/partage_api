@@ -33,12 +33,23 @@ public class ChannelService {
     private final ChannelRoleMappingRepository channelRoleMappingRepository;
     private final ChannelPermissionRepository channelPermissionRepository;
     private final PlaylistRepository playlistRepository;
+    private final ChannelSessionRepository channelSessionRepository;
     private final ModelMapper modelMapper;
 
 
     public boolean isExistsChannel(String channelId) {
         // 채널아이디를 이용해 해당 채널이 존재하고 엑티브 상태인지 확인
         return channelRepository.existsByChannelIdAndIsActive(channelId, true);
+    }
+
+    /**
+     * 채널 조회수 동기화 : 레디스에 생성된 유저세선을 이용해 조회수를 동기화
+     * @return 동기화 된 채널 수
+     */
+    public long syncChannelViewCount() {
+        
+
+        return 0;
     }
 
     public boolean isExistsActiveChannelByUserId(String userId) {
