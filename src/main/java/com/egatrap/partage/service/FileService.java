@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -30,8 +32,11 @@ public class FileService {
 
     private final List<String> ALLOWED_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg");
     private final String STORAGE_BASE_URL = "https://storage.googleapis.com/";
-    // private final int PROFILE_IMAGE_MAX_WIDTH = 1920;
-    // private final int PROFILE_IMAGE_MAX_HEIGHT = 1080;
+
+    private final int PROFILE_IMAGE_MIN_WIDTH = 240;
+    private final int PROFILE_IMAGE_MIN_HEIGHT = 240;
+    private final int PROFILE_IMAGE_MAX_WIDTH = 4000;   // 임시 맥스 사이즈
+    private final int PROFILE_IMAGE_MAX_HEIGHT = 4000;  // 임시 맥스 사이즈
 
     public String saveProgileImage(MultipartFile profileImage) {
         // 이미지 확장자 체크
@@ -40,8 +45,9 @@ public class FileService {
         if (!isValidExtension(extension))
             throw new BadRequestException("Unsupported file format. Only png, jpg, jpeg are allowed.");
 
-        // ToDo. 이미지 사이즈 체크
-        //  - 이미지 용량 체크를 진행하므로 일단 보류
+        // 이미지 사이즈 체크
+        if (!isValidImageSize(profileImage))
+            throw new BadRequestException("The minimum/maximum width, less than or above height of the image.");
 
         // Cloud에 이미지 업로드
         String uuid = CodeGenerator.generateID("I");
@@ -65,5 +71,25 @@ public class FileService {
         if (extension != null)
             return ALLOWED_EXTENSIONS.contains(extension.toLowerCase());
         return false;
+    }
+
+    private boolean isValidImageSize(MultipartFile profileImage) {
+
+        BufferedImage image = null;
+        try {
+            image = ImageIO.read(profileImage.getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to profile image load error.", e);
+        }
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        // 이미지 최소 사이즈 또는 최대 사이즈 기준에 미충족
+        if (width < PROFILE_IMAGE_MIN_WIDTH || width > PROFILE_IMAGE_MAX_WIDTH ||
+            height < PROFILE_IMAGE_MIN_HEIGHT || height > PROFILE_IMAGE_MAX_HEIGHT)
+            return false;
+
+        return true;
     }
 }
