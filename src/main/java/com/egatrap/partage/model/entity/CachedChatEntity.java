@@ -11,6 +11,11 @@ import org.springframework.data.redis.core.RedisHash;
 @RedisHash(value = "cached-chat")
 public class CachedChatEntity {
 
-
+    private Long id;
+    private String userId;
+    private String channelId;
+    private String message;
+    private String createdAt;
 
 }
+
