@@ -122,24 +122,8 @@ public class StompController {
                 .build());
     }
 
-
-    @MessageMapping("/video.current")
-    public void currentVideo(SimpMessageHeaderAccessor headerAccessor, @Payload String videoId) {
-        SessionAttributes session = new SessionAttributes(headerAccessor);
-        String channelId = session.getChannelId();
-
-        // @TODO Update current video
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("videoId", videoId);
-
-        messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
-                .data(data)
-                .type(MessageType.VIDEO_CURRENT)
-                .build());
-    }
-
     @MessageMapping("/video.play")
+    @MessagePermission(permission = MessageType.VIDEO_PLAY)
     public void playVideo(SimpMessageHeaderAccessor headerAccessor, @Payload RequestPlayVideoDto params) {
         SessionAttributes session = new SessionAttributes(headerAccessor);
 
@@ -158,7 +142,6 @@ public class StompController {
                 .type(MessageType.VIDEO_PLAY)
                 .build());
     }
-
 
     //    ###################################################################################
 //    TEST CODE
