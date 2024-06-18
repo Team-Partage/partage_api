@@ -5,15 +5,14 @@ import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.model.dto.ChannelCacheDataDto;
 import com.egatrap.partage.model.dto.chat.ChatMessageDto;
 import com.egatrap.partage.model.dto.chat.MessageDto;
+import com.egatrap.partage.model.dto.chat.RequestPlayVideoDto;
 import com.egatrap.partage.model.dto.chat.SendMessageDto;
 import com.egatrap.partage.model.vo.SessionAttributes;
 import com.egatrap.partage.model.vo.UserSession;
-import com.egatrap.partage.service.ChannelPermissionService;
-import com.egatrap.partage.service.ChannelService;
-import com.egatrap.partage.service.ChannelUserService;
-import com.egatrap.partage.service.PlaylistService;
+import com.egatrap.partage.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -21,7 +20,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +36,7 @@ public class StompController {
     private final ChannelPermissionService channelPermissionService;
     private final ChannelService channelService;
     private final ChannelUserService channelUserService;
+    private final ChannelSessionService channelSessionService;
     private final PlaylistService playlistService;
 
     public static final String CHANNEL_PREFIX = "/channel/";
@@ -118,4 +121,67 @@ public class StompController {
                 .type(MessageType.USER_JOIN)
                 .build());
     }
+
+
+    @MessageMapping("/video.current")
+    public void currentVideo(SimpMessageHeaderAccessor headerAccessor, @Payload String videoId) {
+        SessionAttributes session = new SessionAttributes(headerAccessor);
+        String channelId = session.getChannelId();
+
+        // @TODO Update current video
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("videoId", videoId);
+
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
+                .data(data)
+                .type(MessageType.VIDEO_CURRENT)
+                .build());
+    }
+
+    @MessageMapping("/video.play")
+    public void playVideo(SimpMessageHeaderAccessor headerAccessor, @Payload RequestPlayVideoDto params) {
+        SessionAttributes session = new SessionAttributes(headerAccessor);
+
+        int playTime = channelSessionService.updatePlayTime(
+                session.getChannelId(),
+                params.getPlayTime(),
+                params.isPlaying());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("playlistId", params.getPalylistId());
+        data.put("playTime", params.getPlayTime());
+        data.put("isPlaying", params.isPlaying());
+
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
+                .data(data)
+                .type(MessageType.VIDEO_PLAY)
+                .build());
+    }
+
+
+    //    ###################################################################################
+//    TEST CODE
+//    ###################################################################################
+    @PostMapping("/test/video.play")
+    public ResponseEntity<?> testPlaVideo(@Validated @RequestBody RequestPlayVideoDto params) {
+        log.debug("RequestPlayVideoDto: {}", params);
+
+        String channelId = "C-3e270b0a697e45d8b083414968437e";
+
+        int playTime = channelSessionService.updatePlayTime(channelId, params.getPlayTime(), params.isPlaying());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("playlistId", params.getPalylistId());
+        data.put("playTime", playTime);
+        data.put("isPlaying", params.isPlaying());
+
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + channelId, SendMessageDto.builder()
+                .data(data)
+                .type(MessageType.VIDEO_PLAY)
+                .build());
+
+        return ResponseEntity.ok().build();
+    }
+
 }

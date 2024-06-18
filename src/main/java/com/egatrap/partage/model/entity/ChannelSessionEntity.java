@@ -20,12 +20,12 @@ public class ChannelSessionEntity {
     @Id
     private String id; // channelId
 
-    private int currentPlayTime;
+    private int playTime;
+    private LocalDateTime updateTime;
     private boolean isPlaying;
+    private LocalDateTime lastAccessTime;
 
-    private LocalDateTime lastActiveTime;
-
-    public void updateLastActiveTime() {
-        this.lastActiveTime = LocalDateTime.now();
+    public void updateLastAccessTime() {
+        this.lastAccessTime = LocalDateTime.now();
     }
 }

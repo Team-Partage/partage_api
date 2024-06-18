@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@RedisHash(value = "user-session")
+@RedisHash(value = "user-session", timeToLive = 36000) // 10 hours
 public class UserSessionEntity {
 
     @Id
@@ -29,5 +29,10 @@ public class UserSessionEntity {
     private ChannelRoleType channelRole;
     private LocalDateTime joinTime;
     private LocalDateTime lastAccessTime;
+
+
+    public void updateLastAccessTime() {
+        this.lastAccessTime = LocalDateTime.now();
+    }
 
 }

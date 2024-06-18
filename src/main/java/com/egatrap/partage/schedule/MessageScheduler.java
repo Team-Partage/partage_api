@@ -4,6 +4,7 @@ import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.model.dto.ChannelSessionDto;
 import com.egatrap.partage.model.dto.chat.SendMessageDto;
 import com.egatrap.partage.service.ChannelService;
+import com.egatrap.partage.service.ChannelSessionService;
 import com.egatrap.partage.service.ChannelUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +24,14 @@ public class MessageScheduler {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChannelUserService channelUserService;
     private final ChannelService channelService;
+    private final ChannelSessionService channelSessionService;
 
 
     /**
      * 채널의 시청자 수를 실시간으로 푸시
-     * 10초마다 실행
+     * 30초마다 실행
      */
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 30000)
     public void sendPeriodicMessages() {
         for (ChannelSessionDto channel : channelUserService.getChannels()) {
 //            log.info("Send Message : {}", channel.getId());
@@ -48,10 +50,13 @@ public class MessageScheduler {
     public void sendCurrentPlayTime() {
         List<ChannelSessionDto> channels = channelUserService.getChannels();
         for (ChannelSessionDto channel : channels) {
-            messagingTemplate.convertAndSend(CHANNEL_PREFIX + channel.getId(), SendMessageDto.builder()
-                    .data(channel.getCurrentPlayTime())
-                    .type(MessageType.VIDEO_CURRENT)
-                    .build());
+            if (channel.isPlaying()) {
+                int currentPlayTime = channelSessionService.getPlayTime(channel);
+                messagingTemplate.convertAndSend(CHANNEL_PREFIX + channel.getId(), SendMessageDto.builder()
+                        .data(currentPlayTime)
+                        .type(MessageType.VIDEO_CURRENT)
+                        .build());
+            }
         }
     }
 

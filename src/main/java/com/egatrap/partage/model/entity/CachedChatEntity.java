@@ -18,4 +18,3 @@ public class CachedChatEntity {
     private String createdAt;
 
 }
-

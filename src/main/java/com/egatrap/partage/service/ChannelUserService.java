@@ -13,17 +13,13 @@ import com.egatrap.partage.repository.UserSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -37,21 +33,17 @@ public class ChannelUserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
-    /**
-     * 채널에 유저 추가
-     *
-     * @param sessionData 세션 정보
-     */
-    public void addUsersToChannel(SessionAttributes sessionData) {
-        addUserToChannel(sessionData.getSessionId(), sessionData.getUserId(), sessionData.getChannelId());
+
+    public UserSession addUserSession(SimpMessageHeaderAccessor headerAccessor) {
+        SessionAttributes session = new SessionAttributes(headerAccessor);
+        return addUserSession(session.getSessionId(), session.getUserId(), session.getChannelId());
     }
 
-    /**
-     * 채널에 유저 세션 추가
-     *
-     * @param channelId 채널 아이디
-     */
-    public void addUserToChannel(String sessionId, String userId, String channelId) {
+    public UserSession addUserSession(SessionAttributes sessionData) {
+        return addUserSession(sessionData.getSessionId(), sessionData.getUserId(), sessionData.getChannelId());
+    }
+
+    public UserSession addUserSession(String sessionId, String userId, String channelId) {
         Optional<ChannelSessionEntity> channelSession = channelSessionRepository.findById(channelId);
 
         UserEntity user = userRepository.findById(userId).orElse(null);
@@ -69,30 +61,29 @@ public class ChannelUserService {
         if (channelSession.isEmpty()) {
             channelSessionRepository.save(ChannelSessionEntity.builder()
                     .id(channelId)
-                    .lastActiveTime(LocalDateTime.now())
+                    .lastAccessTime(LocalDateTime.now())
                     .build());
         }
 
         log.debug("Redis User added to channel: sessionId={}, userId={}, channelId={}", sessionId, userId, channelId);
         userSessionRepository.save(userSession);
+
+        return UserSession.builder()
+                .id(userSession.getId())
+                .userId(userSession.getUserId())
+                .channelId(userSession.getChannelId())
+                .nickname(userSession.getNickname())
+                .role(userSession.getChannelRole())
+                .lastAccessTime(userSession.getLastAccessTime())
+                .joinTime(userSession.getJoinTime())
+                .build();
     }
 
-    /**
-     * 채널에서 유저 제거
-     *
-     * @param sessionId 세션 아이디
-     */
-    public void removeUserFromChannel(String sessionId) {
+    public void removeUserSession(String sessionId) {
         log.debug("Redis User removed from channel: sessionId={}", sessionId);
         userSessionRepository.deleteById(sessionId);
     }
 
-    /**
-     * 세션 아이디로 세션 정보 조회
-     *
-     * @param sessionId 세션 아이디
-     * @return 세션 정보
-     */
     public SessionAttributes getSessionAttributes(String sessionId) {
         UserSessionEntity channelUserEntity = userSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("UserSessionEntity not found: sessionId=" + sessionId));
@@ -105,12 +96,21 @@ public class ChannelUserService {
     }
 
     public UserSession getUserSession(SimpMessageHeaderAccessor headerAccessor) {
-        return getUserSession(headerAccessor.getSessionAttributes().get("sessionId").toString());
+        SessionAttributes session = new SessionAttributes(headerAccessor);
+        return getUserSession(session.getSessionId(), session.getChannelId(), session.getUserId());
     }
 
-    public UserSession getUserSession(String sessionId) {
-        UserSessionEntity userSessionEntity = userSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("UserSessionEntity not found: sessionId=" + sessionId));
+    public UserSession getUserSession(String sessionId, String channelId, String userId) {
+        UserSessionEntity userSessionEntity = userSessionRepository.findById(sessionId).orElse(null);
+
+        if (userSessionEntity == null) {
+            return addUserSession(sessionId, userId, channelId);
+        }
+
+        userSessionEntity.updateLastAccessTime();
+        log.debug("Redis User updated last access time: sessionId={}", sessionId);
+        userSessionRepository.save(userSessionEntity);
+
         return UserSession.builder()
                 .id(userSessionEntity.getId())
                 .userId(userSessionEntity.getUserId())

@@ -89,7 +89,7 @@ public class SessionAttributesInterceptor implements HandshakeInterceptor {
 
         SessionAttributes sessionData = new SessionAttributes(userId, channelId, sessionId, channelRole);
         log.info("WebSocket init session Data : sessionData={}", sessionData);
-        channelUserService.addUsersToChannel(sessionData);
+        channelUserService.addUserSession(sessionData);
 
         return true;
     }

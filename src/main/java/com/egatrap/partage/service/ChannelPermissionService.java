@@ -95,7 +95,6 @@ public class ChannelPermissionService {
         channelRoleMappingRepository.save(channelRoleMappingEntity);
     }
 
-
     public boolean isExistChannelRole(String channelId, String userId) {
         return channelRoleMappingRepository.existsById(new ChannelRoleMappingId(channelId, userId));
     }

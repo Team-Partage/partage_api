@@ -10,7 +10,6 @@ public enum MessageType {
     CHANNEL_INFO(1),
     CHANNEL_VIEWER(2),
     USER_INFO(3),
-    VIDEO_CURRENT(4),
 
     USER_CHAT(11),
     USER_JOIN(12),
@@ -21,9 +20,11 @@ public enum MessageType {
     PLAYLIST_REMOVE(22),
     PLAYLIST_MOVE(23),
 
+    VIDEO_CURRENT(30),
     VIDEO_PLAY(31),
     VIDEO_SEEK(32),
     VIDEO_SKIP(33),
+    VIDEO_TIME(34),
 
     NONE(0);
 
