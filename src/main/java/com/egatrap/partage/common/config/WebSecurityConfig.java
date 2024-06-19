@@ -41,6 +41,7 @@ public class WebSecurityConfig {
             "/api/v1/user/auth-number",
             "/api/v1/user/join",
             "/api/v1/channel/search",
+            "/api/v1/channel/search-by-hashtag",
             "/ws",
             "/stomp/**",
             "/channel/**",

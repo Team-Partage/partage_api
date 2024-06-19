@@ -94,6 +94,15 @@ public class PlaylistService {
                 .toList();
     }
 
+    public List<PlaylistDto> getNonePaingPlaylists(String channelId)
+    {
+        return playlistRepository.findAllByChannel_ChannelIdAndIsActiveOrderBySequence(channelId, true)
+                .stream()
+                .map(playlistEntity -> modelMapper.map(playlistEntity, PlaylistDto.class))
+                .toList();
+    }
+
+
     @Transactional(rollbackFor = Exception.class, timeout = 10)
     public void deletePlaylist(Long playlistNo) {
         PlaylistEntity playlistEntity = playlistRepository.findById(playlistNo)
