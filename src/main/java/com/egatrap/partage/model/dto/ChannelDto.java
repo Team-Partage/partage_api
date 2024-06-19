@@ -21,4 +21,6 @@ public class ChannelDto {
     private String channelUrl;
     private String channelColor;
     private LocalDateTime createAt;
+    private Integer viewerCount;
+    private Long currentPlaylistNo;
 }

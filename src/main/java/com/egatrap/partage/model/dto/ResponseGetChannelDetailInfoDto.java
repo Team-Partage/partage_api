@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -14,7 +15,8 @@ import java.util.List;
 public class ResponseGetChannelDetailInfoDto {
 
     private ChannelDto channel;
-    private List<ChannelUserDto> channelUsers;
+    private ChannelUserDto owner;
+    private Page<ChannelUserDto> users;
     private List<PlaylistDto> playlists;
     private ChannelPermissionInfoDto channelPermissions;
 }

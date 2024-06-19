@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,14 +121,14 @@ public class ChannelService {
         channelPermissionRepository.save(channelPermission);
 
         // set usersInfo
-        List<ChannelUserDto> channelUserInfo = channelRoleMappingRepository.findActiveUsersByChannelId(channel.getChannelId());
+        ChannelUserDto owner = channelRoleMappingRepository.findActiveOwnerByChannelId(channel.getChannelId(), ChannelRoleType.ROLE_OWNER.getROLE_ID());
         // set channelInfo
         ChannelDto channelInfo = setChannelInfo(channel);
 
         // response 생성
         ResponseCreateChannelDto responseCreateChannelDto = new ResponseCreateChannelDto();
         responseCreateChannelDto.setChannel(channelInfo);
-        responseCreateChannelDto.setChannelUsers(channelUserInfo);
+        responseCreateChannelDto.setOwner(owner);
         responseCreateChannelDto.setChannelPermissions(new ChannelPermissionInfoDto(channelPermission));
 
         return responseCreateChannelDto;
@@ -165,6 +166,11 @@ public class ChannelService {
         channelInfo.setChannelUrl(channel.getChannelUrl());
         channelInfo.setChannelColor(ChannelColorType.getChannelColor(channel.getChannelColor()));
         channelInfo.setCreateAt(channel.getCreateAt());
+        channelInfo.setViewerCount(channel.getViewerCount());
+        if (channel.getCurrentPlaylist() == null)
+            channelInfo.setCurrentPlaylistNo(null);
+        else
+            channelInfo.setCurrentPlaylistNo(channel.getCurrentPlaylist().getPlaylistNo());
 
         return channelInfo;
     }
@@ -221,8 +227,15 @@ public class ChannelService {
         return setChannelInfo(channel);
     }
 
-    public List<ChannelUserDto> getChannelUsers(String channelId) {
-        return channelRoleMappingRepository.findActiveUsersByChannelId(channelId);
+    public ChannelUserDto getChannelOwner(String channelId) {
+        return channelRoleMappingRepository.findActiveOwnerByChannelId(channelId, ChannelRoleType.ROLE_OWNER.getROLE_ID());
+    }
+
+    public Page<ChannelUserDto> getChannelUsers(String channelId, int page, int pageSize) {
+
+        Pageable pageable = Pageable.ofSize(pageSize).withPage(page - 1);
+
+        return channelRoleMappingRepository.findActiveUsersByChannelId(channelId, pageable);
     }
 
     public ChannelPermissionInfoDto getChannelPermission(String channelId) {
@@ -260,7 +273,65 @@ public class ChannelService {
         if (keyword == null || keyword.trim().isEmpty())
             pagingChannels = channelRepository.findByTypeAndIsActive(ChannelType.PUBLIC, true, pageRequest);
         else
-            pagingChannels = channelRepository.findBySearchKeywordAndIsActive(keyword, true, pageRequest);
+            pagingChannels = channelRepository.findByNameOrHashtagSearchKeywordAndIsActive(keyword, true, pageRequest);
+
+        // 페이지 정보 생성
+        PageInfoDto page = PageInfoDto.builder()
+                .cursor(cursor)
+                .perPage(perPage)
+                .totalPage(pagingChannels.getTotalPages())
+                .totalCount(pagingChannels.getTotalElements()).build();
+
+        // 채널 검색 정보 목록 생성
+        List<ChannelSearchDto> channels = pagingChannels.stream()
+                .map(channelEntity -> {
+
+                    // 채널 정보
+                    ChannelDto channelDto = modelMapper.map(channelEntity, ChannelDto.class);
+
+                    // 현재 재생중인 플레이리스트 정보
+                    PlaylistDto playlistDto = null;
+                    Optional<PlaylistEntity> playlistEntity =
+                            playlistRepository.findFirstByChannel_ChannelIdAndIsActiveAndSequence(channelDto.getChannelId(), true, 0);
+                    if (playlistEntity.isPresent())
+                        playlistDto = modelMapper.map(playlistEntity.get(), PlaylistDto.class);
+
+                    // 채널 생성자 정보
+                    UserDto userDto = null;
+                    Optional<ChannelRoleMappingEntity> channelRoleEntity =
+                            channelRoleMappingRepository.findByChannel_ChannelIdAndRole_RoleId(channelDto.getChannelId(), ChannelRoleType.ROLE_OWNER.getROLE_ID());
+                    if (channelRoleEntity.isPresent())
+                        userDto = modelMapper.map(channelRoleEntity.get().getUser(), UserDto.class);
+
+                    return ChannelSearchDto.builder()
+                            .channel(channelDto)
+                            .playlist(playlistDto)
+                            .owner(userDto)
+                            .user_count(new Random().nextInt(200) + 1)
+                            .build();
+                })
+                .toList();
+
+        // response 생성
+        ResponseSearchChannelsDto response = new ResponseSearchChannelsDto();
+        response.setPage(page);
+        response.setChannels(channels);
+        return response;
+    }
+
+    public ResponseSearchChannelsDto getSearchChannelsByHashtag(int cursor, int perPage, String keyword) {
+
+        // 정렬 조건 - default: 최근 생성일
+        // Pageable 객체 생성
+        Sort sort = Sort.by(Sort.Direction.DESC, "createAt");
+        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+
+        Page<ChannelEntity> pagingChannels = null;
+        // 키워드가 없는 경우 - 400 상태코드 반환
+        if (keyword == null || keyword.trim().isEmpty())
+            throw new BadRequestException("Hashtag search keyword cannot be empty.");
+
+        pagingChannels = channelRepository.findByHashtagSearchKeywordAndIsActive(keyword, true, pageRequest);
 
         // 페이지 정보 생성
         PageInfoDto page = PageInfoDto.builder()

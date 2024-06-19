@@ -3,6 +3,8 @@ package com.egatrap.partage.repository;
 import com.egatrap.partage.model.dto.ChannelUserDto;
 import com.egatrap.partage.model.entity.ChannelRoleMappingEntity;
 import com.egatrap.partage.model.entity.ChannelRoleMappingId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -35,8 +37,16 @@ public interface ChannelRoleMappingRepository extends JpaRepository<ChannelRoleM
             "u.profileColor, u.profileImage) " +
             "FROM ChannelRoleMappingEntity crm " +
             "JOIN UserEntity u ON crm.id.userId = u.userId " +
+            "WHERE crm.id.channelId = :channelId " +
+            "AND crm.role.roleId = :roleId")
+    ChannelUserDto findActiveOwnerByChannelId(String channelId, String roleId);
+
+    @Query("SELECT new com.egatrap.partage.model.dto.ChannelUserDto(crm.role.roleId, u.userId, u.email, u.nickname, " +
+            "u.profileColor, u.profileImage) " +
+            "FROM ChannelRoleMappingEntity crm " +
+            "JOIN UserEntity u ON crm.id.userId = u.userId " +
             "WHERE crm.id.channelId = :channelId")
-    List<ChannelUserDto> findActiveUsersByChannelId(@Param("channelId") String channelId);
+    Page<ChannelUserDto> findActiveUsersByChannelId(@Param("channelId") String channelId, Pageable pageable);
 
     @Query("SELECT c.isActive " +
             "FROM ChannelRoleMappingEntity crm " +

@@ -14,6 +14,6 @@ import java.util.List;
 public class ResponseCreateChannelDto {
 
     private ChannelDto channel;
-    private List<ChannelUserDto> channelUsers;
+    private ChannelUserDto owner;
     private ChannelPermissionInfoDto channelPermissions;
 }
