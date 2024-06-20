@@ -3,7 +3,7 @@ package com.egatrap.partage.common.aspect;
 import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.model.dto.ChannelPermissionDto;
-import com.egatrap.partage.model.vo.SessionAttributes;
+import com.egatrap.partage.model.vo.UserSession;
 import com.egatrap.partage.service.ChannelPermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +33,10 @@ public class MessagePermissionAspect {
         log.debug("Checking permission");
 
         // Session에서 userId, channelId 가져오기
-        SessionAttributes session = new SessionAttributes(headerAccessor);
-        log.debug("Session: {}", session);
-        String userId = session.getUserId();
-        String channelId = session.getChannelId();
+        UserSession user = new UserSession(headerAccessor);
+        log.debug("Session: {}", user);
+        String userId = user.getUserId();
+        String channelId = user.getChannelId();
         log.debug("userId: {}, channelId: {}", userId, channelId);
         if(userId == null || channelId == null) {
             log.error("No permission to perform this action");
@@ -44,7 +44,7 @@ public class MessagePermissionAspect {
         }
 
         // 유저의 채널 권한과 해당 채널의 권한을 가져옴
-        ChannelRoleType userChannelRole = channelPermissionService.getChannelRole(channelId, userId);
+        ChannelRoleType userChannelRole = user.getRole();
         ChannelPermissionDto channelPermission = channelPermissionService.getChannelPermission(channelId);
 
         // 채널에 특정 유저의 권한이 있는지 확인 후 없으면 예외 발생 시킴

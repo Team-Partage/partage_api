@@ -1,8 +1,7 @@
 package com.egatrap.partage.common.interceptor;
 
-import com.egatrap.partage.common.util.CodeGenerator;
 import com.egatrap.partage.constants.ChannelRoleType;
-import com.egatrap.partage.model.vo.SessionAttributes;
+import com.egatrap.partage.model.vo.UserSession;
 import com.egatrap.partage.security.JwtTokenProvider;
 import com.egatrap.partage.service.ChannelPermissionService;
 import com.egatrap.partage.service.ChannelService;
@@ -72,24 +71,19 @@ public class SessionAttributesInterceptor implements HandshakeInterceptor {
         // 비회원인 경우 NONE으로 설정
         if (userId == null || userId.isBlank()) userId = "NONE";
 
-        // 채널 권한 조회
-        if (!"NONE".equals(userId)) {
-            channelRole = channelPermissionService.getChannelRole(channelId, userId);
-        } else {
-            channelRole = ChannelRoleType.ROLE_NONE;
+        // 채널 세션 확인 후 없으면 생성
+        if(channelUserService.isExistsChannel(channelId)){
+            channelUserService.createChannelSession(channelId);
+            log.debug("채널 세션 생성 : channelId={}", channelId);
         }
 
-        String sessionId = CodeGenerator.generateID("WS");
+        // 유저 세션 관리
+        UserSession userSession = channelUserService.addUserSession(userId, channelId);
 
         // 세션에 데이터 저장 (userId, channelId, channelRole)
-        attributes.put("sessionId", sessionId);
-        attributes.put("userId", userId);
-        attributes.put("channelId", channelId);
-        attributes.put("channelRole", channelRole); // 채널 권한 정보 저장 커넥션 연결시 or 메세지 전송할때마다확인 중 체크 필요
+        attributes.put("userSession", userSession);
 
-        SessionAttributes sessionData = new SessionAttributes(userId, channelId, sessionId, channelRole);
-        log.info("WebSocket init session Data : sessionData={}", sessionData);
-        channelUserService.addUserSession(sessionData);
+        log.info("WebSocket init session Data : sessionData={}", userSession);
 
         return true;
     }

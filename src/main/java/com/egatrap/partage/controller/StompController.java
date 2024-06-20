@@ -2,12 +2,10 @@ package com.egatrap.partage.controller;
 
 import com.egatrap.partage.common.aspect.MessagePermission;
 import com.egatrap.partage.constants.MessageType;
-import com.egatrap.partage.model.dto.ChannelCacheDataDto;
 import com.egatrap.partage.model.dto.chat.ChatMessageDto;
 import com.egatrap.partage.model.dto.chat.MessageDto;
 import com.egatrap.partage.model.dto.chat.RequestPlayVideoDto;
 import com.egatrap.partage.model.dto.chat.SendMessageDto;
-import com.egatrap.partage.model.vo.SessionAttributes;
 import com.egatrap.partage.model.vo.UserSession;
 import com.egatrap.partage.service.*;
 import lombok.RequiredArgsConstructor;
@@ -46,37 +44,10 @@ public class StompController {
         return "/ws.html";
     }
 
-    @MessageMapping("/channel.info")
-    public void channelInfo(SimpMessageHeaderAccessor headerAccessor) {
-        SessionAttributes session = new SessionAttributes(headerAccessor);
-        log.debug("Channel info: {}", session.getChannelId());
-
-//        ChannelCacheDataDto channelCacheData = channelService.getChannelCacheData(session.getChannelId());
-
-        // Create channel info data
-//        Map<String, Object> data = new HashMap<>();
-//        data.put("channel", channelService.getChannel(session.getChannelId()));
-//        data.put("playlists", playlistService.getPlaylists(session.getChannelId(), 1, 10));
-//        data.put("currentUsers", channelCacheData.getUsers());
-//        data.put("currentPlayTime", channelCacheData.getCurrentPlayTime());
-//        data.put("isPlaying", channelCacheData.getIsPlaying());
-//        data.put("userRole", channelPermissionService.getChannelRole(session.getChannelId(), session.getUserId()));
-//
-//        log.debug("[data]=[{}]", data);
-//
-//        // Send to user only : channel info
-//        messagingTemplate.convertAndSendToUser(session.getUserId(),
-//                CHANNEL_PREFIX + session.getChannelId(),
-//                SendMessageDto.builder()
-//                        .data(data)
-//                        .type(MessageType.CHANNEL_INFO)
-//                        .build());
-    }
-
     @MessageMapping("/user.chat")
     @MessagePermission(permission = MessageType.USER_CHAT)
     public void sendMessage(SimpMessageHeaderAccessor headerAccessor, @Validated @Payload ChatMessageDto message) {
-        UserSession user = channelUserService.getUserSession(headerAccessor);
+        UserSession user = new UserSession(headerAccessor);
         log.debug("Sending message to channel {}: {}", user.getChannelId(), message.getMessage());
 
         Map<String, Object> data = new HashMap<>();
@@ -92,16 +63,15 @@ public class StompController {
 
     @MessageMapping("/user.join")
     public void addUser(SimpMessageHeaderAccessor headerAccessor, @Payload MessageDto message) {
-        log.debug("user.join");
-        SessionAttributes session = new SessionAttributes(headerAccessor);
-        log.info("User {} joined channel {}", session.getUserId(), session.getChannelId());
+        UserSession user = new UserSession(headerAccessor);
+        log.info("User {} joined channel {}", user.getUserId(), user.getChannelId());
         log.info("SessionId: {}", headerAccessor.getSessionId());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("sender", session.getUserId());
+        data.put("sender", user.getUserId());
         data.put("content", message.getContent());
 
-        messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
                 .type(MessageType.USER_JOIN)
                 .build());
@@ -109,14 +79,14 @@ public class StompController {
 
     @MessageMapping("/user.leave")
     public void leaveUser(SimpMessageHeaderAccessor headerAccessor, @Payload MessageDto message) {
-        SessionAttributes session = new SessionAttributes(headerAccessor);
-        log.info("User {} left channel {}", message.getSender(), session.getChannelId());
+        UserSession user = new UserSession(headerAccessor);
+        log.info("User {} left channel {}", message.getSender(), user.getChannelId());
 
         Map<String, Object> data = new HashMap<>();
         data.put("sender", message.getSender());
         data.put("content", message.getContent());
 
-        messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
                 .type(MessageType.USER_JOIN)
                 .build());
@@ -125,19 +95,19 @@ public class StompController {
     @MessageMapping("/video.play")
     @MessagePermission(permission = MessageType.VIDEO_PLAY)
     public void playVideo(SimpMessageHeaderAccessor headerAccessor, @Payload RequestPlayVideoDto params) {
-        SessionAttributes session = new SessionAttributes(headerAccessor);
+        UserSession user = new UserSession(headerAccessor);
 
         int playTime = channelSessionService.updatePlayTime(
-                session.getChannelId(),
+                user.getChannelId(),
                 params.getPlayTime(),
                 params.isPlaying());
 
         Map<String, Object> data = new HashMap<>();
         data.put("playlistId", params.getPalylistId());
-        data.put("playTime", params.getPlayTime());
+        data.put("playTime", playTime);
         data.put("isPlaying", params.isPlaying());
 
-        messagingTemplate.convertAndSend(CHANNEL_PREFIX + session.getChannelId(), SendMessageDto.builder()
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
                 .type(MessageType.VIDEO_PLAY)
                 .build());

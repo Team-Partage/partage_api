@@ -1,6 +1,6 @@
 package com.egatrap.partage.common.interceptor;
 
-import com.egatrap.partage.model.vo.SessionAttributes;
+import com.egatrap.partage.model.vo.UserSession;
 import com.egatrap.partage.service.ChannelUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +33,9 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        SessionAttributes session = new SessionAttributes(headerAccessor);
-        channelUserService.removeUserSession(session.getSessionId());
-        log.debug("Web socket connection closed. Session ID: {}", session.getSessionId());
+        UserSession session = new UserSession(headerAccessor);
+        channelUserService.removeUserSession(session.getId());
+        log.debug("Web socket connection closed. Session ID: {}", session.getId());
     }
 
 }
