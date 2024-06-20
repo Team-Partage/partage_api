@@ -1,6 +1,5 @@
 package com.egatrap.partage.model.entity;
 
-import com.egatrap.partage.constants.ProfileColorType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -72,6 +71,10 @@ public class UserEntity {
     @OneToMany(mappedBy = "bannedByUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ChannelBanListEntity> bannedByChannels;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<ChannelUserEntity> channelUsers;
 
     @PrePersist
     protected void onCreate() {

@@ -49,6 +49,10 @@ public class ChannelEntity {
     @Column(nullable = false)
     private Integer viewerCount;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "playlist_no")
+    private PlaylistEntity currentPlaylist;
+
     @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ChannelRoleMappingEntity> channelRoleMappings;
@@ -69,6 +73,10 @@ public class ChannelEntity {
     @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<PlaylistEntity> playlists;
+
+    @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<ChannelUserEntity> channelUsers;
 
     @PrePersist
     protected void onCreate() {

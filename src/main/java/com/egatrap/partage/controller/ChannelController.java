@@ -10,6 +10,7 @@ import com.egatrap.partage.service.PlaylistService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -82,18 +83,20 @@ public class ChannelController {
 
     @ApiOperation(value = "채널 상세 정보 조회")
     @GetMapping("/{channelId}")
-    public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId,
-                                                  @Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
-                                                  @Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+    public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId) {
+                                                  //@Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
+                                                  //@Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
 
         ChannelDto channel = channelService.getChannel(channelId);
-        List<ChannelUserDto> channelUsers = channelService.getChannelUsers(channelId);
-        List<PlaylistDto> playlists = playlistService.getPlaylists(channelId, page, pageSize);
+        ChannelUserDto owner =  channelService.getChannelOwner(channelId);
+//        Page<ChannelUserDto> users = channelService.getChannelUsers(channelId, page, pageSize);
+        List<PlaylistDto> playlists = playlistService.getNonePaingPlaylists(channelId);
         ChannelPermissionInfoDto channelPermission = channelService.getChannelPermission(channelId);
 
         ResponseGetChannelDetailInfoDto response = ResponseGetChannelDetailInfoDto.builder()
                 .channel(channel)
-                .channelUsers(channelUsers)
+                .owner(owner)
+//                .users(users)
                 .playlists(playlists)
                 .channelPermissions(channelPermission)
                 .build();
@@ -101,7 +104,6 @@ public class ChannelController {
 
         // ToDo. 추후 추가 예정 (Redis)
         //  - 채팅 정보
-        //  - 현재 플레이중인 영상 정보
     }
 
     @ApiOperation(value = "채널 사용자 권한 수정")
@@ -143,13 +145,23 @@ public class ChannelController {
     }
 
 
-    @ApiOperation(value = "채널 검색")
+    @ApiOperation(value = "채널 검색- 채널명, 해시태그")
     @GetMapping("/search")
     public ResponseEntity<?> searchChannels(@RequestParam(value = "cursor", defaultValue = "1") int cursor,
                                             @RequestParam(value = "perPage", defaultValue = "10") int perPage,
                                             @RequestParam(value = "keyword", required = false) String keyword) {
 
         ResponseSearchChannelsDto response = channelService.getSearchChannels(cursor, perPage, keyword);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "채널 검색 - 해시태그")
+    @GetMapping("/search-by-hashtag")
+    public ResponseEntity<?> searchChannelsByHashtag(@RequestParam(value = "cursor", defaultValue = "1") int cursor,
+                                                     @RequestParam(value = "perPage", defaultValue = "10") int perPage,
+                                                     @RequestParam(value = "keyword", required = false) String keyword) {
+
+        ResponseSearchChannelsDto response = channelService.getSearchChannelsByHashtag(cursor, perPage, keyword);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

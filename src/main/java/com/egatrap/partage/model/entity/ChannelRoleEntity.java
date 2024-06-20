@@ -25,6 +25,10 @@ public class ChannelRoleEntity {
     @ToString.Exclude
     private List<ChannelRoleMappingEntity> channelRoleMappings;
 
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<ChannelUserEntity> channelUsers;
+
     public ChannelRoleEntity(ChannelRoleType roleType) {
         this.roleId = roleType.getROLE_ID();
         this.roleName = roleType.name();
