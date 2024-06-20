@@ -3,6 +3,7 @@ package com.egatrap.partage.model.entity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -13,16 +14,14 @@ import javax.persistence.*;
 @Table(name = "tb_channel_user")
 public class ChannelUserEntity {
 
-    @EmbeddedId
-    private ChannelUserId id;
+    @Id
+    private String sessionId;
 
-    @MapsId("channelId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "channel_id")
     @ToString.Exclude
     private ChannelEntity channel;
 
-    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @ToString.Exclude
@@ -34,12 +33,11 @@ public class ChannelUserEntity {
     private ChannelRoleEntity role;
 
     @Column(nullable = false)
-    private String sessionId;
-
-    @Column(nullable = false)
     private Boolean isOnline;
 
-    public void updateChannelRoleEntity(ChannelRoleEntity channelRoleEntity) {
-        this.role = channelRoleEntity;
-    }
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createAt;
+
+    @Column(nullable = false)
+    private LocalDateTime lastAccessAt;
 }
