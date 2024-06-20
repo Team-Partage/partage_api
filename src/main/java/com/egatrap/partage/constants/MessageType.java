@@ -9,7 +9,7 @@ public enum MessageType {
 
     CHANNEL_INFO(10), // 채널 정보
     CHANNEL_VIEWER(11), // 채널 시청자 수
-    VIDEO_CURRENT(12), // 현재 재생중인 비디오 시간
+    VIDEO_TIME(12), // 현재 재생중인 비디오 시간
 
     USER_CHAT(20), // 채팅 메시지
     USER_JOIN(21), // 사용자 입장 알림

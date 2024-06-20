@@ -54,7 +54,7 @@ public class MessageScheduler {
                 int currentPlayTime = channelSessionService.getPlayTime(channel);
                 messagingTemplate.convertAndSend(CHANNEL_PREFIX + channel.getId(), SendMessageDto.builder()
                         .data(currentPlayTime)
-                        .type(MessageType.VIDEO_CURRENT)
+                        .type(MessageType.VIDEO_TIME)
                         .build());
             }
         }
