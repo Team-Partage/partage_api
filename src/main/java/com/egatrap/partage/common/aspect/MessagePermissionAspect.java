@@ -64,8 +64,8 @@ public class MessagePermissionAspect {
 
             // Layer 2
             case VIDEO_PLAY -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoPlay().getROLE_PRIORITY();
-            case VIDEO_SEEK -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoSeek().getROLE_PRIORITY();
-            case VIDEO_SKIP -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoSkip().getROLE_PRIORITY();
+//            case VIDEO_SEEK -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoSeek().getROLE_PRIORITY();
+//            case VIDEO_SKIP -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoSkip().getROLE_PRIORITY();
 
             // Layer 3
             case PLAYLIST_ADD -> userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistAdd().getROLE_PRIORITY();
@@ -74,7 +74,7 @@ public class MessagePermissionAspect {
             case PLAYLIST_MOVE -> userRole.getROLE_PRIORITY() <= channelPermission.getPlaylistMove().getROLE_PRIORITY();
 
             // Layer 4
-            case USER_BAN -> userRole.getROLE_PRIORITY() <= channelPermission.getBan().getROLE_PRIORITY();
+//            case USER_BAN -> userRole.getROLE_PRIORITY() <= channelPermission.getBan().getROLE_PRIORITY();
 
             default -> false;
         };

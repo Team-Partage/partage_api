@@ -83,20 +83,20 @@ public class ChannelController {
 
     @ApiOperation(value = "채널 상세 정보 조회")
     @GetMapping("/{channelId}")
-    public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId,
-                                                  @Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
-                                                  @Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+    public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId) {
+                                                  //@Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
+                                                  //@Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
 
         ChannelDto channel = channelService.getChannel(channelId);
         ChannelUserDto owner =  channelService.getChannelOwner(channelId);
-        Page<ChannelUserDto> users = channelService.getChannelUsers(channelId, page, pageSize);
+//        Page<ChannelUserDto> users = channelService.getChannelUsers(channelId, page, pageSize);
         List<PlaylistDto> playlists = playlistService.getNonePaingPlaylists(channelId);
         ChannelPermissionInfoDto channelPermission = channelService.getChannelPermission(channelId);
 
         ResponseGetChannelDetailInfoDto response = ResponseGetChannelDetailInfoDto.builder()
                 .channel(channel)
                 .owner(owner)
-                .users(users)
+//                .users(users)
                 .playlists(playlists)
                 .channelPermissions(channelPermission)
                 .build();
