@@ -4,14 +4,10 @@ package com.egatrap.partage.service;
 import com.egatrap.partage.common.util.CodeGenerator;
 import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.model.dto.ChannelSessionDto;
-import com.egatrap.partage.model.entity.ChannelSessionEntity;
-import com.egatrap.partage.model.entity.UserEntity;
-import com.egatrap.partage.model.entity.UserSessionEntity;
+import com.egatrap.partage.model.dto.CountViewerDto;
+import com.egatrap.partage.model.entity.*;
 import com.egatrap.partage.model.vo.UserSession;
-import com.egatrap.partage.repository.ChannelSessionRepository;
-import com.egatrap.partage.repository.ChannelUserRepository;
-import com.egatrap.partage.repository.UserRepository;
-import com.egatrap.partage.repository.UserSessionRepository;
+import com.egatrap.partage.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -21,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -32,8 +29,40 @@ public class ChannelUserService {
     private final UserSessionRepository userSessionRepository;
     private final ChannelUserRepository channelUserRepository;
     private final ChannelSessionRepository channelSessionRepository;
+    private final ChannelRepository channelRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+
+    @Transactional
+    public UserSession joinUser(String channelId, String userId) {
+        ChannelUserId channelUserId = new ChannelUserId(channelId, userId);
+        ChannelUserEntity user = channelUserRepository.findById(channelUserId).orElse(null);
+        log.debug("[userEntitiy]=[{}]", user);
+        log.debug("User joined to channel: channelId={}, userId={}", channelId, userId);
+        if (user != null) {
+            user.increaseOnlineCount();
+            user.updateLastAccessAt();
+            channelUserRepository.save(user);
+            return new UserSession(user);
+        } else {
+            return addUserSession(userId, channelId);
+        }
+    }
+
+    @Transactional
+    public void leaveUser(String channelId, String userId) {
+        ChannelUserId channelUserId = new ChannelUserId(channelId, userId);
+
+        // Optional을 사용하여 null 체크 개선
+        Optional<ChannelUserEntity> userOptional = channelUserRepository.findById(channelUserId);
+
+        // ifPresent를 사용하여 user가 존재할 때만 로직 실행
+        userOptional.ifPresent(user -> {
+            user.decreaseOnlineCount();
+            channelUserRepository.save(user);
+            log.debug("User removed from channel: channelId={}, userId={}", channelId, userId);
+        });
+    }
 
     public UserSession addUserSession(String userId, String channelId) {
         return addUserSession(userId, channelId, ChannelRoleType.ROLE_VIEWER);
@@ -66,7 +95,7 @@ public class ChannelUserService {
                     channelId,
                     userId,
                     channelRole.getROLE_ID(),
-                    true,
+                    1L,
                     now,
                     now);
         }
@@ -87,7 +116,7 @@ public class ChannelUserService {
         userSessionRepository.deleteById(sessionId);
     }
 
-    public UserSession getUserSession(String sessionId, String channelId, String userId) {
+    public UserSession getUserSession(String sessionId) {
         UserSessionEntity userSessionEntity = userSessionRepository.findById(sessionId).orElse(null);
 
         if (userSessionEntity == null) {
@@ -137,34 +166,82 @@ public class ChannelUserService {
                 .id(channelId)
                 .isPlaying(false)
                 .playTime(0)
+                .updateTime(LocalDateTime.now())
                 .lastAccessTime(LocalDateTime.now())
                 .build());
     }
 
-    public long countUserByChannel(String channelId) {
+    public CountViewerDto countUserByChannel(String channelId) {
         Iterable<UserSessionEntity> users = userSessionRepository.findAllByChannelId(channelId);
-        return StreamSupport.stream(users.spliterator(), false).count();
+
+        // 채널 사용자 수 조회 : 로그인 사용자 수 (중복 접속은 1명으로 처리)
+        long loginUsers = channelUserRepository
+                .countById_ChannelIdAndOnlineCountGreaterThan(channelId, 0);
+
+        // 채널 사용자 수 조회 : 비회원 사용자 수
+        long anonymousUsers = StreamSupport.stream(users.spliterator(), false).count();
+
+        return new CountViewerDto(loginUsers, anonymousUsers);
     }
 
-    public long removeNoneUserChannel() {
-        Iterable<ChannelSessionEntity> channelSessionEntities = channelSessionRepository.findAll();
-        long removedChannel = 0;
-        for (ChannelSessionEntity channelSessionEntity : channelSessionEntities) {
-            Iterable<UserSessionEntity> users = userSessionRepository.findAllByChannelId(channelSessionEntity.getId());
-            Stream<UserSessionEntity> userStream = StreamSupport.stream(users.spliterator(), false);
+    /**
+     * 채널 조회수 동기화 : 레디스에 생성된 유저세선을 이용해 조회수를 동기화
+     * @return 동기화 된 채널 수
+     */
+    public long syncChannelViewerCount() {
 
-            if (userStream.findAny().isEmpty()) {
-                log.info("Remove Channel : {}", channelSessionEntity.getId());
-                channelSessionRepository.deleteById(channelSessionEntity.getId());
-                removedChannel++;
+        long updatedChannel = 0;
+
+        // 시청자 수가 1이상이 채널 조회
+        List<ChannelEntity> channels = channelRepository.findByViewerCountGreaterThan(0);
+
+        // 기존 채널에 저장된 시청자 수와 현재 시청자 수가 다른 경우 동기화
+        for (ChannelEntity channel : channels) {
+//            Iterable<UserSessionEntity> users = userSessionRepository.findAllByChannelId(channel.getChannelId());
+            long viewerCount = countUserByChannel(channel.getChannelId()).getTotalUsers();
+            if (channel.getViewerCount() != viewerCount) {
+                channel.setViewerCount(Integer.parseInt(String.valueOf(viewerCount))); // long 으로 수정
+                channelRepository.save(channel);
+                updatedChannel++;
             }
         }
 
-        return removedChannel;
+        // 캐싱된 채널에 대한 시청자 수 동기화
+        Iterable<ChannelSessionEntity> channelSessions = channelSessionRepository.findAll();
+        for (ChannelSessionEntity channelSession : channelSessions) {
+            long viewerCount = countUserByChannel(channelSession.getId()).getTotalUsers();
+
+            ChannelEntity channel = channelRepository.findById(channelSession.getId()).orElse(null);
+            if (channel != null && channel.getViewerCount() != viewerCount) {
+                channel.setViewerCount(Integer.parseInt(String.valueOf(viewerCount))); // long 으로 수정
+                channelRepository.save(channel);
+                updatedChannel++;
+            }
+        }
+
+        return updatedChannel;
     }
 
+//    public long removeNoneUserChannel() {
+//        Iterable<ChannelSessionEntity> channelSessionEntities = channelSessionRepository.findAll();
+//        long removedChannel = 0;
+//        for (ChannelSessionEntity channelSessionEntity : channelSessionEntities) {
+//            Iterable<UserSessionEntity> users = userSessionRepository.findAllByChannelId(channelSessionEntity.getId());
+//            Stream<UserSessionEntity> userStream = StreamSupport.stream(users.spliterator(), false);
+//
+//            if (userStream.findAny().isEmpty()) {
+//                log.info("Remove Channel : {}", channelSessionEntity.getId());
+//                channelSessionRepository.deleteById(channelSessionEntity.getId());
+//                removedChannel++;
+//            }
+//        }
+//        return removedChannel;
+//    }
+
     public long countUser() {
-        return userSessionRepository.count();
+        // 채널 사용자 수 조회 : 로그인 사용자 수 (중복 접속은 1명으로 처리)
+        long loginUsers = channelUserRepository.countByOnlineCountGreaterThan(0);
+        return userSessionRepository.count() + loginUsers;
     }
 
     public long countChannel() {

@@ -34,7 +34,7 @@ public class WebSocketEventListener {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         UserSession session = new UserSession(headerAccessor);
-        channelUserService.removeUserSession(session.getId());
+        channelUserService.leaveUser(session.getChannelId(), session.getUserId());
         log.debug("Web socket connection closed. Session ID: {}", session.getId());
     }
 

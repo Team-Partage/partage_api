@@ -77,7 +77,7 @@ public class MessageScheduler {
      */
     @Scheduled(fixedRate = 30000)
     public void syncChannelViewerCount() {
-        long updatedChannel = channelService.syncChannelViewerCount();
+        long updatedChannel = channelUserService.syncChannelViewerCount();
         log.info(">> Sync Channel Viewer Count : {}", updatedChannel);
     }
 
@@ -85,10 +85,10 @@ public class MessageScheduler {
      * 비활성화된 채널 제거
      * 5분마다 실행
      */
-    @Scheduled(fixedRate = 300000)
-    public void removeInactiveChannel() {
-        long removedChannel = channelUserService.removeNoneUserChannel();
-        log.info(">> Remove Inactive Channel : {}", removedChannel);
-    }
+//    @Scheduled(fixedRate = 300000)
+//    public void removeInactiveChannel() {
+//        long removedChannel = channelUserService.removeNoneUserChannel();
+//        log.info(">> Remove Inactive Channel : {}", removedChannel);
+//    }
 
 }

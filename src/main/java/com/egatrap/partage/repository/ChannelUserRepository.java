@@ -3,17 +3,23 @@ package com.egatrap.partage.repository;
 import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.model.entity.ChannelUserEntity;
 import com.egatrap.partage.model.entity.ChannelUserId;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Repository
 public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, ChannelUserId> {
+
+//      Pessimistic Locking
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({@QueryHint(name = "javax.persistence.lock.timeout", value = "3000")})
+    Optional<ChannelUserEntity> findById(ChannelUserId id);
 
     /**
      * 채널 사용자 정보 저장
@@ -33,7 +39,7 @@ public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, 
                     "    channel_id, " +
                     "    user_id, " +
                     "    role_id, " +
-                    "    is_online, " +
+                    "    online_count, " +
                     "    create_at, " +
                     "    last_access_at" +
                     ") VALUES (" +
@@ -41,7 +47,7 @@ public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, 
                     "    :channelId, " +
                     "    :userId, " +
                     "    :roleId, " +
-                    "    :isOnline, " +
+                    "    :onlineCount, " +
                     "    :createAt, " +
                     "    :lastAccessAt" +
                     ")",
@@ -52,9 +58,12 @@ public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, 
             @Param("channelId") String channelId,
             @Param("userId") String userId,
             @Param("roleId") String roleId,
-            @Param("isOnline") Boolean isOnline,
+            @Param("onlineCount") Long onlineCount,
             @Param("createAt") LocalDateTime createAt,
             @Param("lastAccessAt") LocalDateTime lastAccessAt
     );
 
+    long countById_ChannelIdAndOnlineCountGreaterThan(String channelId, long onlineCount);
+
+    long countByOnlineCountGreaterThan(long onlineCount);
 }

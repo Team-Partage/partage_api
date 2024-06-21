@@ -38,11 +38,23 @@ public class ChannelUserEntity {
     private String sessionId;
 
     @Column(nullable = false)
-    private Integer onlineCount;
+    private Long onlineCount;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createAt;
 
     @Column(nullable = false)
     private LocalDateTime lastAccessAt;
+
+    public void increaseOnlineCount() {
+        this.onlineCount++;
+    }
+
+    public void decreaseOnlineCount() {
+        this.onlineCount = Math.max(0, this.onlineCount - 1);
+    }
+
+    public void updateLastAccessAt() {
+        this.lastAccessAt = LocalDateTime.now();
+    }
 }
