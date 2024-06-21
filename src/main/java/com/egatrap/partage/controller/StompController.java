@@ -2,10 +2,7 @@ package com.egatrap.partage.controller;
 
 import com.egatrap.partage.common.aspect.MessagePermission;
 import com.egatrap.partage.constants.MessageType;
-import com.egatrap.partage.model.dto.chat.ChatMessageDto;
-import com.egatrap.partage.model.dto.chat.MessageDto;
-import com.egatrap.partage.model.dto.chat.RequestPlayVideoDto;
-import com.egatrap.partage.model.dto.chat.SendMessageDto;
+import com.egatrap.partage.model.dto.chat.*;
 import com.egatrap.partage.model.vo.UserSession;
 import com.egatrap.partage.service.*;
 import lombok.RequiredArgsConstructor;
@@ -92,26 +89,40 @@ public class StompController {
                 .build());
     }
 
-    @MessageMapping("/video.play")
-    @MessagePermission(permission = MessageType.VIDEO_PLAY)
-    public void playVideo(SimpMessageHeaderAccessor headerAccessor, @Payload RequestPlayVideoDto params) {
+    @MessageMapping("/video.move")
+    @MessagePermission(permission = MessageType.VIDEO_MOVE)
+    public void playVideo(SimpMessageHeaderAccessor headerAccessor, @Payload RequestMoveVideoDto params) {
         UserSession user = new UserSession(headerAccessor);
 
-        int playTime = channelSessionService.updatePlayTime(
-                user.getChannelId(),
-                params.getPlayTime(),
-                params.isPlaying());
+        int playtime = channelSessionService.updatePlayTime(user.getChannelId(), params.getPlaytime());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("playlistId", params.getPalylistId());
-        data.put("playTime", playTime);
-        data.put("isPlaying", params.isPlaying());
+        data.put("playlistId", params.getPlaylistId());
+        data.put("playtime", playtime);
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
                 .type(MessageType.VIDEO_PLAY)
                 .build());
     }
+
+    @MessageMapping("/video.play")
+    @MessagePermission(permission = MessageType.VIDEO_PLAY)
+    public void playVideo(SimpMessageHeaderAccessor headerAccessor, @Payload RequestPlayVideoDto params) {
+        UserSession user = new UserSession(headerAccessor);
+
+        channelSessionService.updatePlayStatus(user.getChannelId(), params.isPlaying());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("playlistId", params.getPlaylistId());
+        data.put("playing", params.isPlaying());
+
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
+                .data(data)
+                .type(MessageType.VIDEO_PLAY)
+                .build());
+    }
+
 
     //    ###################################################################################
     //                                      TEST CODE
