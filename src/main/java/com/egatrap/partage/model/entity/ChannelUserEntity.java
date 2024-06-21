@@ -14,16 +14,18 @@ import java.time.LocalDateTime;
 @Table(name = "tb_channel_user")
 public class ChannelUserEntity {
 
-    @Id
-    private String sessionId;
+    @EmbeddedId
+    private ChannelUserId id;
 
+    @MapsId("channelId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "channel_id")
+    @JoinColumn(name = "channel_id", insertable = false, updatable = false)
     @ToString.Exclude
     private ChannelEntity channel;
 
+    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     @ToString.Exclude
     private UserEntity user;
 
@@ -33,7 +35,10 @@ public class ChannelUserEntity {
     private ChannelRoleEntity role;
 
     @Column(nullable = false)
-    private Boolean isOnline;
+    private String sessionId;
+
+    @Column(nullable = false)
+    private Integer onlineCount;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createAt;

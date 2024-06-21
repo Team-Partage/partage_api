@@ -2,6 +2,7 @@ package com.egatrap.partage.repository;
 
 import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.model.entity.ChannelUserEntity;
+import com.egatrap.partage.model.entity.ChannelUserId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Repository
-public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, String> {
+public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, ChannelUserId> {
 
     /**
      * 채널 사용자 정보 저장
