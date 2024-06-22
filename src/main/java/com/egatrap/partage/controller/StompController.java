@@ -133,11 +133,10 @@ public class StompController {
 
         String channelId = "C-1cd8996b9b3946b9b54e5c65c20916";
 
-        int playTime = channelSessionService.updatePlayTime(channelId, params.getPlayTime(), params.isPlaying());
+        channelSessionService.updatePlayStatus(channelId, params.isPlaying());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("playlistId", params.getPalylistId());
-        data.put("playTime", playTime);
+        data.put("playlistId", params.getPlaylistId());
         data.put("isPlaying", params.isPlaying());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + channelId, SendMessageDto.builder()
