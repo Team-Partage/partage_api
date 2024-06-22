@@ -150,7 +150,7 @@ public class StompController {
     public ResponseEntity<?> testPlaVideo(@Validated @RequestBody RequestPlayVideoDto params) {
         log.debug("RequestPlayVideoDto: {}", params);
 
-        String channelId = "C-3e270b0a697e45d8b083414968437e";
+        String channelId = "C-1cd8996b9b3946b9b54e5c65c20916";
 
         int playTime = channelSessionService.updatePlayTime(channelId, params.getPlayTime(), params.isPlaying());
 
