@@ -25,7 +25,6 @@ public class ChannelPermissionService {
     private final ChannelPermissionRepository channelPermissionRepository;
     private final ChannelRepository channelRepository;
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
 
     /**
      * Get channel permission

@@ -5,13 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Min;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RequestPlayVideoDto {
+public class RequestMoveVideoDto {
     private String playlistId;
-    private boolean playing;
+    private int playtime;
 }

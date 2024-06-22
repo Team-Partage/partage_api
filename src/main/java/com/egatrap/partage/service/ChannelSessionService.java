@@ -18,13 +18,22 @@ public class ChannelSessionService {
 
     private final ChannelSessionRepository channelSessionRepository;
 
-    public int updatePlayTime(String channelId, int playTime, boolean isPlaying) {
+    public void updatePlayStatus(String channelId, boolean isPlaying) {
+        ChannelSessionEntity channelSession = channelSessionRepository.findById(channelId)
+                .orElseThrow(() -> new IllegalArgumentException("Channel not found. channelId: " + channelId));
+
+        channelSession.setPlaying(isPlaying);
+        channelSession.setUpdateTime(LocalDateTime.now());
+
+        channelSessionRepository.save(channelSession);
+    }
+
+    public int updatePlayTime(String channelId, int playTime) {
         ChannelSessionEntity channelSession = channelSessionRepository.findById(channelId)
                 .orElseThrow(() -> new IllegalArgumentException("Channel not found. channelId: " + channelId));
 
         channelSession.setPlayTime(playTime);
         channelSession.setUpdateTime(LocalDateTime.now());
-        channelSession.setPlaying(isPlaying);
 
         channelSessionRepository.save(channelSession);
 
