@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class PlaylistController {
 
     private final PlaylistService playlistService;
-    private static final String VIDEO_ID_PATTERN = "^[a-zA-Z0-9_-]{11}$";
+    public static final String VIDEO_ID_PATTERN = "^[a-zA-Z0-9_-]{11}$";
 
     @ApiOperation(value = "플레이리스트 추가")
     @PostMapping(value = "", produces = "application/json")

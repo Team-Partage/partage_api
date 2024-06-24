@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestPlaylistDto {
-    private String playlistId;
+    private Long playlistNo;
 }

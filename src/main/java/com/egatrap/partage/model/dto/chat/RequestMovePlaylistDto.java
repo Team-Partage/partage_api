@@ -5,10 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestMovePlaylistDto {
-    private String playlistId;
+
+    @NotBlank
+    private Long playlistNo;
+
+    @Min(0)
     private int sequence;
 }

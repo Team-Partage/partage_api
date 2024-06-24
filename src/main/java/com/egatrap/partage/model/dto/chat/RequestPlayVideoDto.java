@@ -12,6 +12,6 @@ import javax.validation.constraints.Min;
 @AllArgsConstructor
 @Builder
 public class RequestPlayVideoDto {
-    private String playlistId;
+    private Long playlistNo;
     private boolean playing;
 }

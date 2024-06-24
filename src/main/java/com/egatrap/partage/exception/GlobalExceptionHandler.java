@@ -1,11 +1,16 @@
 package com.egatrap.partage.exception;
 
+import com.egatrap.partage.constants.MessageType;
+import com.egatrap.partage.controller.StompController;
 import com.egatrap.partage.model.dto.ErrorMessageDto;
+import com.egatrap.partage.model.dto.chat.SendMessageDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,7 +21,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     //    +------------------------------------------------------------------+
     //    |                        4xx Client Errors                         |
@@ -121,6 +129,27 @@ public class GlobalExceptionHandler {
     //    +------------------------------------------------------------------+
     //    |                        5xx Server Errors                         |
     //    +------------------------------------------------------------------+
+
+    @ExceptionHandler(SendMessageException.class)
+    public void handleException(SendMessageException e) {
+        log.error(e.getMessage(), e);
+
+        String channelId = e.getChannelId();
+
+        // 에러 메시지
+        ErrorMessageDto error = ErrorMessageDto.builder()
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message(e.getMessage())
+                .build();
+
+        messagingTemplate.convertAndSend(StompController.CHANNEL_PREFIX + channelId, SendMessageDto.builder()
+                .data(error)
+                .type(MessageType.ERROR_SERVER)
+                .build());
+    }
+
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleException(RuntimeException e) {
         log.error(e.getMessage(), e);

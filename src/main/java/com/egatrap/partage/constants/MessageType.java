@@ -24,6 +24,9 @@ public enum MessageType {
 
     ROLE_CHANGE(40), // 권한 변경
 
+    ERROR_SERVER(90), // 서버 오류
+    ERROR_CLIENT(91), // 클라이언트 오류
+
     NONE(0); // 기본
 
     private final long id;

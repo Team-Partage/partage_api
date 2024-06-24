@@ -11,6 +11,10 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class ChatMessageDto {
 
+    private String nickname;
+
+    private String profile;
+
     @NotBlank
     private String message;
 

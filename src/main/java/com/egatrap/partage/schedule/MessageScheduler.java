@@ -62,9 +62,9 @@ public class MessageScheduler {
 
     /**
      * 채널의 세션 수를 모니터링
-     * 10초마다 실행
+     * 1분마다 실행
      */
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 60000)
     public void ChannelMonitoring() {
         long channels = channelUserService.countChannel();
         long users = channelUserService.countUser();
@@ -73,9 +73,9 @@ public class MessageScheduler {
 
     /**
      * 채널의 시청자 수를 실시간으로 동기화
-     * 30초마다 실행
+     * 10분마다 실행
      */
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 600000)
     public void syncChannelViewerCount() {
         long updatedChannel = channelUserService.syncChannelViewerCount();
         log.info(">> Sync Channel Viewer Count : {}", updatedChannel);

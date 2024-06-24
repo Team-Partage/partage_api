@@ -42,7 +42,7 @@ public class PlaylistService {
     private final Gson gson;
 
     @Transactional(rollbackFor = Exception.class, timeout = 10)
-    public void addPlaylist(String channelId, String videoId) throws GeneralSecurityException, IOException {
+    public PlaylistDto addPlaylist(String channelId, String videoId) throws GeneralSecurityException, IOException {
         VideoListResponse response;
 
 //        채널 플레이리스트 조회
@@ -74,6 +74,8 @@ public class PlaylistService {
 
         // 플레이리스트 저장
         playlistRepository.save(playlistEntity);
+
+        return modelMapper.map(playlistEntity, PlaylistDto.class);
     }
 
     public long getTotalPlaylist(String channelId) {
