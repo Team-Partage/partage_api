@@ -5,6 +5,7 @@ import com.egatrap.partage.constants.ResponseType;
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
+import com.egatrap.partage.service.ChannelPermissionService;
 import com.egatrap.partage.service.ChannelService;
 import com.egatrap.partage.service.PlaylistService;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +29,7 @@ import java.util.List;
 public class ChannelController {
 
     private final ChannelService channelService;
+    private final ChannelPermissionService channelPermissionService;
     private final PlaylistService playlistService;
 
     @ApiOperation(value = "채널 생성")
@@ -44,6 +46,13 @@ public class ChannelController {
 
         // 채널 생성 및 채널 권한 설정 정보 생성
         ResponseCreateChannelDto responseCreateChannelDto = channelService.createChannel(params, userId);
+
+        // 업데이트된 채널 권한 설정 (채널 매핑 디비 사용 X)
+        channelPermissionService.createChannelRole(
+                responseCreateChannelDto.getChannel().getChannelId(),
+                userId,
+                ChannelRoleType.ROLE_OWNER);
+
         return new ResponseEntity<>(responseCreateChannelDto, HttpStatus.OK);
     }
 
@@ -84,11 +93,11 @@ public class ChannelController {
     @ApiOperation(value = "채널 상세 정보 조회")
     @GetMapping("/{channelId}")
     public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId) {
-                                                  //@Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
-                                                  //@Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        //@Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
+        //@Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
 
         ChannelDto channel = channelService.getChannel(channelId);
-        ChannelUserDto owner =  channelService.getChannelOwner(channelId);
+        ChannelUserDto owner = channelService.getChannelOwner(channelId);
 //        Page<ChannelUserDto> users = channelService.getChannelUsers(channelId, page, pageSize);
         List<PlaylistDto> playlists = playlistService.getNonePaingPlaylists(channelId);
         ChannelPermissionInfoDto channelPermission = channelService.getChannelPermission(channelId);

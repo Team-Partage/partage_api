@@ -18,4 +18,6 @@ public interface PlaylistRepository extends JpaRepository<PlaylistEntity, Long> 
     List<PlaylistEntity> findAllByChannel_ChannelIdAndIsActiveOrderBySequence(String channelId, boolean isActive);
 
     Optional<PlaylistEntity> findFirstByChannel_ChannelIdAndIsActiveAndSequence(String channelId, boolean isActive, int sequence);
+
+    boolean existsByChannel_ChannelIdAndPlaylistNoAndIsActive(String channelId, Long playlistNo, boolean b);
 }

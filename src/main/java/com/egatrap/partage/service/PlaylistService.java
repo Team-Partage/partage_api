@@ -154,6 +154,10 @@ public class PlaylistService {
         }
     }
 
+    public boolean isExistPlaylist(String channelId, Long playlistNo) {
+        return playlistRepository.existsByChannel_ChannelIdAndPlaylistNoAndIsActive(channelId, playlistNo, true);
+    }
+
     private Video getVideoById(String id) {
         try {
             YouTube client = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)

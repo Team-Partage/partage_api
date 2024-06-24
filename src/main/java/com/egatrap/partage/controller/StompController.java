@@ -2,6 +2,7 @@ package com.egatrap.partage.controller;
 
 import com.egatrap.partage.common.aspect.MessagePermission;
 import com.egatrap.partage.constants.MessageType;
+import com.egatrap.partage.exception.SendMessageException;
 import com.egatrap.partage.model.dto.PlaylistDto;
 import com.egatrap.partage.model.dto.chat.*;
 import com.egatrap.partage.model.vo.UserSession;
@@ -133,7 +134,7 @@ public class StompController {
 
 //        비디오 아이디 추출
         if (!url.startsWith("https://www.youtube.com/"))
-            throw new IllegalArgumentException("Invalid URL : Not Youtube URL");
+            throw new SendMessageException("Invalid URL : Not Youtube URL", user.getChannelId());
 
         // URL에서 비디오 아이디 추출 (유튜브)
         Pattern pattern = Pattern.compile(PlaylistController.VIDEO_ID_PATTERN);
@@ -148,7 +149,7 @@ public class StompController {
 
         // 비디오 아이디가 없으면 URL이 잘못된 것으로 판단 후 에러 메시지 반환
         if (videoId == null)
-            throw new IllegalArgumentException("Invalid URL : Not Found Video ID");
+            throw new SendMessageException("Invalid URL : Not Youtube URL", user.getChannelId());
         log.debug("[videoId]=[{}]", videoId);
 
         // 플레이리스트 추가
@@ -165,6 +166,10 @@ public class StompController {
     public void movePlaylist(SimpMessageHeaderAccessor headerAccessor, @Payload RequestMovePlaylistDto params)
             throws Exception {
         UserSession user = new UserSession(headerAccessor);
+
+        if (!playlistService.isExistPlaylist(user.getChannelId(), params.getPlaylistNo())) {
+            throw new SendMessageException("Playlist not found. playlistNo=" + params.getPlaylistNo(), user.getChannelId());
+        }
 
         playlistService.movePlaylist(params.getPlaylistNo(), params.getSequence());
 
