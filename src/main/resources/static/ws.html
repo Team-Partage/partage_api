@@ -27,10 +27,20 @@
                 <div id="chatWindow" class="border w-full p-4 h-80 overflow-y-scroll mb-4 rounded bg-gray-50"></div>
                 <div id="sysWindow" class="border w-full p-4 h-80 overflow-y-scroll mb-4 rounded bg-gray-50"></div>
             </div>
-            <div class="flex">
+            <div class="flex mb-4">
                 <input id="messageInput" type="text" placeholder="Enter your message"
                     class="border p-2 flex-grow rounded-l" />
                 <button id="sendBtn" class="bg-green-500 text-white p-2 rounded-r">Send</button>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg">
+                <div class="mb-4">
+                    <input id="stompEndpoint" type="text" placeholder="Enter STOMP endpoint"
+                        class="border p-2 w-full rounded mb-2" />
+                    <textarea id="stompPayload" placeholder="Enter JSON payload"
+                        class="border p-2 w-full rounded mb-2"></textarea>
+                    <button id="sendStompMessageBtn" class="bg-blue-500 text-white p-2 rounded w-full">Send STOMP
+                        Message</button>
+                </div>
             </div>
         </div>
     </div>
@@ -106,37 +116,41 @@
             }
         }
 
+        function sendStompMessage() {
+            const stompEndpoint = document.getElementById('stompEndpoint').value.trim();
+            const stompPayload = document.getElementById('stompPayload').value.trim();
+
+            if (stompEndpoint && stompPayload && stompClient) {
+                try {
+                    const payloadObject = JSON.parse(stompPayload);
+                    stompClient.send(stompEndpoint, {}, JSON.stringify(payloadObject));
+                    console.log(`STOMP message sent successfully : ${stompEndpoint}`, payloadObject);
+                    // alert('STOMP message sent successfully');
+                } catch (error) {
+                    alert('Invalid JSON payload: ' + error);
+                }
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+
         function showMessage(message) {
             const chatWindow = document.getElementById('chatWindow');
             const sysWindow = document.getElementById('sysWindow');
             const messageElement = document.createElement('div');
             messageElement.className = 'message p-2 mb-2 rounded bg-gray-200';
 
-            // if (message.type === 'JOIN') {
-            //     messageElement.innerText = `[${message?.data?.sender} joined the channel]`;
-            //     messageElement.classList.add('text-green-500');
-            // } else if (message.type === 'LEAVE') {
-            //     messageElement.innerText = `[${message?.data?.sender} left the channel]`;
-            //     messageElement.classList.add('text-red-500');
-            // } else if (message.type === 'CHAT') {
-            //     messageElement.innerText = `[${message.type}]: ${message.data}`;
-            // } else {
-            //     messageElement.innerText = JSON.stringify(message);
-            // }
-
             if (message.type === 'USER_JOIN') {
-                messageElement.innerText = `[${message.sender} joined the channel]`;
+                messageElement.innerText = `[${message.data.user_id} joined the channel]`;
                 messageElement.classList.add('text-green-500');
             } else if (message.type === 'USER_LEAVE') {
-                messageElement.innerText = `[${message.sender} left the channel]`;
+                messageElement.innerText = `[${message.data.user_id} left the channel]`;
                 messageElement.classList.add('text-red-500');
             } else if (message.type === 'USER_CHAT') {
-                messageElement.innerText = `[${message.sender}]: ${message.content}`;
+                messageElement.innerText = `[${message.data.user_id}]: ${message.data.message}`;
             } else {
                 messageElement.innerText = JSON.stringify(message);
             }
-
-            messageElement.innerText = JSON.stringify(message);
 
             if (['USER_JOIN', 'USER_LEAVE', 'USER_CHAT'].includes(message.type)) {
                 chatWindow.appendChild(messageElement);
@@ -162,8 +176,8 @@
             sendMessage();
         });
 
-        document.getElementById('channelInfoBtn').addEventListener('click', () => {
-            getChannelInfo();
+        document.getElementById('sendStompMessageBtn').addEventListener('click', () => {
+            sendStompMessage();
         });
 
         document.getElementById('messageInput').addEventListener('keypress', (e) => {

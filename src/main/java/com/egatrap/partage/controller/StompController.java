@@ -6,6 +6,7 @@ import com.egatrap.partage.model.dto.PlaylistDto;
 import com.egatrap.partage.model.dto.chat.*;
 import com.egatrap.partage.model.vo.UserSession;
 import com.egatrap.partage.service.*;
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ public class StompController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChannelSessionService channelSessionService;
     private final PlaylistService playlistService;
+    private final Gson gson;
 
     public static final String CHANNEL_PREFIX = "/channel/";
 
@@ -47,11 +49,12 @@ public class StompController {
         UserSession user = new UserSession(headerAccessor);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("userId", user.getUserId());
+        data.put("user_id", user.getUserId());
         data.put("nickname", message.getNickname());
         data.put("profile", message.getProfile());
         data.put("message", message.getMessage());
         data.put("sendTime", LocalDateTime.now());
+        log.debug("data: {}", data);
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
@@ -64,7 +67,7 @@ public class StompController {
         UserSession user = new UserSession(headerAccessor);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("userId", user.getUserId());
+        data.put("user_id", user.getUserId());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
@@ -77,7 +80,7 @@ public class StompController {
         UserSession user = new UserSession(headerAccessor);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("userId", user.getUserId());
+        data.put("user_id", user.getUserId());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
@@ -93,7 +96,7 @@ public class StompController {
         int playtime = channelSessionService.updatePlayTime(user.getChannelId(), params.getPlaytime());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("playlistNo", params.getPlaylistNo());
+        data.put("playlist_no", params.getPlaylistNo());
         data.put("playtime", playtime);
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
@@ -110,7 +113,7 @@ public class StompController {
         channelSessionService.updatePlayStatus(user.getChannelId(), params.isPlaying());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("playlistNo", params.getPlaylistNo());
+        data.put("playlist_no", params.getPlaylistNo());
         data.put("playing", params.isPlaying());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
@@ -152,7 +155,7 @@ public class StompController {
         PlaylistDto data = playlistService.addPlaylist(user.getChannelId(), videoId);
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
-                .data(data)
+                .data(gson.toJson(data))
                 .type(MessageType.PLAYLIST_ADD)
                 .build());
     }
@@ -166,7 +169,7 @@ public class StompController {
         playlistService.movePlaylist(params.getPlaylistNo(), params.getSequence());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("playlistNo", params.getPlaylistNo());
+        data.put("playlist_no", params.getPlaylistNo());
         data.put("sequence", params.getSequence());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
@@ -184,7 +187,7 @@ public class StompController {
         playlistService.deletePlaylist(params.getPlaylistNo());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("playlistNo", params.getPlaylistNo());
+        data.put("playlist_no", params.getPlaylistNo());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
@@ -204,8 +207,8 @@ public class StompController {
         channelSessionService.updatePlayStatus(channelId, params.isPlaying());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("playlistNo", params.getPlaylistNo());
-        data.put("isPlaying", params.isPlaying());
+        data.put("playlist_no", params.getPlaylistNo());
+        data.put("playing", params.isPlaying());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + channelId, SendMessageDto.builder()
                 .data(data)
