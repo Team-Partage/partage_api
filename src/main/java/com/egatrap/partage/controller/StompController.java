@@ -81,7 +81,7 @@ public class StompController {
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
-                .type(MessageType.USER_JOIN)
+                .type(MessageType.USER_LEAVE)
                 .build());
     }
 
