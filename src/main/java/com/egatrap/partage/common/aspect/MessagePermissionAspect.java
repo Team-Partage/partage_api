@@ -64,6 +64,7 @@ public class MessagePermissionAspect {
 
             // Layer 2
             case VIDEO_PLAY -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoPlay().getROLE_PRIORITY();
+            case VIDEO_MOVE -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoSeek().getROLE_PRIORITY();
 //            case VIDEO_SEEK -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoSeek().getROLE_PRIORITY();
 //            case VIDEO_SKIP -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoSkip().getROLE_PRIORITY();
 
