@@ -59,6 +59,7 @@ public class ChannelService {
                 .channelColor(ChannelColorType.getChannelColor(params.getChannelColor()))
                 .channelUrl(makeChannelUrl())
                 .isActive(true)
+                .viewerCount(0)
                 .build();
         channelRepository.save(channel);
 

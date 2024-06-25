@@ -30,7 +30,9 @@ public class UserSession {
         this.userId = userSession.getUserId();
         this.channelId = userSession.getChannelId();
         this.nickname = userSession.getNickname();
-        this.role = userSession.getRole();
+//        this.role = userSession.getRole();
+        // ToDo. 사용자에 따라 권한 설정 필요
+        this.role = ChannelRoleType.ROLE_OWNER;
         this.lastAccessTime = userSession.getLastAccessTime();
         this.createdAt = userSession.getCreatedAt();
     }
