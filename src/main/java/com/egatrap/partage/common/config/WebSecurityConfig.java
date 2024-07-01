@@ -68,6 +68,7 @@ public class WebSecurityConfig {
                 .authorizeRequests()
                 .antMatchers(EXCLUDE_PATHS).permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/channel/{channelId}").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/playlist/{channelId}").permitAll()
                 .antMatchers("/api/**").authenticated()
                 .antMatchers("/").denyAll()
                 .anyRequest().permitAll()
