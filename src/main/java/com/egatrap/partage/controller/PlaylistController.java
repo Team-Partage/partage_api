@@ -68,6 +68,7 @@ public class PlaylistController {
 
     @ApiOperation(value = "플레이리스트 조회")
     @GetMapping(value = "/{channelId}", produces = "application/json")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<?> getPlaylist(
             @NotNull @PathVariable("channelId") String channelId,
             @Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
