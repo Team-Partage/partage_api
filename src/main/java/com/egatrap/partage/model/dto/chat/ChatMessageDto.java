@@ -13,7 +13,9 @@ public class ChatMessageDto {
 
     private String nickname;
 
-    private String profile;
+    private String profileColor;
+
+    private String profileImage;
 
     @NotBlank
     private String message;

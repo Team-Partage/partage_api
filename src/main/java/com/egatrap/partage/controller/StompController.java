@@ -1,6 +1,7 @@
 package com.egatrap.partage.controller;
 
 import com.egatrap.partage.common.aspect.MessagePermission;
+import com.egatrap.partage.constants.ChannelColorType;
 import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.exception.SendMessageException;
 import com.egatrap.partage.model.dto.PlaylistDto;
@@ -52,7 +53,8 @@ public class StompController {
         Map<String, Object> data = new HashMap<>();
         data.put("user_id", user.getUserId());
         data.put("nickname", message.getNickname());
-        data.put("profile", message.getProfile());
+        data.put("profile_color", ChannelColorType.getChannelColor(message.getProfileColor()));
+        data.put("profile_image", message.getProfileImage());
         data.put("message", message.getMessage());
         data.put("sendTime", LocalDateTime.now());
         log.debug("data: {}", data);
@@ -102,7 +104,7 @@ public class StompController {
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
-                .type(MessageType.VIDEO_PLAY)
+                .type(MessageType.VIDEO_MOVE)
                 .build());
     }
 
@@ -162,7 +164,7 @@ public class StompController {
     }
 
     @MessageMapping("/playlist.move")
-    @MessagePermission(permission = MessageType.PLAYLIST_ADD)
+    @MessagePermission(permission = MessageType.PLAYLIST_MOVE)
     public void movePlaylist(SimpMessageHeaderAccessor headerAccessor, @Payload RequestMovePlaylistDto params)
             throws Exception {
         UserSession user = new UserSession(headerAccessor);
@@ -179,7 +181,7 @@ public class StompController {
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
-                .type(MessageType.PLAYLIST_ADD)
+                .type(MessageType.PLAYLIST_MOVE)
                 .build());
     }
 

@@ -5,9 +5,7 @@ import com.egatrap.partage.constants.ResponseType;
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
-import com.egatrap.partage.service.ChannelPermissionService;
-import com.egatrap.partage.service.ChannelService;
-import com.egatrap.partage.service.PlaylistService;
+import com.egatrap.partage.service.*;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +29,7 @@ public class ChannelController {
     private final ChannelService channelService;
     private final ChannelPermissionService channelPermissionService;
     private final PlaylistService playlistService;
+    private final ChannelUserService channelUserService;
 
     @ApiOperation(value = "채널 생성")
     @PostMapping
@@ -52,6 +51,8 @@ public class ChannelController {
                 responseCreateChannelDto.getChannel().getChannelId(),
                 userId,
                 ChannelRoleType.ROLE_OWNER);
+
+        channelUserService.addUserSession(userId, responseCreateChannelDto.getChannel().getChannelId(), ChannelRoleType.ROLE_OWNER);
 
         return new ResponseEntity<>(responseCreateChannelDto, HttpStatus.OK);
     }
