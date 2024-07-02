@@ -38,7 +38,7 @@ public class MessagePermissionAspect {
         String userId = user.getUserId();
         String channelId = user.getChannelId();
         log.debug("userId: {}, channelId: {}", userId, channelId);
-        if(userId == null || channelId == null) {
+        if(userId == null || channelId == null || "NONE".equals(userId)) {
             log.error("No permission to perform this action");
             throw new SecurityException("No permission to perform this action");
         }
