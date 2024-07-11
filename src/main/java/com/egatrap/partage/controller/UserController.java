@@ -52,27 +52,27 @@ public class UserController {
     }
 
     @ApiOperation(value = "이메일 중복 확인")
-    @PostMapping("/check-email")
-    public ResponseEntity<?> checkDuplicateEmail(@Valid @RequestBody RequestCheckDuplicateEmailDto params) {
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkDuplicateEmail(@RequestParam("email") String email) {
 
         // 이메일 중복 확인
-        boolean isExisted = userService.isExistEmail(params.getEmail());
+        boolean isExisted = userService.isExistEmail(email);
         // 이메일 중복
         if (isExisted)
-            throw new ConflictException("The resource already exists. email=" + params.getEmail());
+            throw new ConflictException("The resource already exists. email=" + email);
 
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
     @ApiOperation(value = "닉네임 중복 확인")
-    @PostMapping("/check-nickname")
-    public ResponseEntity<?> checkDuplicateNickname(@Valid @RequestBody RequestCheckDuplicateNicknameDto params) {
+    @GetMapping("/check-nickname")
+    public ResponseEntity<?> checkDuplicateNickname(@RequestParam("nickname") String nickname) {
 
         // 닉네임 중복 확인
-        boolean isExisted = userService.isExistNickname(params.getNickname());
+        boolean isExisted = userService.isExistNickname(nickname);
         // 닉네임 중복
         if (isExisted)
-            throw new ConflictException("The resource already exists. nickname=" + params.getNickname());
+            throw new ConflictException("The resource already exists. nickname=" + nickname);
 
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
