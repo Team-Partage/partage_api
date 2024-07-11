@@ -71,6 +71,7 @@ public class StompController {
 
         Map<String, Object> data = new HashMap<>();
         data.put("user_id", user.getUserId());
+        data.put("nickname", user.getNickname());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
@@ -84,6 +85,7 @@ public class StompController {
 
         Map<String, Object> data = new HashMap<>();
         data.put("user_id", user.getUserId());
+        data.put("nickname", user.getNickname());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
