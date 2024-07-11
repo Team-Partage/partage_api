@@ -124,6 +124,18 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "프로필 색상 수정")
+    @PatchMapping("/me/profile-color")
+    public ResponseEntity<?> updateProfileColor(@Valid @RequestBody RequestUpdateProfileColorDto params) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+
+        // 프로필 색상 수정
+        userService.updateProfileColor(userId, params.getProfileColor());
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
     @ApiOperation(value = "비밀번호 수정")
     @PatchMapping("/me/password")
     public ResponseEntity<?> updatePassword(@Valid @RequestBody RequestUpdatePasswordDto params) {
@@ -140,17 +152,6 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "프로필 색상 수정")
-    @PatchMapping("/me/profile-color")
-    public ResponseEntity<?> updateProfileColor(@Valid @RequestBody RequestUpdateProfileColorDto params) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getName();
-
-        // 프로필 색상 수정
-        userService.updateProfileColor(userId, params.getProfileColor());
-        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
-    }
 
     @ApiOperation(value = "비밀번호 찾기 - 임시 비밀번호 발급")
     @PostMapping("/password")
@@ -172,6 +173,21 @@ public class UserController {
 
         // 프로필 이미지 수정
         userService.updateProfileImage(userId, url);
+        return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "닉네임/프로필 색상 수정")
+    @PatchMapping("/me/profile")
+    public ResponseEntity<?> updateNicknameAndProfileColor(@Valid @RequestBody RequestUpdateNicknameAndProfileColorDto params) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+
+        // 닉네임 수정
+        userService.updateNickname(userId, params.getNickname());
+        // 프로필 색상 수정
+        userService.updateProfileColor(userId, params.getProfileColor());
+
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 }
