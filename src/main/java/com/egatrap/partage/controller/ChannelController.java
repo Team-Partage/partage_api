@@ -169,4 +169,15 @@ public class ChannelController {
         ResponseSearchChannelsDto response = channelService.getSearchChannelsByHashtag(cursor, perPage, keyword);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @ApiOperation(value = "채널 접속 유저 목록 조회")
+    @GetMapping("/{channelId}/user")
+    public ResponseEntity<?> getChannelUsers(@PathVariable("channelId") String channelId,
+                                             @RequestParam(value = "cursor", defaultValue = "1") int cursor,
+                                             @RequestParam(value = "perPage", defaultValue = "10") int perPage) {
+
+        ResponseChannelUsersDto response = channelUserService.getChannelUsers(channelId, cursor, perPage);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

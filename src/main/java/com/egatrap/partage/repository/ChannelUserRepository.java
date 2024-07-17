@@ -3,6 +3,8 @@ package com.egatrap.partage.repository;
 import com.egatrap.partage.constants.ChannelRoleType;
 import com.egatrap.partage.model.entity.ChannelUserEntity;
 import com.egatrap.partage.model.entity.ChannelUserId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -71,4 +73,7 @@ public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, 
     Optional<ChannelUserEntity> findByChannel_ChannelIdAndUser_UserIdAndOnlineCountGreaterThanOne(
             @Param("channelId") String channelId,
             @Param("userId") String userId);
+
+    @Query("SELECT cu FROM ChannelUserEntity cu WHERE cu.channel.channelId = :channelId AND cu.onlineCount >= 1")
+    Page<ChannelUserEntity> findByChannel_ChannelIdAndOnlineCountGreaterThanOne(String channelId, PageRequest pageRequest);
 }

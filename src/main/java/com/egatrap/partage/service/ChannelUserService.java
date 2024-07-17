@@ -3,14 +3,16 @@ package com.egatrap.partage.service;
 
 import com.egatrap.partage.common.util.CodeGenerator;
 import com.egatrap.partage.constants.ChannelRoleType;
-import com.egatrap.partage.model.dto.ChannelSessionDto;
-import com.egatrap.partage.model.dto.CountViewerDto;
+import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.model.entity.*;
 import com.egatrap.partage.model.vo.UserSession;
 import com.egatrap.partage.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -248,4 +250,37 @@ public class ChannelUserService {
         return channelSessionRepository.count();
     }
 
+    public ResponseChannelUsersDto getChannelUsers(String channelId, int cursor, int perPage) {
+
+        // 정렬 조건 - default: 권한 아이디
+        // Pageable 객체 생성
+        Sort sort = Sort.by(Sort.Direction.ASC, "role.roleId");
+        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+
+        Page<ChannelUserEntity> pagingChannelUsers = channelUserRepository.findByChannel_ChannelIdAndOnlineCountGreaterThanOne(channelId, pageRequest);
+
+        // 페이지 정보 생성
+        PageInfoDto page = PageInfoDto.builder()
+                .cursor(cursor)
+                .perPage(perPage)
+                .totalPage(pagingChannelUsers.getTotalPages())
+                .totalCount(pagingChannelUsers.getTotalElements()).build();
+
+        List<ChannelUserDto> channelUsers = new ArrayList<>();
+        for (ChannelUserEntity channelUser : pagingChannelUsers) {
+            channelUsers.add(ChannelUserDto.builder()
+                    .roleId(channelUser.getRole().getRoleId())
+                    .userId(channelUser.getUser().getUserId())
+                    .email(channelUser.getUser().getEmail())
+                    .nickname(channelUser.getUser().getNickname())
+                    .profileColor(channelUser.getUser().getProfileColor())
+                    .profileImage(channelUser.getUser().getProfileImage())
+                    .build());
+        }
+
+        return ResponseChannelUsersDto.builder()
+                .users(channelUsers)
+                .page(page)
+                .build();
+    }
 }
