@@ -16,7 +16,6 @@ public class ResponseGetChannelDetailInfoDto {
 
     private ChannelDto channel;
     private ChannelUserDto owner;
-//    private Page<ChannelUserDto> users;
-    private List<PlaylistDto> playlists;
+    private ChannelUserDto user;
     private ChannelPermissionInfoDto channelPermissions;
 }

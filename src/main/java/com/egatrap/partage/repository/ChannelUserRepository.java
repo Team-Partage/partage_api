@@ -66,4 +66,9 @@ public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, 
     long countById_ChannelIdAndOnlineCountGreaterThan(String channelId, long onlineCount);
 
     long countByOnlineCountGreaterThan(long onlineCount);
+
+    @Query("SELECT cu FROM ChannelUserEntity cu WHERE cu.channel.channelId = :channelId AND cu.user.userId = :userId AND cu.onlineCount >= 1")
+    Optional<ChannelUserEntity> findByChannel_ChannelIdAndUser_UserIdAndOnlineCountGreaterThanOne(
+            @Param("channelId") String channelId,
+            @Param("userId") String userId);
 }

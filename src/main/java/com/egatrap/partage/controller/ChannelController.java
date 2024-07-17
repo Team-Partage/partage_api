@@ -94,26 +94,21 @@ public class ChannelController {
     @ApiOperation(value = "채널 상세 정보 조회")
     @GetMapping("/{channelId}")
     public ResponseEntity<?> getChannelDetailInfo(@PathVariable("channelId") String channelId) {
-        //@Min(1) @RequestParam(value = "page", defaultValue = "1") int page,
-        //@Min(1) @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
 
         ChannelDto channel = channelService.getChannel(channelId);
         ChannelUserDto owner = channelService.getChannelOwner(channelId);
-//        Page<ChannelUserDto> users = channelService.getChannelUsers(channelId, page, pageSize);
-        List<PlaylistDto> playlists = playlistService.getNonePaingPlaylists(channelId);
+        ChannelUserDto user = channelService.getChannelUser(channelId, userId);
         ChannelPermissionInfoDto channelPermission = channelService.getChannelPermission(channelId);
 
         ResponseGetChannelDetailInfoDto response = ResponseGetChannelDetailInfoDto.builder()
                 .channel(channel)
                 .owner(owner)
-//                .users(users)
-                .playlists(playlists)
+                .user(user)
                 .channelPermissions(channelPermission)
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
-
-        // ToDo. 추후 추가 예정 (Redis)
-        //  - 채팅 정보
     }
 
     @ApiOperation(value = "채널 사용자 권한 수정")

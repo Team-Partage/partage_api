@@ -35,6 +35,7 @@ public class StompController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChannelSessionService channelSessionService;
+    private final ChannelUserService channelUserService;
     private final PlaylistService playlistService;
     private final Gson gson;
 

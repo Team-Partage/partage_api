@@ -39,6 +39,8 @@ public class ChannelService {
     private final ModelMapper modelMapper;
     private final UserSessionRepository userSessionRepository;
 
+    private final ChannelUserRepository channelUserRepository;
+
     public boolean isExistsChannel(String channelId) {
         // 채널아이디를 이용해 해당 채널이 존재하고 엑티브 상태인지 확인
         return channelRepository.existsByChannelIdAndIsActive(channelId, true);
@@ -172,9 +174,6 @@ public class ChannelService {
 
         // 채널 사용자 모두 제거
         channelRoleMappingRepository.deleteByChannel_ChannelId(channelId);
-
-        // ToDo. 채널이 종료되면 이후에 추가 로직이 필요하지 않은지
-        //  - 채팅 로그 백업 등
     }
 
     @Transactional
@@ -190,6 +189,22 @@ public class ChannelService {
 
     public ChannelUserDto getChannelOwner(String channelId) {
         return channelRoleMappingRepository.findActiveOwnerByChannelId(channelId, ChannelRoleType.ROLE_OWNER.getROLE_ID());
+    }
+
+    public ChannelUserDto getChannelUser(String channelId, String userId) {
+        // 비회원인 경우 고려 필요
+        Optional<ChannelUserEntity> channelUser = channelUserRepository.findByChannel_ChannelIdAndUser_UserIdAndOnlineCountGreaterThanOne(channelId, userId);
+        if (channelUser.isPresent())
+            return ChannelUserDto.builder()
+                    .roleId(channelUser.get().getRole().getRoleId())
+                    .userId(channelUser.get().getUser().getUserId())
+                    .email(channelUser.get().getUser().getEmail())
+                    .nickname(channelUser.get().getUser().getNickname())
+                    .profileColor(channelUser.get().getUser().getProfileColor())
+                    .profileImage(channelUser.get().getUser().getProfileImage())
+                    .build();
+
+        return new ChannelUserDto();
     }
 
     public Page<ChannelUserDto> getChannelUsers(String channelId, int page, int pageSize) {
@@ -337,4 +352,6 @@ public class ChannelService {
         response.setChannels(channels);
         return response;
     }
+
+
 }
