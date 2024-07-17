@@ -52,6 +52,7 @@ public class StompController {
         UserSession user = new UserSession(headerAccessor);
 
         Map<String, Object> data = new HashMap<>();
+        data.put("role_id", user.getRole().getROLE_ID());
         data.put("user_id", user.getUserId());
         data.put("nickname", message.getNickname());
         data.put("profile_color", ChannelColorType.getChannelColor(message.getProfileColor()));
