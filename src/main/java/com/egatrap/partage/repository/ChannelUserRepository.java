@@ -76,4 +76,8 @@ public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, 
 
     @Query("SELECT cu FROM ChannelUserEntity cu WHERE cu.channel.channelId = :channelId AND cu.onlineCount >= 1")
     Page<ChannelUserEntity> findByChannel_ChannelIdAndOnlineCountGreaterThanOne(String channelId, PageRequest pageRequest);
+
+    @Query("SELECT cu FROM ChannelUserEntity cu WHERE cu.channel.channelId = :channelId AND cu.onlineCount >= 1 AND cu.user.nickname LIKE %:keyword%")
+    Page<ChannelUserEntity> findBySearchChannelUsers(@Param("channelId") String channelId, PageRequest pageRequest, @Param("keyword") String keyword);
+
 }

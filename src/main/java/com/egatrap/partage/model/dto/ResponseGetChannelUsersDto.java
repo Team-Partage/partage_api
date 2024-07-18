@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseChannelUsersDto {
+public class ResponseGetChannelUsersDto {
 
     private PageInfoDto page;
     private List<ChannelUserDto> users;

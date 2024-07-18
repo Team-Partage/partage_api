@@ -9,7 +9,6 @@ import com.egatrap.partage.service.*;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,8 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -176,8 +173,18 @@ public class ChannelController {
                                              @RequestParam(value = "cursor", defaultValue = "1") int cursor,
                                              @RequestParam(value = "perPage", defaultValue = "10") int perPage) {
 
-        ResponseChannelUsersDto response = channelUserService.getChannelUsers(channelId, cursor, perPage);
+        ResponseGetChannelUsersDto response = channelUserService.getChannelUsers(channelId, cursor, perPage);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "채널 접속 유저 검색")
+    @GetMapping("/{channelId}/search-user")
+    public ResponseEntity<?> searchChannelUsers(@PathVariable("channelId") String channelId,
+                                                @RequestParam(value = "cursor", defaultValue = "1") int cursor,
+                                                @RequestParam(value = "perPage", defaultValue = "10") int perPage,
+                                                @RequestParam(value = "keyword", required = false) String keyword) {
+
+        ResponseSearchChannelUsersDto response =  channelUserService.searchChannelUsers(channelId, cursor, perPage, keyword);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

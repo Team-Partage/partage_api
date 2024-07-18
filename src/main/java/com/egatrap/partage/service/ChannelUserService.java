@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Slf4j
@@ -250,7 +249,7 @@ public class ChannelUserService {
         return channelSessionRepository.count();
     }
 
-    public ResponseChannelUsersDto getChannelUsers(String channelId, int cursor, int perPage) {
+    public ResponseGetChannelUsersDto getChannelUsers(String channelId, int cursor, int perPage) {
 
         // 정렬 조건 - default: 권한 아이디
         // Pageable 객체 생성
@@ -278,7 +277,42 @@ public class ChannelUserService {
                     .build());
         }
 
-        return ResponseChannelUsersDto.builder()
+        return ResponseGetChannelUsersDto.builder()
+                .users(channelUsers)
+                .page(page)
+                .build();
+    }
+
+    public ResponseSearchChannelUsersDto searchChannelUsers(String channelId, int cursor, int perPage, String keyword) {
+
+        // 정렬 조건 - default: 권한 아이디
+        // Pageable 객체 생성
+        Sort sort = Sort.by(Sort.Direction.ASC, "role.roleId");
+        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+
+
+        Page<ChannelUserEntity> pagingChannelUsers = channelUserRepository.findBySearchChannelUsers(channelId, pageRequest, keyword);
+
+        // 페이지 정보 생성
+        PageInfoDto page = PageInfoDto.builder()
+                .cursor(cursor)
+                .perPage(perPage)
+                .totalPage(pagingChannelUsers.getTotalPages())
+                .totalCount(pagingChannelUsers.getTotalElements()).build();
+
+        List<ChannelUserDto> channelUsers = new ArrayList<>();
+        for (ChannelUserEntity channelUser : pagingChannelUsers) {
+            channelUsers.add(ChannelUserDto.builder()
+                    .roleId(channelUser.getRole().getRoleId())
+                    .userId(channelUser.getUser().getUserId())
+                    .email(channelUser.getUser().getEmail())
+                    .nickname(channelUser.getUser().getNickname())
+                    .profileColor(channelUser.getUser().getProfileColor())
+                    .profileImage(channelUser.getUser().getProfileImage())
+                    .build());
+        }
+
+        return ResponseSearchChannelUsersDto.builder()
                 .users(channelUsers)
                 .page(page)
                 .build();
