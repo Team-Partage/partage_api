@@ -184,9 +184,11 @@ public class UserController {
         String userId = authentication.getName();
 
         // 닉네임 수정
-        userService.updateNickname(userId, params.getNickname());
+        if (params.getNickname() != null)
+            userService.updateNickname(userId, params.getNickname());
         // 프로필 색상 수정
-        userService.updateProfileColor(userId, params.getProfileColor());
+        if (params.getProfileColor() != null)
+            userService.updateProfileColor(userId, params.getProfileColor());
 
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
