@@ -14,12 +14,9 @@ spring:
   #  mysql
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #url: jdbc:mysql://183.96.35.71:4406/partage?useSSL=false&serverTimezone=Asia/Seoul
-    #username: ENC(kCK23Aq6Hb3NfP8FQ/Nd4A==)
-    #password: ENC(pxWqfCD/p9PPsWa12DXBlg==)
-    url: jdbc:mysql://localhost:3306/partage?useSSL=false&serverTimezone=Asia/Seoul
-    username: root
-    password: asd123
+    url: ENC(1N4tIi0s/QK1vH/CiRZpz3lomIIywwMO/JO/UAYYh62/S8PT9XVLc0SeGK77rbIKobw2d89z0ZTEsCSW/bNYVS1LD3anBX7GOuLlynJLoYz1ix0zloTc8Q==)
+    username: ENC(wFGZw5SUsDHyEmjJh+BMEw==)
+    password: ENC(xFPyihZvWivRf2izzSyByjHwV61KFtex)
   # data.sql
   sql:
     init:
@@ -34,9 +31,9 @@ spring:
     #host: 183.96.35.71
     #port: 4407
     #password: ENC(CbbG8fWSz/uTEugdbiMPZQ==)
-    host: localhost
+    host: ENC(eqiZLldyV89XFLbgrHJMPPXLtRB1jgAK)
     port: 6379
-    password:
+    password: ENC(1taz4+tslq2+0cGhUcH88Q==)
   # mail-service
   mail:
     host: smtp.gmail.com

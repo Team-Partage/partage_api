@@ -17,7 +17,7 @@ public interface ChannelRepository extends JpaRepository<ChannelEntity, String> 
 
     Page<ChannelEntity> findByTypeAndIsActive(ChannelType channelType, boolean isActive, PageRequest pageRequest);
 
-    @Query("SELECT c from ChannelEntity c where c.hashtag like %:keyword% or c.name like %:keyword% and c.isActive = :isActive")
+    @Query("SELECT c from ChannelEntity c where (c.hashtag like %:keyword% or c.name like %:keyword%) and c.isActive = :isActive")
     Page<ChannelEntity> findByNameOrHashtagSearchKeywordAndIsActive(String keyword, boolean isActive, PageRequest pageRequest);
 
     @Query("SELECT c from ChannelEntity c where c.hashtag like %:keyword% and c.isActive = :isActive")
