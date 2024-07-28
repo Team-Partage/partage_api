@@ -35,11 +35,11 @@ public class ChannelService {
     private final ChannelRoleMappingRepository channelRoleMappingRepository;
     private final ChannelPermissionRepository channelPermissionRepository;
     private final PlaylistRepository playlistRepository;
-    private final ChannelSessionRepository channelSessionRepository;
-    private final ModelMapper modelMapper;
-    private final UserSessionRepository userSessionRepository;
-
     private final ChannelUserRepository channelUserRepository;
+    private final ChannelRoleRepository channelRoleRepository;
+    private final ModelMapper modelMapper;
+    private final ChannelSessionRepository channelSessionRepository;
+    private final UserSessionRepository userSessionRepository;
 
     public boolean isExistsChannel(String channelId) {
         // 채널아이디를 이용해 해당 채널이 존재하고 엑티브 상태인지 확인
@@ -178,7 +178,8 @@ public class ChannelService {
 
     @Transactional
     public Boolean isActiveChannelByUserIdAndChannelId(String userId, String channelId) {
-        return channelRoleMappingRepository.isActiveChannelByUserIdAndChannelId(userId, channelId);
+        return channelUserRepository.existsByChannel_ChannelIdAndUser_UserId(channelId, userId);
+//        return channelRoleMappingRepository.isActiveChannelByUserIdAndChannelId(userId, channelId);
     }
 
     public ChannelDto getChannel(String channelId) {
@@ -223,7 +224,15 @@ public class ChannelService {
 
     @Transactional
     public void updateUserChannelRole(String channelId, RequestUpdateUserChannelRoleDto params) {
-        channelRoleMappingRepository.updateRoleId(channelId, params.getUserId(), params.getRoleId());
+        ChannelUserEntity channelUser = channelUserRepository.findByChannel_ChannelIdAndUser_UserId(channelId, params.getUserId())
+                .orElseThrow(() -> new BadRequestException("Not found channel user. channelId=" + channelId + ", userId" + params.getUserId()));
+        //new ChannelRoleEntity(ChannelRoleType.get(params.getRoleId()))
+
+
+        ChannelRoleEntity channelRoleEntity = channelRoleRepository.findById(params.getRoleId())
+                .orElseThrow(() -> new BadRequestException("Not found channel role. roleId=" + params.getRoleId()));
+        channelUser.updateChannelRole(channelRoleEntity);
+        //channelRoleMappingRepository.updateRoleId(channelId, params.getUserId(), params.getRoleId());
     }
 
     @Transactional

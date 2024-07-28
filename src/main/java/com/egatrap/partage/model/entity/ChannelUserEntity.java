@@ -57,4 +57,8 @@ public class ChannelUserEntity {
     public void updateLastAccessAt() {
         this.lastAccessAt = LocalDateTime.now();
     }
+
+    public void updateChannelRole(ChannelRoleEntity role) {
+        this.role = role;
+    }
 }

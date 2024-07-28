@@ -123,6 +123,12 @@ public class ChannelController {
 
         // 채널이 활성화 중이고 요청자 권한 체크
         // 변경 대상 및 변경 권한 체크
+        if (channelService.isActiveChannelByOwnerUserIdAndChannelId(userId, channelId) == null)
+            System.out.println("111");
+        if (channelService.isActiveChannelByUserIdAndChannelId(params.getUserId(), channelId) == null)
+            System.out.println("222");
+        if (params.getUserId().equals(userId) || params.getRoleId().equals(ChannelRoleType.ROLE_OWNER.getROLE_ID()))
+            System.out.println("333");
         if (channelService.isActiveChannelByOwnerUserIdAndChannelId(userId, channelId) == null ||
                 channelService.isActiveChannelByUserIdAndChannelId(params.getUserId(), channelId) == null ||
                 params.getUserId().equals(userId) || params.getRoleId().equals(ChannelRoleType.ROLE_OWNER.getROLE_ID())) {
