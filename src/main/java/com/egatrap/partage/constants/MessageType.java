@@ -22,7 +22,8 @@ public enum MessageType {
     VIDEO_PLAY(34), // 비디오 재생 및 일시정지
     VIDEO_MOVE(35), // 비디오 이동 (시간)
 
-    ROLE_CHANGE(40), // 권한 변경
+    CHANNEL_USER_ROLE_CHANGE(40),  // 채널 사용자 권한 변경
+    CHANNEL_PERMISSION_CHANGE(41), // 채널 permission 변경
 
     ERROR_SERVER(90), // 서버 오류
     ERROR_CLIENT(91), // 클라이언트 오류

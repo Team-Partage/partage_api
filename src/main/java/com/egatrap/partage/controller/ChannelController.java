@@ -1,21 +1,26 @@
 package com.egatrap.partage.controller;
 
 import com.egatrap.partage.constants.ChannelRoleType;
+import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.constants.ResponseType;
 import com.egatrap.partage.exception.BadRequestException;
 import com.egatrap.partage.exception.ConflictException;
 import com.egatrap.partage.model.dto.*;
+import com.egatrap.partage.model.dto.chat.SendMessageDto;
 import com.egatrap.partage.service.*;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import static com.egatrap.partage.controller.StompController.CHANNEL_PREFIX;
 
 @Slf4j
 @RestController
@@ -25,8 +30,8 @@ public class ChannelController {
 
     private final ChannelService channelService;
     private final ChannelPermissionService channelPermissionService;
-    private final PlaylistService playlistService;
     private final ChannelUserService channelUserService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @ApiOperation(value = "채널 생성")
     @PostMapping
@@ -126,6 +131,10 @@ public class ChannelController {
         }
 
         channelService.updateUserChannelRole(channelId, params);
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + channelId, SendMessageDto.builder()
+                .data(params)
+                .type(MessageType.CHANNEL_USER_ROLE_CHANGE)
+                .build());
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
@@ -143,6 +152,10 @@ public class ChannelController {
             throw new BadRequestException("Invalid update channel permission request.");
 
         channelService.updateChannelPermissions(channelId, params);
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + channelId, SendMessageDto.builder()
+                .data(params)
+                .type(MessageType.CHANNEL_PERMISSION_CHANGE)
+                .build());
         return new ResponseEntity<>(new ResponseDto(ResponseType.SUCCESS), HttpStatus.OK);
     }
 
