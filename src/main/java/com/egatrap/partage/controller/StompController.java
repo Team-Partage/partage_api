@@ -118,9 +118,11 @@ public class StompController {
         UserSession user = new UserSession(headerAccessor);
 
         channelSessionService.updatePlayStatus(user.getChannelId(), params.isPlaying());
+        PlaylistDto playlist = playlistService.getPlaylist(params.getPlaylistNo());
 
         Map<String, Object> data = new HashMap<>();
         data.put("playlist_no", params.getPlaylistNo());
+        data.put("url", playlist.getUrl());
         data.put("playing", params.isPlaying());
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()

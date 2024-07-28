@@ -180,4 +180,11 @@ public class PlaylistService {
             throw new RuntimeException("Failed to youtube connection error", e);
         }
     }
+
+    public PlaylistDto getPlaylist(Long playlistNo) {
+        PlaylistEntity playlistEntity = playlistRepository.findById(playlistNo)
+                .orElseThrow(() -> new BadRequestException("Video not found. playlistNo=" + playlistNo));
+
+        return modelMapper.map(playlistEntity, PlaylistDto.class);
+    }
 }
