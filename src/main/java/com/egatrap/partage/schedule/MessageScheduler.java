@@ -29,9 +29,9 @@ public class MessageScheduler {
 
     /**
      * 채널의 시청자 수를 실시간으로 푸시
-     * 30초마다 실행
+     * 5초마다 실행
      */
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 5000)
     public void sendPeriodicMessages() {
         for (ChannelSessionDto channel : channelUserService.getChannels()) {
 //            log.info("Send Message : {}", channel.getId());
