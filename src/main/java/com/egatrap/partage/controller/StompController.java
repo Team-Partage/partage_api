@@ -50,7 +50,7 @@ public class StompController {
     }
 
     @MessageMapping("/channel.info")
-    @MessagePermission(permission = MessageType.CHANNEL_INFO)
+    // @MessagePermission(permission = MessageType.CHANNEL_INFO)
     public void sendChannelInfo(SimpMessageHeaderAccessor headerAccessor, @Validated @Payload RequestSendChannelInfoDto params) {
 
         ChannelSessionDto channel = channelSessionService.getChannelSession(params.getChannelId());

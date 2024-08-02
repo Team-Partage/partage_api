@@ -28,12 +28,12 @@ spring:
     defer-datasource-initialization: true
   # redis
   redis:
-    #host: 183.96.35.71
-    #port: 4407
-    #password: ENC(CbbG8fWSz/uTEugdbiMPZQ==)
+    #host: localhost
+    #port: 6379
+    #password:
     host: ENC(eqiZLldyV89XFLbgrHJMPPXLtRB1jgAK)
     port: 6379
-    password: ENC(1taz4+tslq2+0cGhUcH88Q==)
+    password: zxc123!! #ENC(1taz4+tslq2+0cGhUcH88Q==)
   # mail-service
   mail:
     host: smtp.gmail.com

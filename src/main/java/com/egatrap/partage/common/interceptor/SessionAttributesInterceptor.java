@@ -79,10 +79,8 @@ public class SessionAttributesInterceptor implements HandshakeInterceptor {
 
         // 유저 세션 관리
         UserSession userSession = channelUserService.joinUser(channelId, userId);
-
         // 세션에 데이터 저장 (userId, channelId, channelRole)
         attributes.put("userSession", userSession);
-
         log.info("WebSocket init session Data : sessionData={}", userSession);
 
         return true;

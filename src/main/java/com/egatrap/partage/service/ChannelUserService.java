@@ -36,18 +36,21 @@ public class ChannelUserService {
 
     @Transactional
     public UserSession joinUser(String channelId, String userId) {
-        ChannelUserId channelUserId = new ChannelUserId(channelId, userId);
-        ChannelUserEntity user = channelUserRepository.findById(channelUserId).orElse(null);
-        log.debug("[userEntitiy]=[{}]", user);
-        log.debug("User joined to channel: channelId={}, userId={}", channelId, userId);
-        if (user != null) {
-            user.increaseOnlineCount();
-            user.updateLastAccessAt();
-            channelUserRepository.save(user);
-            return new UserSession(user);
-        } else {
-            return addUserSession(userId, channelId);
-        }
+//        synchronized (this)
+//        {
+            ChannelUserId channelUserId = new ChannelUserId(channelId, userId);
+            ChannelUserEntity user = channelUserRepository.findById(channelUserId).orElse(null);
+            log.debug("[userEntitiy]=[{}]", user);
+            log.debug("User joined to channel: channelId={}, userId={}", channelId, userId);
+            if (user != null) {
+                user.increaseOnlineCount();
+                user.updateLastAccessAt();
+                channelUserRepository.save(user);
+                return new UserSession(user);
+            } else {
+                return addUserSession(userId, channelId);
+            }
+//        }
     }
 
     @Transactional
