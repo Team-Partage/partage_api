@@ -48,9 +48,12 @@ public class MessagePermissionAspect {
         ChannelPermissionDto channelPermission = channelPermissionService.getChannelPermission(channelId);
 
         // 채널에 특정 유저의 권한이 있는지 확인 후 없으면 예외 발생 시킴
-        if (channelPermission == null ||!hasPermission(userChannelRole, messagePermission.permission(), channelPermission)) {
-            log.error("No permission to perform this action");
-            throw new SecurityException("No permission to perform this action");
+        if (messagePermission.permission() != MessageType.CHANNEL_INFO)
+        {
+            if (channelPermission == null ||!hasPermission(userChannelRole, messagePermission.permission(), channelPermission)) {
+                log.error("No permission to perform this action");
+                throw new SecurityException("No permission to perform this action");
+            }
         }
     }
 
@@ -61,7 +64,7 @@ public class MessagePermissionAspect {
             // Layer 1
             case USER_CHAT -> userRole.getROLE_PRIORITY() <= channelPermission.getChatSend().getROLE_PRIORITY();
             case USER_LEAVE, USER_JOIN -> true;
-            case CHANNEL_INFO -> true;
+            case CHANNEL_INFO -> false;
 
             // Layer 2
             case VIDEO_PLAY -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoPlay().getROLE_PRIORITY();
