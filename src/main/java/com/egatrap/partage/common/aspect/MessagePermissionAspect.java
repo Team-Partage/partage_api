@@ -61,6 +61,7 @@ public class MessagePermissionAspect {
             // Layer 1
             case USER_CHAT -> userRole.getROLE_PRIORITY() <= channelPermission.getChatSend().getROLE_PRIORITY();
             case USER_LEAVE, USER_JOIN -> true;
+            case CHANNEL_INFO -> true;
 
             // Layer 2
             case VIDEO_PLAY -> userRole.getROLE_PRIORITY() <= channelPermission.getVideoPlay().getROLE_PRIORITY();
