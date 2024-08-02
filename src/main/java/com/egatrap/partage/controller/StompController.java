@@ -40,7 +40,8 @@ public class StompController {
     private final ChannelUserService channelUserService;
     private final PlaylistService playlistService;
     private final Gson gson;
-    private final KafkaTemplate<String, ChatMessage> kafkaTemplate;
+    // private final KafkaTemplate<String, ChatMessage> kafkaTemplate;
+    private final ChatMessageProducerService chatMessageProducerService;
 
     public static final String CHANNEL_PREFIX = "/channel/";
 
@@ -93,7 +94,8 @@ public class StompController {
                 .content(message.getMessage())
                 .createAt(LocalDateTime.now())
                 .build();
-        kafkaTemplate.send("chat-messages", chatMessage.getChannelId(), chatMessage);
+        // kafkaTemplate.send("chat-messages", chatMessage.getChannelId(), chatMessage);
+        chatMessageProducerService.sendMessage(chatMessage);
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)

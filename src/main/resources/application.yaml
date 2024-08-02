@@ -33,7 +33,7 @@ spring:
     #password:
     host: ENC(eqiZLldyV89XFLbgrHJMPPXLtRB1jgAK)
     port: 6379
-    password: zxc123!! #ENC(1taz4+tslq2+0cGhUcH88Q==)
+    password: ENC(iML21VcpSUmd0eR5G7LIosb6RUeAbB6+) #ENC(1taz4+tslq2+0cGhUcH88Q==)
   # mail-service
   mail:
     host: smtp.gmail.com
@@ -62,14 +62,19 @@ spring:
       group-id: chat-backup-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
-        spring.json.trusted.packages: '*'
+        spring:
+          deserializer:
+            value:
+              delegate:
+                class: org.springframework.kafka.support.serializer.JsonDeserializer
+          json:
+            trusted:
+              packages: "*"
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
-
 
 # save path
 file:
@@ -91,3 +96,6 @@ logging:
   level:
     root: error
     com.egatrap.partage: debug
+#    org:
+#      springframework:
+#        kafka: DEBUG

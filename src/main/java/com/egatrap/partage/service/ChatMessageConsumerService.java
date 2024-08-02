@@ -18,6 +18,7 @@ public class ChatMessageConsumerService {
 
     @KafkaListener(topics = "chat-messages", groupId = "chat-backup-group")
     public void listen(ConsumerRecord<String, ChatMessage> record) {
+        // System.out.println("Received message: " + record.value());
         messageQueue.add(record.value());
     }
 

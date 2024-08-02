@@ -36,8 +36,8 @@ public class ChannelUserService {
 
     @Transactional
     public UserSession joinUser(String channelId, String userId) {
-//        synchronized (this)
-//        {
+        synchronized (this)
+        {
             ChannelUserId channelUserId = new ChannelUserId(channelId, userId);
             ChannelUserEntity user = channelUserRepository.findById(channelUserId).orElse(null);
             log.debug("[userEntitiy]=[{}]", user);
@@ -50,7 +50,7 @@ public class ChannelUserService {
             } else {
                 return addUserSession(userId, channelId);
             }
-//        }
+        }
     }
 
     @Transactional
