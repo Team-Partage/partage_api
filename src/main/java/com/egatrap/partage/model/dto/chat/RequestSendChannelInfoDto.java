@@ -5,15 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Min;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RequestPlayVideoDto {
-    private Long playlistNo;
-    private boolean playing;
-    @Min(0)
-    private int playtime;
+public class RequestSendChannelInfoDto {
+
+    private String channelId;
 }

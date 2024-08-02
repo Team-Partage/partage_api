@@ -7,8 +7,6 @@ import com.egatrap.partage.model.dto.*;
 import com.egatrap.partage.service.FileService;
 import com.egatrap.partage.service.UserService;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @Slf4j
@@ -167,6 +164,8 @@ public class UserController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
+
+        log.info("update profile image params = {}", profileImage);
 
         // 프로필 이미지 저장
         String url = fileService.saveProgileImage(profileImage);

@@ -20,6 +20,7 @@ public class ChannelSessionEntity {
     @Id
     private String id; // channelId
 
+    private Long playlistNo; // 현재 재생중인 playlist url
     private int playTime;
     private LocalDateTime updateTime;
     private boolean isPlaying;

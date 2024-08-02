@@ -4,6 +4,7 @@ import com.egatrap.partage.common.aspect.MessagePermission;
 import com.egatrap.partage.constants.ChannelColorType;
 import com.egatrap.partage.constants.MessageType;
 import com.egatrap.partage.exception.SendMessageException;
+import com.egatrap.partage.model.dto.ChannelSessionDto;
 import com.egatrap.partage.model.dto.PlaylistDto;
 import com.egatrap.partage.model.dto.chat.*;
 import com.egatrap.partage.model.vo.UserSession;
@@ -12,6 +13,7 @@ import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -38,6 +40,7 @@ public class StompController {
     private final ChannelUserService channelUserService;
     private final PlaylistService playlistService;
     private final Gson gson;
+    private final KafkaTemplate<String, ChatMessage> kafkaTemplate;
 
     public static final String CHANNEL_PREFIX = "/channel/";
 
@@ -46,9 +49,31 @@ public class StompController {
         return "/ws.html";
     }
 
+    @MessageMapping("/channel.info")
+    @MessagePermission(permission = MessageType.CHANNEL_INFO)
+    public void sendChannelInfo(SimpMessageHeaderAccessor headerAccessor, @Validated @Payload RequestSendChannelInfoDto params) {
+
+        ChannelSessionDto channel = channelSessionService.getChannelSession(params.getChannelId());
+        int currentPlaytime;
+        if (channel.isPlaying())
+            currentPlaytime = channelSessionService.getPlayTime(channel);
+        else
+            currentPlaytime = channel.getPlayTime();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("playlist_no", channel.getPlaylistNo());
+        data.put("playtime", currentPlaytime);
+        data.put("is_playing", channel.isPlaying());
+
+        messagingTemplate.convertAndSend(CHANNEL_PREFIX + params.getChannelId(), SendMessageDto.builder()
+                .data(data)
+                .type(MessageType.CHANNEL_INFO)
+                .build());
+    }
+
     @MessageMapping("/user.chat")
     @MessagePermission(permission = MessageType.USER_CHAT)
-    public void sendMessage(SimpMessageHeaderAccessor headerAccessor, @Validated @Payload ChatMessageDto message) {
+    public void sendMessage(SimpMessageHeaderAccessor headerAccessor, @Validated @Payload RequestChatMessageDto message) {
         UserSession user = new UserSession(headerAccessor);
 
         Map<String, Object> data = new HashMap<>();
@@ -60,6 +85,15 @@ public class StompController {
         data.put("message", message.getMessage());
         data.put("sendTime", LocalDateTime.now());
         log.debug("data: {}", data);
+
+        // kafka
+        ChatMessage chatMessage = ChatMessage.builder()
+                .channelId(user.getChannelId())
+                .userId(user.getUserId())
+                .content(message.getMessage())
+                .createAt(LocalDateTime.now())
+                .build();
+        kafkaTemplate.send("chat-messages", chatMessage.getChannelId(), chatMessage);
 
         messagingTemplate.convertAndSend(CHANNEL_PREFIX + user.getChannelId(), SendMessageDto.builder()
                 .data(data)
@@ -100,6 +134,8 @@ public class StompController {
     public void moveVideo(SimpMessageHeaderAccessor headerAccessor, @Payload RequestMoveVideoDto params) {
         UserSession user = new UserSession(headerAccessor);
 
+        log.info("/stomp/video.move params= {}", params);
+
         int playtime = channelSessionService.updatePlayTime(user.getChannelId(), params.getPlaytime());
 
         Map<String, Object> data = new HashMap<>();
@@ -116,9 +152,12 @@ public class StompController {
     @MessagePermission(permission = MessageType.VIDEO_PLAY)
     public void playVideo(SimpMessageHeaderAccessor headerAccessor, @Payload RequestPlayVideoDto params) {
         UserSession user = new UserSession(headerAccessor);
-
-        channelSessionService.updatePlayStatus(user.getChannelId(), params.isPlaying());
         PlaylistDto playlist = playlistService.getPlaylist(params.getPlaylistNo());
+
+        log.info("/stomp/video.play params= {}", params);
+        channelSessionService.updateUrl(user.getChannelId(), params.getPlaylistNo());
+        channelSessionService.updatePlayStatus(user.getChannelId(), params.isPlaying());
+        channelSessionService.updatePlayTime(user.getChannelId(), params.getPlaytime());
 
         Map<String, Object> data = new HashMap<>();
         data.put("playlist_no", params.getPlaylistNo());

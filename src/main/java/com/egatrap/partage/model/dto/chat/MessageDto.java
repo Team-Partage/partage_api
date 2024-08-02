@@ -1,6 +1,5 @@
 package com.egatrap.partage.model.dto.chat;
 
-import com.egatrap.partage.constants.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

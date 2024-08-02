@@ -35,8 +35,8 @@ public class ChattingEntity {
     @Column(nullable = false)
     private Boolean isActive;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createAt = LocalDateTime.now();
-    }
+//    @PrePersist
+//    protected void onCreate() {
+//        this.createAt = LocalDateTime.now();
+//    }
 }

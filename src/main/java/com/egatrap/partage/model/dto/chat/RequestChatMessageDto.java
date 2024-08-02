@@ -9,7 +9,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessageDto {
+public class RequestChatMessageDto {
 
     private String nickname;
 

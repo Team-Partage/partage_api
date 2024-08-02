@@ -72,7 +72,7 @@ public class SessionAttributesInterceptor implements HandshakeInterceptor {
         if (userId == null || userId.isBlank()) userId = "NONE";
 
         // 채널 세션 확인 후 없으면 생성
-        if(!channelUserService.isExistsChannel(channelId)){
+        if (!channelUserService.isExistsChannel(channelId)) {
             channelUserService.createChannelSession(channelId);
             log.debug("채널 세션 생성 : channelId={}", channelId);
         }

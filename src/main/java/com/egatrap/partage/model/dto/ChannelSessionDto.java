@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class ChannelSessionDto {
 
     private String id;
+    private Long playlistNo;
     private int playTime;
     private LocalDateTime updateTime;
     private boolean isPlaying;

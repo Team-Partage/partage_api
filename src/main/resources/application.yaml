@@ -55,6 +55,21 @@ spring:
           location: ENC(bHHtGYCsh4p/QR083sy2qLal6Y2XuxTKac5bKqrEj/tekzzEkjOpiAPZR3AFUWYDNApj5BhA798=)
         project-id: ENC(McAhjDuntjazqk6+t/xb62AyHYUF1h31pKh/yLQzLv4=)
         bucket: ENC(HUu0VHh+fSO9J/KwCmORhoaKWc82L6hy)
+  # kafka
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: chat-backup-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+
 
 # save path
 file:

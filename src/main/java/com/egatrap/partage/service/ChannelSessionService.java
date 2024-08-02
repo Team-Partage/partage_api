@@ -6,7 +6,9 @@ import com.egatrap.partage.repository.ChannelSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.asm.Advice;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -17,27 +19,54 @@ import java.time.temporal.ChronoUnit;
 public class ChannelSessionService {
 
     private final ChannelSessionRepository channelSessionRepository;
+    private final ModelMapper modelMapper;
+
+    public ChannelSessionDto getChannelSession(String channelId) {
+        synchronized (this) {
+            ChannelSessionEntity channelSession = channelSessionRepository.findById(channelId)
+                    .orElseThrow(() -> new IllegalArgumentException("Channel not found. channelId: " + channelId));
+
+            return modelMapper.map(channelSession, ChannelSessionDto.class);
+        }
+    }
 
     public void updatePlayStatus(String channelId, boolean isPlaying) {
-        ChannelSessionEntity channelSession = channelSessionRepository.findById(channelId)
-                .orElseThrow(() -> new IllegalArgumentException("Channel not found. channelId: " + channelId));
+        synchronized(this) {
+            ChannelSessionEntity channelSession = channelSessionRepository.findById(channelId)
+                    .orElseThrow(() -> new IllegalArgumentException("Channel not found. channelId: " + channelId));
 
-        channelSession.setPlaying(isPlaying);
-        channelSession.setUpdateTime(LocalDateTime.now());
+            log.info("updatePlayStatus-channelSession = {}", channelSession);
+            channelSession.setPlaying(isPlaying);
+            channelSession.setUpdateTime(LocalDateTime.now());
 
-        channelSessionRepository.save(channelSession);
+            channelSessionRepository.save(channelSession);
+        }
     }
 
     public int updatePlayTime(String channelId, int playTime) {
-        ChannelSessionEntity channelSession = channelSessionRepository.findById(channelId)
-                .orElseThrow(() -> new IllegalArgumentException("Channel not found. channelId: " + channelId));
+        synchronized(this) {
+            ChannelSessionEntity channelSession = channelSessionRepository.findById(channelId)
+                    .orElseThrow(() -> new IllegalArgumentException("Channel not found. channelId: " + channelId));
 
-        channelSession.setPlayTime(playTime);
-        channelSession.setUpdateTime(LocalDateTime.now());
+            channelSession.setPlayTime(playTime);
+            channelSession.setUpdateTime(LocalDateTime.now());
 
-        channelSessionRepository.save(channelSession);
+            channelSessionRepository.save(channelSession);
 
-        return getPlayTime(playTime, channelSession.getUpdateTime());
+            return getPlayTime(playTime, channelSession.getUpdateTime());
+        }
+    }
+
+    public void updateUrl(String channelId, Long playlistNo) {
+        synchronized(this) {
+            ChannelSessionEntity channelSession = channelSessionRepository.findById(channelId)
+                    .orElseThrow(() -> new IllegalArgumentException("Channel not found. channelId: " + channelId));
+
+            channelSession.setPlaylistNo(playlistNo);
+            channelSession.setUpdateTime(LocalDateTime.now());
+
+            channelSessionRepository.save(channelSession);
+        }
     }
 
     public int getPlayTime(String channelId) {
@@ -57,6 +86,4 @@ public class ChannelSessionService {
         // 현재 플레이 타임에 차이를 더한다.
         return playTime + (int) diff;
     }
-
-
 }

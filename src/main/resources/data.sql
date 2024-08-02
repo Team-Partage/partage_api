@@ -13,3 +13,4 @@ insert into tb_channel_role(role_id, role_name) values('C0200', 'ROLE_VIEWER');
 ALTER TABLE tb_playlist MODIFY title VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE tb_channel MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE tb_user MODIFY nickname VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE tb_chatting MODIFY message VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

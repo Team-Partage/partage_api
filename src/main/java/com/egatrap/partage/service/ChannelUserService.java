@@ -151,8 +151,10 @@ public class ChannelUserService {
         Iterable<ChannelSessionEntity> channelSessionEntities = channelSessionRepository.findAll();
         List<ChannelSessionDto> result = new ArrayList<>();
 
+        //log.info("getChannels-channelSessionEntity: {}", channelSessionEntities);
         for (ChannelSessionEntity channelSessionEntity : channelSessionEntities) {
-            result.add(modelMapper.map(channelSessionEntity, ChannelSessionDto.class));
+            if (channelSessionEntity != null)
+                result.add(modelMapper.map(channelSessionEntity, ChannelSessionDto.class));
         }
 
         return result;
@@ -165,6 +167,7 @@ public class ChannelUserService {
     public void createChannelSession(String channelId) {
         channelSessionRepository.save(ChannelSessionEntity.builder()
                 .id(channelId)
+                .playlistNo(null)
                 .isPlaying(false)
                 .playTime(0)
                 .updateTime(LocalDateTime.now())
