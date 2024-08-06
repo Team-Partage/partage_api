@@ -1,0 +1,23 @@
+version: '3.1'
+
+services:
+  mysql:
+    image: mysql:5.6
+    container_name: mysql
+    mem_limit: 1g
+    environment:
+      - MYSQL_ROOT_PASSWORD=zxzx2324
+      - TZ=Asia/Seoul
+    ports:
+      - "xxxx:xxxx"                       # 포트 설정을 해주세요
+    volumes:
+      - ../data/mysql:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/my.cnf:ro
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  mysql_data:

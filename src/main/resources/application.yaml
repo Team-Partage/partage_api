@@ -20,7 +20,9 @@ spring:
   # data.sql
   sql:
     init:
-      mode: never  # 데이터베이스 초기화 시 always, 이후 never
+      # 데이터베이스 초기화 시 always, 이후 never
+      # mode: always
+      mode: never
   # jpa
   jpa:
     hibernate:
@@ -28,9 +30,6 @@ spring:
     defer-datasource-initialization: true
   # redis
   redis:
-    #host: localhost
-    #port: 6379
-    #password:
     host: ENC(eqiZLldyV89XFLbgrHJMPPXLtRB1jgAK)
     port: 6379
     password: ENC(iML21VcpSUmd0eR5G7LIosb6RUeAbB6+) #ENC(1taz4+tslq2+0cGhUcH88Q==)
@@ -84,7 +83,7 @@ security:
   jwt:
     secret-key: bWUtaHllb25pYy1teS1wbGktbWUtaHllb25pYy1teS1wbGktbWUtaHllb25pYy1teS1wbGktbWUtaHllb25pYy1teS1wbGk=
     #access-token-expire: 300000
-    access-token-expire: 86400000
+    access-token-expire: 86400000 # 개발 편의성을 위해서 Access Token 유효시간을 24시간으로 설정
     refresh-token-expire: 86400000
   cors:
     allowed-origins: http://localhost:3000

@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  partage:
+    container_name: partage
+    build: .
+    image: partage:latest
+    ports:
+      - "xxxx:xxxx"                       # 포트 설정을 해주세요
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JVM_OPTS=-Xmx1g -Xms1g
+      - TZ=Asia/Seoul
+      - "--jasypt.encryptor.key=${KEY}"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - "xxxx:xxxx"                       # 포트 설정을 해주세요
+    volumes:
+      - ../data/redis:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "3"
